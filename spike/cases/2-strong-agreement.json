@@ -1,0 +1,22 @@
+[
+  { "skill": "market-intel", "status": "ok", "value": {
+    "source": "market-intel", "direction": "bullish", "conviction": 0.7, "timeframe": "weeks",
+    "evidence": "Net ETF inflows $380m over 5 sessions. Exchange reserves down 12,100 BTC. Stablecoin supply up $1.4bn.",
+    "internal_divergence": null } },
+  { "skill": "macro-analyst", "status": "ok", "value": {
+    "source": "macro-analyst", "direction": "bullish", "conviction": 0.6, "timeframe": "months",
+    "evidence": "CPI at 2.9% against 3.1% expected. 2y yield down 19bp on the week. DXY down 0.8%. Fed funds futures price a cut at the next meeting.",
+    "internal_divergence": null } },
+  { "skill": "sentiment-analyst", "status": "ok", "value": {
+    "source": "sentiment-analyst", "direction": "bullish", "conviction": 0.55, "timeframe": "days",
+    "evidence": "Fear & Greed at 61 (Greed). Long/short ratio 1.8. Funding 0.012% on 8h, not yet stretched.",
+    "internal_divergence": null } },
+  { "skill": "technical-analysis", "status": "ok", "value": {
+    "source": "technical-analysis", "direction": "bullish", "conviction": 0.65, "timeframe": "intraday",
+    "evidence": "4h RSI 58.1, price above MA7 (77310) and MA25 (77885), MACD histogram +182 with an upward cross 4 bars ago.",
+    "internal_divergence": null } },
+  { "skill": "news-briefing", "status": "ok", "value": {
+    "source": "news-briefing", "direction": "bullish", "conviction": 0.5, "timeframe": "days",
+    "evidence": "Dominant narrative across six outlets is the softer CPI print and resumed institutional allocation.",
+    "internal_divergence": null } }
+]

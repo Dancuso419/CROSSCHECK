@@ -42,7 +42,8 @@ unavailable.
 | `BITGET_MCP_TIMEOUT_MS` | no | `12000` | Per-call cap. Dead upstreams hang 16–41s; this stops a cold demo stalling |
 | `CROSSCHECK_CACHE_TTL_MS` | no | `300000` | In-memory cache bucket, keyed by ticker. No database |
 | `GEMINI_MODEL_EXTRACT` | no | `gemini-2.5-flash` | Pass 1, normalisation. **Confirm with `list-models.mjs`** — the default may be stale |
-| `GEMINI_MODEL_REASON` | no | `gemini-2.5-pro` | Pass 2, conflict reasoning (not wired yet) |
+| `GEMINI_MODEL_REASON` | no | `gemini-3.5-flash` | Pass 2, conflict reasoning. The pro line is unusable on a free key — see PROGRESS.md |
+| `DEEPSEEK_API_KEY` | no | — | Only needed to run the prompt suite against DeepSeek for comparison |
 
 `.env.local` is covered by `.gitignore`'s `.env*`. Verify before any commit:
 `git check-ignore -v crosscheck/.env.local`
@@ -53,6 +54,10 @@ unavailable.
 cd crosscheck
 npx tsx src/lib/liveness.test.ts     # 14 cases: the MCP's silent-failure payloads
 npx tsx src/lib/indicators.test.ts   # pins the TS engine to the Skill's Python engine
+npx tsx src/lib/materiality.test.ts # 14 cases: conflict detection and ranking, no LLM
+npx tsx scripts/cases.ts            # Pass 2 suite: the four cases from 05-prompts.md
+npx tsx scripts/cases.ts deepseek-chat   # same suite, other provider
+npx tsx scripts/stability.ts 5      # is Pass 1 direction stable on identical input?
 npm run build
 ```
 

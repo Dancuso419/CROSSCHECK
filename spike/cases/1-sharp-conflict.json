@@ -1,0 +1,22 @@
+[
+  { "skill": "market-intel", "status": "ok", "value": {
+    "source": "market-intel", "direction": "bullish", "conviction": 0.75, "timeframe": "weeks",
+    "evidence": "Net ETF inflows of $412m over the last 5 sessions, up 40% week-on-week. Exchange reserves down 18,400 BTC. Stablecoin supply up $2.1bn.",
+    "internal_divergence": null } },
+  { "skill": "macro-analyst", "status": "ok", "value": {
+    "source": "macro-analyst", "direction": "bearish", "conviction": 0.7, "timeframe": "months",
+    "evidence": "2y yield repriced 28bp higher on Tuesday after the CPI print came in at 3.4% against 3.1% expected. DXY up 1.2% on the week. 10y-2y spread inverted by 41bp.",
+    "internal_divergence": null } },
+  { "skill": "sentiment-analyst", "status": "ok", "value": {
+    "source": "sentiment-analyst", "direction": "bullish", "conviction": 0.6, "timeframe": "days",
+    "evidence": "Fear & Greed at 72 (Greed), up from 54 a week ago. Long/short ratio 2.4. Funding 0.031% on 8h.",
+    "internal_divergence": null } },
+  { "skill": "technical-analysis", "status": "ok", "value": {
+    "source": "technical-analysis", "direction": "bearish", "conviction": 0.5, "timeframe": "intraday",
+    "evidence": "4h RSI 38.2, price below MA25 (77885) and MA99 (78658), MACD histogram -478 with a downward cross 3 bars ago.",
+    "internal_divergence": "Bollinger pctB at 0.31 suggests room lower, but OBV has risen over the same 12 bars." } },
+  { "skill": "news-briefing", "status": "ok", "value": {
+    "source": "news-briefing", "direction": "neutral", "conviction": 0.3, "timeframe": "days",
+    "evidence": "Coverage split: three outlets lead on the CPI surprise, two on continued ETF accumulation. No single dominant narrative.",
+    "internal_divergence": null } }
+]

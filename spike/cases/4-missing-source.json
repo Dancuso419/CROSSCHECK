@@ -1,0 +1,18 @@
+[
+  { "skill": "market-intel", "status": "ok", "value": {
+    "source": "market-intel", "direction": "bullish", "conviction": 0.68, "timeframe": "weeks",
+    "evidence": "Net ETF inflows $295m over 4 sessions. Exchange reserves down 9,800 BTC.",
+    "internal_divergence": null } },
+  { "skill": "sentiment-analyst", "status": "ok", "value": {
+    "source": "sentiment-analyst", "direction": "bearish", "conviction": 0.58, "timeframe": "days",
+    "evidence": "Fear & Greed at 31 (Fear), down from 52. Long/short ratio 0.81. Funding -0.009% on 8h.",
+    "internal_divergence": null } },
+  { "skill": "technical-analysis", "status": "ok", "value": {
+    "source": "technical-analysis", "direction": "neutral", "conviction": 0.3, "timeframe": "intraday",
+    "evidence": "4h RSI 49.8, price between MA7 (77310) and MA25 (77885), MACD histogram +12 and flat.",
+    "internal_divergence": "MACD has just crossed up while the MA stack remains bearish." } },
+  { "skill": "macro-analyst", "status": "unavailable",
+    "reason": "upstream fetch failed (error field present)" },
+  { "skill": "news-briefing", "status": "unavailable",
+    "reason": "all feeds returned zero items" }
+]

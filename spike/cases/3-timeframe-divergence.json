@@ -1,0 +1,14 @@
+[
+  { "skill": "macro-analyst", "status": "ok", "value": {
+    "source": "macro-analyst", "direction": "bearish", "conviction": 0.72, "timeframe": "months",
+    "evidence": "10y-2y inverted by 47bp for a fourth consecutive month. Core PCE re-accelerating to 3.2%. Fed minutes repeat 'higher for longer'.",
+    "internal_divergence": null } },
+  { "skill": "technical-analysis", "status": "ok", "value": {
+    "source": "technical-analysis", "direction": "bullish", "conviction": 0.68, "timeframe": "intraday",
+    "evidence": "4h RSI 62.4, price above MA7 (77310), MA25 (77885) and MA99 (78658), MACD histogram +305 with an upward cross 2 bars ago, ADX 27 and rising.",
+    "internal_divergence": null } },
+  { "skill": "news-briefing", "status": "ok", "value": {
+    "source": "news-briefing", "direction": "neutral", "conviction": 0.25, "timeframe": "days",
+    "evidence": "No dominant catalyst in the last 24h. Coverage is routine market commentary.",
+    "internal_divergence": null } }
+]
