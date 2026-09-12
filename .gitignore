@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+spike/raw/*.json
+!spike/raw/_klines_only.json
+.DS_Store

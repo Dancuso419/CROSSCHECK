@@ -1,0 +1,2 @@
+2026-09-12T08:42:35  macro-analyst=OK(20.84s)  market-intel=dead(30.83s)  news-briefing=dead(20.85s)  sentiment-analyst=dead(31.18s)  control/ccxt=OK(1.48s)   *** RECOVERED: macro-analyst ***
+2026-09-12T08:46:05  macro-analyst=dead(21.0s)  market-intel=dead(31.06s)  news-briefing=dead(21.11s)  sentiment-analyst=dead(31.11s)  control/ccxt=OK(2.15s)

@@ -1,0 +1,29 @@
+STATUS        LAT  SKILL               TOOL/ACTION                            PAYLOAD (truncated)
+------------------------------------------------------------------------------------------------------------------------------------------------------
+ERROR      40.79s  macro-analyst       cross_asset/correlation                {"_raw": "Error executing tool cross_asset: ", "_envelope": {"jsonrpc": "2.0", "id": 2, "r
+ERROR      16.05s  macro-analyst       global_assets/price                    {"_raw": "Error executing tool global_assets: ", "_envelope": {"jsonrpc": "2.0", "id": 2, 
+DEAD       20.99s  macro-analyst       global_data/forex                      {"error": "", "rates": {}}
+DEAD       22.08s  macro-analyst       macro_indicators/fomc_news             {"error": "Failed to fetch Fed RSS: "}
+DEAD       20.92s  macro-analyst       macro_indicators/multi_indicator       {"cpi": {"error": ""}, "nonfarm_payrolls": {"error": ""}, "gdp_growth": {"error": ""}, "un
+TIMEOUT/EXC        —  macro-analyst       rates_yields/rates_snapshot            {"_exception": "TimeoutError('The read operation timed out')", "_tb": "Traceback (most rec
+DEAD       22.97s  macro-analyst       rates_yields/yield_curve               {"yield_curve": {"t3m": {"error": ""}, "t1y": {"error": ""}, "t2y": {"error": ""}, "t5y": 
+ERROR      30.86s  market-intel        crypto_market/global                   {"_raw": "Error executing tool crypto_market: ConnectTimeout('')", "_envelope": {"jsonrpc"
+ERROR      31.33s  market-intel        crypto_market/markets                  {"_raw": "Error executing tool crypto_market: ConnectTimeout('')", "_envelope": {"jsonrpc"
+DEAD       20.77s  market-intel        defi_analytics/stablecoins             {"error": "", "url": "https://stablecoins.llama.fi/stablecoins"}
+DEAD       20.82s  market-intel        defi_analytics/tvl_rank                {"error": "", "url": "https://api.llama.fi/protocols"}
+DEAD        15.9s  market-intel        dex_market/trending                    {"error": "", "url": "https://api.dexscreener.com/token-boosts/top/v1"}
+DEAD       16.01s  market-intel        network_status/btc_fees                {"error": "", "url": "https://mempool.space/api/v1/fees/recommended"}
+DEAD       15.88s  market-intel        network_status/btc_mempool             {"error": "", "url": "https://mempool.space/api/mempool"}
+DEAD       22.67s  news-briefing       news_feed/latest                       [{"feed": "cointelegraph", "error": "", "items": []}, {"feed": "decrypt", "error": "", "it
+DEAD       30.83s  news-briefing       social_trending/trending               {"platform": "weibo", "provider": "all_failed", "items": []}
+DEAD       15.97s  news-briefing       tradfi_news/crypto_news                {"error": ""}
+DEAD       15.97s  sentiment-analyst   derivatives_sentiment/long_short       {"error": ""}
+DEAD       16.14s  sentiment-analyst   derivatives_sentiment/open_interest    {"error": ""}
+DEAD       16.07s  sentiment-analyst   derivatives_sentiment/reddit_trending  {"error": ""}
+DEAD       16.47s  sentiment-analyst   derivatives_sentiment/taker_ratio      {"error": ""}
+DEAD       30.96s  sentiment-analyst   sentiment_index/current                {"alt_me_error": ""}
+DEAD       16.35s  sentiment-analyst   sentiment_index/history                {"error": ""}
+OK          1.19s  technical-analysis  crypto_derivatives/klines              [{"timestamp": 1786320000000, "open": 64901.59, "high": 65391.14, "low": 64826.78, "close"
+OK          1.04s  technical-analysis  technical_analysis/full_analysis       {"symbol": "BTC/USDT", "timeframe": "4h", "rsi": {"rsi": 41.95, "period": 14, "signal": "n
+
+tally: ERROR=4, DEAD=18, TIMEOUT/EXC=1, OK=2  (total 25)
