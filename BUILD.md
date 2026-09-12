@@ -21,11 +21,12 @@ Directory to `crosscheck`.**
 ```bash
 cd crosscheck
 npm install
-cp .env.local.example .env.local     # then put a real ANTHROPIC_API_KEY in it
-npm run dev                          # http://localhost:3000
+cp .env.local.example .env.local     # then put a real GEMINI_API_KEY in it
+node scripts/list-models.mjs         # confirm model ids this key can reach, set them in .env.local
+npm run dev -- -p 3100               # http://localhost:3100 (3000 is taken by Hindsight)
 ```
 
-Node 20+. Requires `ANTHROPIC_API_KEY` for the normalisation pass; without it the app
+Node 20+. Requires `GEMINI_API_KEY` for the normalisation pass; without it the app
 still fans out and shows the five raw Skill responses, with normalisation marked
 unavailable.
 
@@ -36,12 +37,12 @@ unavailable.
 
 | Var | Required | Default | What it does |
 |---|---|---|---|
-| `ANTHROPIC_API_KEY` | yes (for normalisation) | — | Server-side only, never exposed to the browser |
+| `GEMINI_API_KEY` | yes (for normalisation) | — | Server-side only, never exposed to the browser |
 | `BITGET_MCP_URL` | no | `https://datahub.noxiaohao.com/mcp` | The research MCP |
 | `BITGET_MCP_TIMEOUT_MS` | no | `12000` | Per-call cap. Dead upstreams hang 16–41s; this stops a cold demo stalling |
 | `CROSSCHECK_CACHE_TTL_MS` | no | `300000` | In-memory cache bucket, keyed by ticker. No database |
-| `CROSSCHECK_MODEL_EXTRACT` | no | `claude-sonnet-5` | Pass 1, normalisation |
-| `CROSSCHECK_MODEL_REASON` | no | `claude-opus-5` | Pass 2, conflict reasoning (not wired yet) |
+| `GEMINI_MODEL_EXTRACT` | no | `gemini-2.5-flash` | Pass 1, normalisation. **Confirm with `list-models.mjs`** — the default may be stale |
+| `GEMINI_MODEL_REASON` | no | `gemini-2.5-pro` | Pass 2, conflict reasoning (not wired yet) |
 
 `.env.local` is covered by `.gitignore`'s `.env*`. Verify before any commit:
 `git check-ignore -v crosscheck/.env.local`
@@ -56,6 +57,10 @@ npm run build
 ```
 
 ```bash
+node scripts/list-models.mjs         # which Gemini models this key can reach
+```
+
+```bash
 python spike/ta.py selfcheck         # the Skill's own 23-indicator engine
 python spike/probe.py                # has the dead MCP recovered? appends to spike/raw/_RECOVERY.log
 ```
@@ -66,7 +71,8 @@ upstream fails, so anything that only checks status codes reads failure as succe
 ## Deploy (Vercel)
 
 1. Import the repo. **Root Directory: `crosscheck`.**
-2. Add `ANTHROPIC_API_KEY` as an environment variable (all environments).
+2. Add `GEMINI_API_KEY` as an environment variable (all environments), plus the two
+   `GEMINI_MODEL_*` vars if the defaults are stale.
 3. Deploy. Framework preset Next.js; no build-command override needed.
 
 Note: a Vercel deploy does **not** fix the dead Skills. The MCP is a remote server and

@@ -33,14 +33,14 @@ export async function POST(req: Request) {
   // five sources being queried rather than failing outright.
   let normalised = null;
   let normaliseError: string | null = null;
-  if (process.env.ANTHROPIC_API_KEY) {
+  if (process.env.GEMINI_API_KEY) {
     try {
       normalised = await normaliseAll(fan.sources);
     } catch (e) {
       normaliseError = e instanceof Error ? e.message : String(e);
     }
   } else {
-    normaliseError = "ANTHROPIC_API_KEY not set — fan-out only";
+    normaliseError = "GEMINI_API_KEY not set — fan-out only";
   }
 
   return NextResponse.json({ ...fan, normalised, normaliseError });

@@ -1,42 +1,60 @@
 /**
- * Anthropic Messages API over plain fetch. Server-side only — the key never reaches the
- * browser (CLAUDE.md). No SDK dependency: one POST does not justify one.
+ * Gemini (Google AI) over plain fetch. Server-side only — the key never reaches the
+ * browser (CLAUDE.md). No SDK dependency: two POSTs do not justify one.
+ *
+ * The form requires a "Role of the LLM in Your Project" answer, so keep this accurate:
+ * Pass 1 extracts a fixed schema per Skill, Pass 2 reasons over the extracted objects.
+ * No model ever sees raw data and conflict guidance at the same time.
+ *
+ * Model ids are NOT hardcoded guesses — run `node scripts/list-models.mjs` to see what
+ * this key can actually reach, then set the two env vars. Defaults below are a starting
+ * point only and may be stale.
  */
-const API = "https://api.anthropic.com/v1/messages";
+const BASE = "https://generativelanguage.googleapis.com/v1beta";
 
-// Pass 1 is extraction over a fixed schema, so it runs on Sonnet for latency across five
-// parallel sources. Pass 2 is the reasoning step and gets Opus.
-export const MODEL_EXTRACT = process.env.CROSSCHECK_MODEL_EXTRACT ?? "claude-sonnet-5";
-export const MODEL_REASON = process.env.CROSSCHECK_MODEL_REASON ?? "claude-opus-5";
+export const MODEL_EXTRACT = process.env.GEMINI_MODEL_EXTRACT ?? "gemini-2.5-flash";
+export const MODEL_REASON = process.env.GEMINI_MODEL_REASON ?? "gemini-2.5-pro";
 
-export async function askJson(model: string, prompt: string, maxTokens = 1024): Promise<string> {
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) throw new Error("ANTHROPIC_API_KEY is not set (see BUILD.md)");
+export async function askJson(model: string, prompt: string, maxTokens = 2048): Promise<string> {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) throw new Error("GEMINI_API_KEY is not set (see BUILD.md)");
 
-  const res = await fetch(API, {
+  const res = await fetch(`${BASE}/models/${model}:generateContent`, {
     method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-api-key": key,
-      "anthropic-version": "2023-06-01",
-    },
+    headers: { "content-type": "application/json", "x-goog-api-key": key },
     body: JSON.stringify({
-      model,
-      max_tokens: maxTokens,
-      // Deterministic-as-possible: direction must not wobble between runs on one input.
-      temperature: 0,
-      messages: [{ role: "user", content: prompt }],
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
+        // Direction must not wobble between runs on identical input.
+        temperature: 0,
+        maxOutputTokens: maxTokens,
+        // Ask for JSON at the API level; Zod still validates, because a declared mime
+        // type is not a guarantee and a silently repaired object is an unattributed claim.
+        responseMimeType: "application/json",
+      },
     }),
   });
 
-  if (!res.ok) throw new Error(`Anthropic HTTP ${res.status}: ${(await res.text()).slice(0, 300)}`);
-  const body = (await res.json()) as { content?: { type: string; text?: string }[] };
-  const text = body.content?.filter((b) => b.type === "text").map((b) => b.text).join("") ?? "";
+  if (!res.ok) throw new Error(`Gemini HTTP ${res.status}: ${(await res.text()).slice(0, 300)}`);
+
+  const body = (await res.json()) as {
+    candidates?: { content?: { parts?: { text?: string }[] }; finishReason?: string }[];
+    promptFeedback?: { blockReason?: string };
+  };
+  if (body.promptFeedback?.blockReason) throw new Error(`blocked: ${body.promptFeedback.blockReason}`);
+
+  const cand = body.candidates?.[0];
+  const text = cand?.content?.parts?.map((p) => p.text ?? "").join("") ?? "";
+  // MAX_TOKENS yields a truncated object that would fail Zod confusingly — name it here.
+  if (cand?.finishReason && !["STOP", "MAX_TOKENS"].includes(cand.finishReason)) {
+    throw new Error(`finishReason ${cand.finishReason}`);
+  }
+  if (cand?.finishReason === "MAX_TOKENS") throw new Error("truncated: raise maxTokens");
   if (!text.trim()) throw new Error("empty completion");
   return text;
 }
 
-/** Models like to wrap JSON in prose or a fence. Take the outermost object. */
+/** Models wrap JSON in prose or a fence even when asked not to. Take the outermost object. */
 export function extractJson(text: string): unknown {
   const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
   const candidate = (fenced ? fenced[1] : text).trim();
