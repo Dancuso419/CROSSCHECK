@@ -13,6 +13,7 @@
 import { NextResponse } from "next/server";
 import { fanout } from "@/lib/fanout";
 import { hasSnapshot, snapshotFanout, snapshotMeta } from "@/lib/snapshot";
+import { getScenario, scenarioFanout, scenarioIndex } from "@/lib/scenarios";
 import { normaliseAllCached } from "@/lib/normalise";
 import { buildBriefCached } from "@/lib/conflicts";
 import { MODEL_EXTRACT, MODEL_REASON } from "@/lib/llm";
@@ -26,16 +27,26 @@ const hasKey = () => Boolean(process.env.DEEPSEEK_API_KEY || process.env.GEMINI_
 
 export async function POST(req: Request) {
   let ticker: string;
-  let mode: "live" | "demo";
+  let mode: "live" | "demo" | "scenario";
+  let scenarioId = "";
   try {
-    const body = (await req.json()) as { ticker?: unknown; mode?: unknown };
+    const body = (await req.json()) as { ticker?: unknown; mode?: unknown; scenario?: unknown };
     ticker = String(body.ticker ?? "").trim().toUpperCase();
-    mode = body.mode === "demo" ? "demo" : "live";
+    mode = body.mode === "demo" ? "demo" : body.mode === "scenario" ? "scenario" : "live";
+    scenarioId = String(body.scenario ?? "");
   } catch {
     return NextResponse.json({ error: "invalid JSON body" }, { status: 400 });
   }
+  const scenario = mode === "scenario" ? getScenario(scenarioId) : undefined;
+  if (mode === "scenario" && !scenario) {
+    return NextResponse.json(
+      { error: `Unknown scenario "${scenarioId}". Available: ${scenarioIndex.map((s) => s.id).join(", ")}` },
+      { status: 400 },
+    );
+  }
+
   // Crypto base symbols only. PROGRESS.md: the Skills have no equity path.
-  if (!/^[A-Z0-9]{2,10}$/.test(ticker)) {
+  if (mode !== "scenario" && !/^[A-Z0-9]{2,10}$/.test(ticker)) {
     return NextResponse.json({ error: "Ticker must be 2-10 letters or digits, e.g. BTC" }, { status: 400 });
   }
 
@@ -51,8 +62,9 @@ export async function POST(req: Request) {
   const t0 = Date.now();
   // Demo mode replaces ONLY the upstream data. Normalisation, conflict detection, ranking
   // and the brief all run for real on top of the recording.
-  const fan = mode === "demo" ? snapshotFanout() : await fanout(ticker);
+  const fan = scenario ? scenarioFanout(scenario) : mode === "demo" ? snapshotFanout() : await fanout(ticker);
   const tFanout = Date.now() - t0;
+  if (scenario) ticker = fan.ticker;
 
   let normalised = null;
   let brief = null;
@@ -65,10 +77,12 @@ export async function POST(req: Request) {
   } else {
     try {
       const t1 = Date.now();
-      normalised = await normaliseAllCached(`${mode}:${ticker}`, fan.sources);
+      // Scenario sources arrive already normalised, so Pass 1 is genuinely not run rather
+      // than run over a fabricated raw payload.
+      normalised = scenario ? scenario.outcomes : await normaliseAllCached(`${mode}:${ticker}`, fan.sources);
       tNormalise = Date.now() - t1;
       const t2 = Date.now();
-      brief = await buildBriefCached(ticker, normalised, fan.total, `${mode}:${ticker}`);
+      brief = await buildBriefCached(ticker, normalised, fan.total, `${mode}:${scenarioId || ticker}`);
       tConflict = Date.now() - t2;
     } catch (e) {
       analyseError = e instanceof Error ? e.message : String(e);
@@ -81,8 +95,10 @@ export async function POST(req: Request) {
     brief,
     analyseError,
     mode,
-    // Always sent in demo mode so the UI cannot render a recording without saying so.
+    // Always sent so the UI cannot render a recording or a construction without saying so.
     snapshot: mode === "demo" ? snapshotMeta : null,
+    scenario: scenario ? { id: scenario.id, title: scenario.title, teaches: scenario.teaches } : null,
+    scenarios: scenarioIndex,
     models: { extract: MODEL_EXTRACT, reason: MODEL_REASON },
     timings: { fanoutMs: tFanout, normaliseMs: tNormalise, conflictMs: tConflict, totalMs: Date.now() - t0 },
   });

@@ -120,6 +120,26 @@ brief all run for real on top of it. Demo mode takes ~17s cold (no dead-Skill ti
 
 Re-capture with `python spike/capture.py`.
 
+### Illustrative scenarios
+
+A third mode, **Illustrative**, runs four constructed cases. It exists because the product's
+headline output is a ranked disagreement, and real data only shows one when the sources
+genuinely disagree — which they did not on the capture date. Rather than loosen Pass 1 to
+produce drama, the conflict UI is demonstrated on inputs openly labelled as constructed.
+
+These are the same four fixtures the Pass 2 regression suite asserts against
+(`src/data/scenarios/`, run by `scripts/cases.ts`), so what a judge sees is exactly what the
+tests check. Their sources are already normalised, so Pass 1 is genuinely skipped and the
+page says so; conflict detection, ranking and Pass 2 all run for real.
+
+Three modes, three badges, live by default:
+
+| mode | data | badge |
+|---|---|---|
+| Live | queries the Skills now | none — it is live |
+| Recorded | real captured market data | "Recorded snapshot — real data, not live" |
+| Illustrative | constructed | "Illustrative example — constructed data, not real market data" |
+
 ## Known state (2026-09-12)
 
 Four of five Skills return no data: the MCP's upstream fetching is down on their side.

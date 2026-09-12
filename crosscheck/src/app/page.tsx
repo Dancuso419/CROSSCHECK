@@ -16,8 +16,23 @@ type Result = {
   sources: Source[]; normalised: Normalised[] | null; brief: Brief | null;
   analyseError: string | null; models: { extract: string; reason: string };
   timings: { fanoutMs: number; normaliseMs: number; conflictMs: number; totalMs: number };
-  mode: "live" | "demo";
+  mode: "live" | "demo" | "scenario";
   snapshot: { capturedAt: string; note: string; ticker: string } | null;
+  scenario: { id: string; title: string; teaches: string } | null;
+  scenarios: { id: string; title: string; teaches: string }[];
+};
+
+const SCENARIOS = [
+  { id: "sharp-conflict", title: "Flows against macro" },
+  { id: "strong-agreement", title: "All five aligned" },
+  { id: "timeframe-divergence", title: "Bearish months, bullish intraday" },
+  { id: "missing-source", title: "Two Skills unavailable" },
+];
+
+const MODE_NOTE: Record<string, string> = {
+  live: "Queries the Skills now. Four of five are currently returning no data.",
+  demo: "A real five-source capture, so the full comparison can be shown.",
+  scenario: "Constructed inputs. These are the same fixtures the Pass 2 tests assert against.",
 };
 
 const AGREEMENT: Record<Brief["agreement_level"], { label: string; cls: string }> = {
@@ -45,7 +60,8 @@ function Pill({ children, className = "" }: { children: React.ReactNode; classNa
 
 export default function Home() {
   const [ticker, setTicker] = useState("BTC");
-  const [mode, setMode] = useState<"live" | "demo">("live");
+  const [mode, setMode] = useState<"live" | "demo" | "scenario">("live");
+  const [scenario, setScenario] = useState(SCENARIOS[0].id);
   const [busy, setBusy] = useState(false);
   const [res, setRes] = useState<Result | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -57,7 +73,7 @@ export default function Home() {
       const r = await fetch("/api/crosscheck", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ ticker, mode }),
+        body: JSON.stringify({ ticker, mode, scenario }),
       });
       const body = await r.json();
       if (!r.ok) throw new Error(body.error ?? `HTTP ${r.status}`);
@@ -105,7 +121,7 @@ export default function Home() {
       <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
         <span className="text-neutral-500">Data:</span>
         <div className="inline-flex overflow-hidden rounded-md border border-neutral-300 dark:border-neutral-700">
-          {(["live", "demo"] as const).map((m) => (
+          {([["live", "Live"], ["demo", "Recorded"], ["scenario", "Illustrative"]] as const).map(([m, label]) => (
             <button
               key={m}
               type="button"
@@ -117,15 +133,23 @@ export default function Home() {
                   : "text-neutral-600 dark:text-neutral-400"
               }`}
             >
-              {m === "live" ? "Live" : "Recorded snapshot"}
+              {label}
             </button>
           ))}
         </div>
-        <span className="text-neutral-500">
-          {mode === "live"
-            ? "Queries the Skills now. Four of five are currently returning no data."
-            : "A recorded five-source capture, so the full comparison can be shown."}
-        </span>
+        {mode === "scenario" && (
+          <select
+            value={scenario}
+            onChange={(e) => setScenario(e.target.value)}
+            aria-label="Scenario"
+            className="rounded-md border border-neutral-300 bg-transparent px-2 py-1 dark:border-neutral-700 dark:bg-neutral-900"
+          >
+            {SCENARIOS.map((s) => (
+              <option key={s.id} value={s.id}>{s.title}</option>
+            ))}
+          </select>
+        )}
+        <span className="text-neutral-500">{MODE_NOTE[mode]}</span>
       </div>
 
       {err && <p className="mt-4 rounded-md bg-rose-50 p-3 text-sm text-rose-800 dark:bg-rose-950/50 dark:text-rose-200">{err}</p>}
@@ -136,8 +160,16 @@ export default function Home() {
           <section className="mt-8 border-t border-neutral-200 pt-6 dark:border-neutral-800">
             {res.mode === "demo" && res.snapshot && (
               <div className="mb-4 rounded-md border border-sky-300 bg-sky-50 p-3 text-xs leading-relaxed text-sky-900 dark:border-sky-800 dark:bg-sky-950/50 dark:text-sky-200">
-                <span className="font-semibold">Recorded snapshot — not live data.</span>{" "}
+                <span className="font-semibold">Recorded snapshot — real data, not live.</span>{" "}
                 Captured {new Date(res.snapshot.capturedAt).toLocaleString()}. {res.snapshot.note}
+              </div>
+            )}
+            {res.mode === "scenario" && res.scenario && (
+              <div className="mb-4 rounded-md border border-violet-300 bg-violet-50 p-3 text-xs leading-relaxed text-violet-900 dark:border-violet-800 dark:bg-violet-950/50 dark:text-violet-200">
+                <span className="font-semibold">Illustrative example — constructed data, not real market data.</span>{" "}
+                “{res.scenario.title}”. {res.scenario.teaches} Conflict detection, ranking and the
+                brief run for real on these inputs; Pass 1 is skipped because the sources are
+                already normalised.
               </div>
             )}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
@@ -147,7 +179,7 @@ export default function Home() {
                 {res.reporting} of {res.total} sources reporting
               </span>
               <span className="text-xs text-neutral-500">
-                {res.mode === "demo" ? "recorded" : res.cached ? "cached" : "live"} ·{" "}
+                {res.mode === "demo" ? "recorded" : res.mode === "scenario" ? "illustrative" : res.cached ? "cached" : "live"} ·{" "}
                 {new Date(res.fetchedAt).toLocaleTimeString()}
               </span>
             </div>
@@ -268,6 +300,11 @@ export default function Home() {
               Five Skills queried in parallel · Pass 1 {res.models.extract} · Pass 2 {res.models.reason} ·
               conflict detection and ranking are deterministic, not model judgment
             </p>
+            {res.mode === "scenario" && (
+              <p className="mt-1 text-xs text-neutral-500">
+                No Skills were queried for this example, so no calls or latencies are shown.
+              </p>
+            )}
             <p className="mt-1 text-xs text-neutral-500">
               fan-out {(res.timings.fanoutMs / 1000).toFixed(1)}s · normalise{" "}
               {(res.timings.normaliseMs / 1000).toFixed(1)}s · conflict{" "}

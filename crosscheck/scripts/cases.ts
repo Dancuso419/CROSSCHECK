@@ -16,7 +16,9 @@ for (const line of readFileSync(".env.local", "utf8").split(/\r?\n/)) {
   if (m) process.env[m[1]] ??= m[2].trim().replace(/^["']|["']$/g, "");
 }
 
-const CASES_DIR = "../spike/cases";
+// Single source of truth: these fixtures are both the Pass 2 regression suite and the
+// illustrative scenarios the app can render, so they cannot drift apart.
+const CASES_DIR = "src/data/scenarios";
 
 /**
  * The no-verdict rule is absolute (CLAUDE.md): no buy/sell/hold, no price target, no
