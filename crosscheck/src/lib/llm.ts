@@ -14,15 +14,23 @@
 const GEMINI = "https://generativelanguage.googleapis.com/v1beta";
 const DEEPSEEK = "https://api.deepseek.com/chat/completions";
 
-// Pass 1 runs once per live Skill, so it is the call most exposed to rate limits.
-// gemini-3.8-flash produces good output but one five-source fan-out exhausts its free RPM
-// (observed: 429 with RetryInfo 34s). gemini-2.5-flash has headroom and returns clean JSON.
-export const MODEL_EXTRACT = process.env.GEMINI_MODEL_EXTRACT ?? "gemini-2.5-flash";
-// Pass 2 is the reasoning step, so the pro line would be the natural choice — but on this
-// key it is unusable: gemini-2.5-pro 404s ("no longer available to new users") and
-// gemini-3.1-pro-preview 429s through four retries even honouring its own 12-35s
-// retryDelay. gemini-3.5-flash passes all four cases in 7-14s. Revisit with a paid key.
-export const MODEL_REASON = process.env.GEMINI_MODEL_REASON ?? "gemini-3.5-flash";
+// Both passes default to DeepSeek, chosen by measurement rather than reputation. The same
+// four-case Pass 2 suite and the same Pass 1 stability harness were run against both
+// providers (PROGRESS.md has the table):
+//   - Correctness: gemini-3.5-flash, deepseek-chat and deepseek-reasoner all pass all four
+//     cases. The structural guard in materiality.ts, not the model, is what prevents
+//     manufactured conflict — so model choice is a latency and reliability decision.
+//   - Pass 1 stability: deepseek-chat held conviction at 0.35 across 4 runs (spread 0.00);
+//     gemini-2.5-flash varied 0.35-0.40 (spread 0.05). Same direction from both.
+//   - Pass 2 latency: deepseek-chat 1.6-6.2s, gemini-3.5-flash 7.5-14.0s,
+//     deepseek-reasoner 3.9-31.0s. The reasoner is rejected on latency, not quality.
+//   - Free-tier reliability: Gemini's pro line is unusable on a new key (2.5-pro 404s,
+//     3.1-pro-preview 429s through four retries) and one five-source fan-out exhausts
+//     gemini-3.8-flash's RPM. DeepSeek hit no limits.
+// Gemini stays fully wired as a fallback: set MODEL_EXTRACT / MODEL_REASON to a gemini-*
+// id and the provider switches automatically.
+export const MODEL_EXTRACT = process.env.MODEL_EXTRACT ?? "deepseek-chat";
+export const MODEL_REASON = process.env.MODEL_REASON ?? "deepseek-chat";
 
 export const providerOf = (model: string) => (/^deepseek/.test(model) ? "deepseek" : "gemini");
 

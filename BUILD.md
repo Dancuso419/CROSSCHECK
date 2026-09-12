@@ -21,12 +21,12 @@ Directory to `crosscheck`.**
 ```bash
 cd crosscheck
 npm install
-cp .env.local.example .env.local     # then put a real GEMINI_API_KEY in it
-node scripts/list-models.mjs         # confirm model ids this key can reach, set them in .env.local
+cp .env.local.example .env.local     # then put a real DEEPSEEK_API_KEY in it
+node scripts/list-models.mjs         # only if using Gemini: lists model ids the key can reach
 npm run dev -- -p 3100               # http://localhost:3100 (3000 is taken by Hindsight)
 ```
 
-Node 20+. Requires `GEMINI_API_KEY` for the normalisation pass; without it the app
+Node 20+. Requires `DEEPSEEK_API_KEY` for the normalisation pass; without it the app
 still fans out and shows the five raw Skill responses, with normalisation marked
 unavailable.
 
@@ -37,13 +37,13 @@ unavailable.
 
 | Var | Required | Default | What it does |
 |---|---|---|---|
-| `GEMINI_API_KEY` | yes (for normalisation) | — | Server-side only, never exposed to the browser |
+| `DEEPSEEK_API_KEY` | yes (default provider) | — | Server-side only, never exposed to the browser |
+| `GEMINI_API_KEY` | no | — | Only needed if `MODEL_*` points at a `gemini-*` id |
 | `BITGET_MCP_URL` | no | `https://datahub.noxiaohao.com/mcp` | The research MCP |
 | `BITGET_MCP_TIMEOUT_MS` | no | `12000` | Per-call cap. Dead upstreams hang 16–41s; this stops a cold demo stalling |
 | `CROSSCHECK_CACHE_TTL_MS` | no | `300000` | In-memory cache bucket, keyed by ticker. No database |
-| `GEMINI_MODEL_EXTRACT` | no | `gemini-2.5-flash` | Pass 1, normalisation. **Confirm with `list-models.mjs`** — the default may be stale |
-| `GEMINI_MODEL_REASON` | no | `gemini-3.5-flash` | Pass 2, conflict reasoning. The pro line is unusable on a free key — see PROGRESS.md |
-| `DEEPSEEK_API_KEY` | no | — | Only needed to run the prompt suite against DeepSeek for comparison |
+| `MODEL_EXTRACT` | no | `deepseek-chat` | Pass 1. Provider inferred from the id: `deepseek-*` then DeepSeek, else Gemini |
+| `MODEL_REASON` | no | `deepseek-chat` | Pass 2. `gemini-3.5-flash` and `deepseek-reasoner` also pass the full suite |
 
 `.env.local` is covered by `.gitignore`'s `.env*`. Verify before any commit:
 `git check-ignore -v crosscheck/.env.local`
@@ -76,8 +76,7 @@ upstream fails, so anything that only checks status codes reads failure as succe
 ## Deploy (Vercel)
 
 1. Import the repo. **Root Directory: `crosscheck`.**
-2. Add `GEMINI_API_KEY` as an environment variable (all environments), plus the two
-   `GEMINI_MODEL_*` vars if the defaults are stale.
+2. Add `DEEPSEEK_API_KEY` as an environment variable (all environments).
 3. Deploy. Framework preset Next.js; no build-command override needed.
 
 Note: a Vercel deploy does **not** fix the dead Skills. The MCP is a remote server and

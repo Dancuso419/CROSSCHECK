@@ -16,6 +16,7 @@ for (const line of readFileSync(".env.local", "utf8").split(/\r?\n/)) {
 
 async function main() {
   const runs = Number(process.argv[2] ?? 5);
+  if (process.argv[3]) process.env.MODEL_EXTRACT = process.argv[3]; // optional model override
   const { fanout } = await import("../src/lib/fanout");
   const { normaliseSource } = await import("../src/lib/normalise");
   const { MODEL_EXTRACT } = await import("../src/lib/llm");

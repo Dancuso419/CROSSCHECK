@@ -17,7 +17,9 @@ conviction not noise). Q4 not assessable with one live source.
 - [x] **Ingest** — fan-out to five Skills, parallel, cached, unavailability reported
 - [x] **Analyse, Pass 1** — normalisation running against live data on Gemini,
       Zod-validated, cached. Verified stable across 5 repeat runs and across two models.
-- [ ] **Analyse, Pass 2** — conflict detection + materiality ranking not started.
+- [x] **Analyse, Pass 2** — conflict detection + materiality ranking. Deterministic in
+      code; the model only explains conflicts it is handed. All four cases from
+      05-prompts.md pass on three different models. Not wired into the UI yet.
 - [ ] **Report** — brief rendering not started
 - [ ] Deployed, link verified in a private window
 
@@ -137,8 +139,10 @@ Live TA divergence across timeframes, which is real product material even with o
    Fixed; Wilder yields 842.34, which is the buggy MCP tool's value.
 8. Windows `ENOTEMPTY` corrupted `node_modules` twice → clean reinstall. Fixed.
 9. `create-next-app` created a nested git repo → removed, one repo at the root. Fixed.
-10. `.env.local` parsed as empty: the file is CRLF, and JS regex `.` does not match ``,
-    so every line failed to match. Split on `/?
+10. `.env.local` parsed as empty: the file is CRLF, and JS regex `.` does not match `
+`,
+    so every line failed to match. Split on `/
+?
 /`. Fixed.
 11. Pass 1 truncated mid-JSON at 2048 output tokens → these models spend reasoning tokens
     from the same output budget. Raised to 8192. Fixed.
@@ -166,10 +170,38 @@ Reachable from this machine, but it guts the Skill-integration story, which is g
 ## Stack
 
 - Next.js 16 + TypeScript + Tailwind 4 + Zod 4, in `crosscheck/`. shadcn/ui pending.
-- Models: **Gemini** (the key available). Pass 1 `gemini-2.5-flash`, Pass 2
-  `gemini-3.1-pro-preview` (not wired yet). Pinned explicitly, not `-latest` aliases, so a
-  judged demo stays reproducible. Claude Opus 5 does the build. The form's mandatory
-  "Role of the LLM in Your Project" field must say exactly this.
+- Models: **DeepSeek `deepseek-chat` for both passes**, chosen by measurement (table below).
+  Gemini stays fully wired as a fallback - set `MODEL_EXTRACT`/`MODEL_REASON` to a
+  `gemini-*` id and the provider switches automatically. Pinned ids, never `-latest`
+  aliases, so a judged demo stays reproducible. Claude Opus 5 does the build.
+  The form's mandatory "Role of the LLM in Your Project" field should say: DeepSeek
+  `deepseek-chat` for schema extraction (Pass 1) and conflict explanation (Pass 2); no
+  model decides what counts as a conflict or how material it is - that is deterministic
+  code. Claude Opus 5 for development.
+
+## Model comparison - measured, not assumed
+
+Same four-case Pass 2 suite (`scripts/cases.ts`) and the same Pass 1 stability harness
+(`scripts/stability.ts`), identical inputs, temperature 0:
+
+| | correctness | Pass 2 latency | Pass 1 conviction spread |
+|---|---|---|---|
+| `deepseek-chat` | **4/4** | **1.6-6.2s** | **0.00** |
+| `gemini-3.5-flash` | 4/4 | 7.5-14.0s | 0.05 |
+| `deepseek-reasoner` | 4/4 | 3.9-31.0s | not run |
+
+All three give the same `direction` on live data and all three pass every case, including
+case 2 (five aligned sources produce zero conflicts). **That is the finding:** the guard
+against manufactured conflict is the structure in `materiality.ts`, not the model. So the
+choice is latency and reliability, and `deepseek-chat` wins both. `deepseek-reasoner` is
+rejected on latency, not quality. DeepSeek also names sources explicitly in its summaries
+("market-intel and sentiment-analyst are bullish"), which serves the
+every-claim-cites-its-source rule better than Gemini's "two sources express bullish".
+
+Free-tier reliability was the starkest difference: Gemini's pro line is unusable on a new
+key (`gemini-2.5-pro` 404s "no longer available to new users", `gemini-3.1-pro-preview`
+429s through four retries while honouring its own 12-35s `retryDelay`), and one
+five-source fan-out exhausts `gemini-3.8-flash`'s RPM. DeepSeek hit no limits at all.
 - APIs / Skills: bitget-signal installed (5 Skills). **1 of 5 has live data.**
 
 ## Validation data

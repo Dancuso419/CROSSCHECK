@@ -59,8 +59,8 @@ const EXPECT: Record<string, Expect> = {
 };
 
 async function main() {
-  const model = process.argv[2] ?? process.env.GEMINI_MODEL_REASON ?? "gemini-3.1-pro-preview";
-  process.env.GEMINI_MODEL_REASON = model;
+  const model = process.argv[2] ?? process.env.MODEL_REASON ?? "gemini-3.5-flash";
+  process.env.MODEL_REASON = model;
 
   const { buildBrief } = await import("../src/lib/conflicts");
   const { providerOf } = await import("../src/lib/llm");
