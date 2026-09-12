@@ -14,23 +14,27 @@
 const GEMINI = "https://generativelanguage.googleapis.com/v1beta";
 const DEEPSEEK = "https://api.deepseek.com/chat/completions";
 
-// Both passes default to DeepSeek, chosen by measurement rather than reputation. The same
-// four-case Pass 2 suite and the same Pass 1 stability harness were run against both
-// providers (PROGRESS.md has the table):
-//   - Correctness: gemini-3.5-flash, deepseek-chat and deepseek-reasoner all pass all four
-//     cases. The structural guard in materiality.ts, not the model, is what prevents
-//     manufactured conflict — so model choice is a latency and reliability decision.
-//   - Pass 1 stability: deepseek-chat held conviction at 0.35 across 4 runs (spread 0.00);
-//     gemini-2.5-flash varied 0.35-0.40 (spread 0.05). Same direction from both.
-//   - Pass 2 latency: deepseek-chat 1.6-6.2s, gemini-3.5-flash 7.5-14.0s,
-//     deepseek-reasoner 3.9-31.0s. The reasoner is rejected on latency, not quality.
-//   - Free-tier reliability: Gemini's pro line is unusable on a new key (2.5-pro 404s,
-//     3.1-pro-preview 429s through four retries) and one five-source fan-out exhausts
-//     gemini-3.8-flash's RPM. DeepSeek hit no limits.
+// Both passes default to DeepSeek. Model ids come from GET /models on the key itself, not
+// from memory: that endpoint lists exactly `deepseek-flash` and `deepseek-v4-pro`.
+// `deepseek-chat` and `deepseek-reasoner` still respond but are NOT listed - undocumented
+// legacy aliases pointing at an unknown target - so they are not used here. A judged demo
+// needs an id whose behaviour cannot be re-pointed underneath it.
+//
+// Measured with scripts/cases.ts and scripts/stability.ts, identical inputs, temperature 0:
+//   - Correctness: deepseek-flash, deepseek-v4-pro, both legacy aliases, and
+//     gemini-3.5-flash all pass all four cases from 05-prompts.md. The guard against
+//     manufactured conflict is the structure in materiality.ts, not the model.
+//   - Pass 1 stability: conviction held at 0.35 across 4 runs, spread 0.00.
+//   - Latency is NOT a reliable discriminator at n=1: the same input took 6.2s on one id
+//     and 21.4s on another that should be comparable. Only the v4-pro gap is beyond noise
+//     (46-65s on two cases), which is why the flash tier is the default for an interactive
+//     demo. deepseek-v4-pro writes the better prose - on the timeframe-divergence case it
+//     volunteered "no contradiction needs resolving" - so it is the right choice if the
+//     brief is ever generated ahead of time rather than on request.
 // Gemini stays fully wired as a fallback: set MODEL_EXTRACT / MODEL_REASON to a gemini-*
 // id and the provider switches automatically.
-export const MODEL_EXTRACT = process.env.MODEL_EXTRACT ?? "deepseek-chat";
-export const MODEL_REASON = process.env.MODEL_REASON ?? "deepseek-chat";
+export const MODEL_EXTRACT = process.env.MODEL_EXTRACT ?? "deepseek-flash";
+export const MODEL_REASON = process.env.MODEL_REASON ?? "deepseek-flash";
 
 export const providerOf = (model: string) => (/^deepseek/.test(model) ? "deepseek" : "gemini");
 

@@ -170,39 +170,55 @@ Reachable from this machine, but it guts the Skill-integration story, which is g
 ## Stack
 
 - Next.js 16 + TypeScript + Tailwind 4 + Zod 4, in `crosscheck/`. shadcn/ui pending.
-- Models: **DeepSeek `deepseek-chat` for both passes**, chosen by measurement (table below).
+- Models: **DeepSeek `deepseek-flash` for both passes**, chosen by measurement (table below).
   Gemini stays fully wired as a fallback - set `MODEL_EXTRACT`/`MODEL_REASON` to a
   `gemini-*` id and the provider switches automatically. Pinned ids, never `-latest`
   aliases, so a judged demo stays reproducible. Claude Opus 5 does the build.
   The form's mandatory "Role of the LLM in Your Project" field should say: DeepSeek
-  `deepseek-chat` for schema extraction (Pass 1) and conflict explanation (Pass 2); no
+  `deepseek-flash` for schema extraction (Pass 1) and conflict explanation (Pass 2); no
   model decides what counts as a conflict or how material it is - that is deterministic
   code. Claude Opus 5 for development.
 
-## Model comparison - measured, not assumed
+## Model comparison - measured, with an honest caveat
 
-Same four-case Pass 2 suite (`scripts/cases.ts`) and the same Pass 1 stability harness
+Same four-case Pass 2 suite (`scripts/cases.ts`) and Pass 1 stability harness
 (`scripts/stability.ts`), identical inputs, temperature 0:
 
-| | correctness | Pass 2 latency | Pass 1 conviction spread |
-|---|---|---|---|
-| `deepseek-chat` | **4/4** | **1.6-6.2s** | **0.00** |
-| `gemini-3.5-flash` | 4/4 | 7.5-14.0s | 0.05 |
-| `deepseek-reasoner` | 4/4 | 3.9-31.0s | not run |
+| config | correctness | Pass 2 latency (n=1) |
+|---|---|---|
+| `deepseek-flash` (real id) | 4/4 | 2.6-21.4s |
+| `deepseek-v4-pro` (real id) | 4/4 | 4.9-64.8s |
+| `deepseek-chat` (legacy alias) | 4/4 | 1.6-6.2s |
+| `deepseek-reasoner` (legacy alias) | 4/4 | 3.9-31.0s |
+| `gemini-3.5-flash` | 4/4 | 7.5-14.0s |
 
-All three give the same `direction` on live data and all three pass every case, including
-case 2 (five aligned sources produce zero conflicts). **That is the finding:** the guard
-against manufactured conflict is the structure in `materiality.ts`, not the model. So the
-choice is latency and reliability, and `deepseek-chat` wins both. `deepseek-reasoner` is
-rejected on latency, not quality. DeepSeek also names sources explicitly in its summaries
-("market-intel and sentiment-analyst are bullish"), which serves the
-every-claim-cites-its-source rule better than Gemini's "two sources express bullish".
+**The robust finding: every configuration passes all four cases, case 2 included.** The
+guard against manufactured conflict is the structure in `materiality.ts`, not the model,
+so provider choice cannot silently break the product's core promise.
 
-Free-tier reliability was the starkest difference: Gemini's pro line is unusable on a new
-key (`gemini-2.5-pro` 404s "no longer available to new users", `gemini-3.1-pro-preview`
-429s through four retries while honouring its own 12-35s `retryDelay`), and one
-five-source fan-out exhausts `gemini-3.8-flash`'s RPM. DeepSeek hit no limits at all.
-- APIs / Skills: bitget-signal installed (5 Skills). **1 of 5 has live data.**
+**Caveat on the latency column - it is n=1 per model and too noisy to rank on.** The same
+case 1 input took 6.2s on one DeepSeek id and 21.4s on another that should be comparable.
+An earlier version of this file claimed DeepSeek was "2-4x faster than Gemini"; that was
+over-claimed from single samples. Only the `deepseek-v4-pro` gap (46-65s on two cases) is
+clearly beyond noise, which is why the flash tier is the default for an interactive demo.
+
+**Model ids come from the API, not from memory.** `GET /models` on the DeepSeek key lists
+exactly `deepseek-flash` and `deepseek-v4-pro`. `deepseek-chat` and `deepseek-reasoner`
+still respond but are **not listed** - undocumented legacy aliases pointing at an unknown
+target. The first comparison run used those aliases, which is exactly the
+re-pointed-underneath-you risk that pinning is supposed to avoid. Both providers now have a
+lister: `scripts/list-deepseek-models.mjs` and `scripts/list-models.mjs`.
+
+Quality note worth keeping: `deepseek-v4-pro` writes the best prose of the five. On the
+timeframe-divergence case it volunteered "Because this is a timeframe divergence, no
+contradiction needs resolving", which is precisely the nuance 03-skill-integration.md asks
+for. It is the right choice if a brief is ever generated ahead of time rather than on
+request.
+
+Free-tier reliability was the clearest split: Gemini's pro line is unusable on a new key
+(`gemini-2.5-pro` 404s "no longer available to new users", `gemini-3.1-pro-preview` 429s
+through four retries while honouring its own 12-35s `retryDelay`), and one five-source
+fan-out exhausts `gemini-3.8-flash`'s RPM. DeepSeek hit no limits at all.
 
 ## Validation data
 
