@@ -133,3 +133,19 @@ export async function buildBrief(ticker: string, outcomes: NormaliseOutcome[], t
     unavailable_sources,
   };
 }
+
+// One LLM call per query, so an uncached reload costs a call for a brief we already have.
+// Same TTL bucket as the fan-out and Pass 1, so the three layers never drift apart.
+// No database (CLAUDE.md).
+const TTL_MS = Number(process.env.CROSSCHECK_CACHE_TTL_MS ?? 5 * 60_000);
+const cache = new Map<string, Brief>();
+
+export async function buildBriefCached(ticker: string, outcomes: NormaliseOutcome[], total: number) {
+  const key = `${ticker.toUpperCase()}@${Math.floor(Date.now() / TTL_MS)}`;
+  const hit = cache.get(key);
+  if (hit) return hit;
+  const brief = await buildBrief(ticker, outcomes, total);
+  cache.set(key, brief);
+  if (cache.size > 50) cache.delete(cache.keys().next().value!);
+  return brief;
+}

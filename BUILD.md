@@ -89,6 +89,16 @@ all upstream fetching happens on their side — see PROGRESS.md.
 3. You should see all five Skills listed, each with its individual MCP calls and
    latencies, and an explicit "N of 5 sources reporting" count.
 4. Unavailable Skills must state *why*. A source is never silently dropped.
+5. The brief itself: a consensus summary, disagreements ranked most-material-first with
+   "for X to be right / for Y to be right" and a named resolving observable, sources
+   disagreeing with themselves, and the gaps named.
+6. Nowhere should there be a buy/sell/hold, a direction call or a price target.
+
+**Expect roughly 30s on the first query and instant afterwards** (in-memory cache, 5-minute
+bucket). Measured cold with 4 of 5 Skills dead: fan-out 14s (the dead Skills each burn their
+12s timeout), normalise 12s, conflict 3s. Cached: 0.04s. The route ceiling is 60s; using
+`deepseek-v4-pro` for Pass 1 pushed a cold query to 58s, which is why both passes use
+`deepseek-flash`.
 
 ## Known state (2026-09-12)
 

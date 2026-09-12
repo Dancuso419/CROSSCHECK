@@ -19,8 +19,10 @@ conviction not noise). Q4 not assessable with one live source.
       Zod-validated, cached. Verified stable across 5 repeat runs and across two models.
 - [x] **Analyse, Pass 2** — conflict detection + materiality ranking. Deterministic in
       code; the model only explains conflicts it is handed. All four cases from
-      05-prompts.md pass on three different models. Not wired into the UI yet.
-- [ ] **Report** — brief rendering not started
+      05-prompts.md pass on five different model configurations.
+- [x] **Report** — brief wired into the route and rendered: consensus summary, conflicts
+      ranked by materiality with both cases and a named resolving observable, internal
+      divergence, and the gaps named. Verified end to end on BTC and ETH.
 - [ ] Deployed, link verified in a private window
 
 ## Done this session
