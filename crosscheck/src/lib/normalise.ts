@@ -60,3 +60,24 @@ export async function normaliseSource(src: SourceResult): Promise<NormaliseOutco
 }
 
 export const normaliseAll = (sources: SourceResult[]) => Promise.all(sources.map(normaliseSource));
+
+// Pass 1 costs one LLM call per live Skill, so an uncached repeat query is five calls for
+// an answer we already have. The free Gemini tier rate-limits well inside demo traffic,
+// and a judge reloading the page must not exhaust the quota. Same TTL bucket as the
+// fan-out cache, so raw data and its normalisation never drift apart. No database.
+const TTL_MS = Number(process.env.CROSSCHECK_CACHE_TTL_MS ?? 5 * 60_000);
+const cache = new Map<string, NormaliseOutcome[]>();
+
+export async function normaliseAllCached(ticker: string, sources: SourceResult[]) {
+  const key = `${ticker.toUpperCase()}@${Math.floor(Date.now() / TTL_MS)}`;
+  const hit = cache.get(key);
+  if (hit) return hit;
+  const out = await normaliseAll(sources);
+  // Only cache when nothing failed transiently, so a rate-limited run does not pin a
+  // false "unavailable" into the cache for the rest of the bucket.
+  if (!out.some((o) => o.status === "unavailable" && /transient|HTTP 5|429/.test(o.reason))) {
+    cache.set(key, out);
+    if (cache.size > 50) cache.delete(cache.keys().next().value!);
+  }
+  return out;
+}

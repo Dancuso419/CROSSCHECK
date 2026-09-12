@@ -12,10 +12,42 @@
  */
 const BASE = "https://generativelanguage.googleapis.com/v1beta";
 
+// Pass 1 runs once per live Skill, so it is the call most exposed to free-tier rate
+// limits. gemini-3.8-flash produces good output but its free RPM is exhausted by a single
+// five-source fan-out (observed: 429 with RetryInfo 34s). gemini-2.5-flash has headroom
+// and returns clean JSON, so it is the reliable default; override to upgrade.
 export const MODEL_EXTRACT = process.env.GEMINI_MODEL_EXTRACT ?? "gemini-2.5-flash";
-export const MODEL_REASON = process.env.GEMINI_MODEL_REASON ?? "gemini-2.5-pro";
+export const MODEL_REASON = process.env.GEMINI_MODEL_REASON ?? "gemini-3.1-pro-preview";
 
-export async function askJson(model: string, prompt: string, maxTokens = 2048): Promise<string> {
+/** 429/503 are transient contention, not a bad request. Without a backoff a demand spike
+ *  marks a live source unavailable and the brief reports a gap that is not real. */
+const TRANSIENT = new Set([429, 500, 502, 503, 504]);
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+// 8192, not 2048: these models spend reasoning tokens from the same output budget, so a
+// tight cap truncates the JSON rather than producing a short answer.
+export async function askJson(model: string, prompt: string, maxTokens = 8192): Promise<string> {
+  let lastErr: Error = new Error("unreachable");
+  let waitMs = 600;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    if (attempt) await sleep(waitMs);
+    try {
+      return await once(model, prompt, maxTokens);
+    } catch (e) {
+      lastErr = e instanceof Error ? e : new Error(String(e));
+      // A 429 naming quota/billing is a daily cap, not contention — retrying only burns
+      // more of it. Back off on transient contention only.
+      if (!/^Gemini HTTP (429|500|502|503|504)/.test(lastErr.message)) throw lastErr;
+      // Prefer the server's own RetryInfo over a guess — an observed 429 asked for 34s,
+      // which a 0.6-2.4s backoff would blow straight through.
+      const asked = lastErr.message.match(/retryAfter=(\d+(?:\.\d+)?)s/);
+      waitMs = asked ? Math.min(Number(asked[1]) * 1000 + 500, 40_000) : waitMs * 2;
+    }
+  }
+  throw lastErr;
+}
+
+async function once(model: string, prompt: string, maxTokens: number): Promise<string> {
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw new Error("GEMINI_API_KEY is not set (see BUILD.md)");
 
@@ -35,7 +67,18 @@ export async function askJson(model: string, prompt: string, maxTokens = 2048): 
     }),
   });
 
-  if (!res.ok) throw new Error(`Gemini HTTP ${res.status}: ${(await res.text()).slice(0, 300)}`);
+  if (!res.ok) {
+    const raw = await res.text();
+    let retry = "";
+    try {
+      const d = (JSON.parse(raw).error?.details ?? []) as { retryDelay?: string }[];
+      const delay = d.find((x) => x.retryDelay)?.retryDelay;
+      if (delay) retry = ` retryAfter=${delay}`;
+    } catch {}
+    throw new Error(
+      `Gemini HTTP ${res.status}${TRANSIENT.has(res.status) ? " (transient)" : ""}${retry}: ${raw.slice(0, 200)}`,
+    );
+  }
 
   const body = (await res.json()) as {
     candidates?: { content?: { parts?: { text?: string }[] }; finishReason?: string }[];

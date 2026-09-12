@@ -8,7 +8,7 @@
  */
 import { NextResponse } from "next/server";
 import { fanout } from "@/lib/fanout";
-import { normaliseAll } from "@/lib/normalise";
+import { normaliseAllCached } from "@/lib/normalise";
 
 export const runtime = "nodejs";
 // Dead upstreams are capped at 12s each and the five Skills run in parallel.
@@ -35,7 +35,7 @@ export async function POST(req: Request) {
   let normaliseError: string | null = null;
   if (process.env.GEMINI_API_KEY) {
     try {
-      normalised = await normaliseAll(fan.sources);
+      normalised = await normaliseAllCached(ticker, fan.sources);
     } catch (e) {
       normaliseError = e instanceof Error ? e.message : String(e);
     }

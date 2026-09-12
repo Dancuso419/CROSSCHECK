@@ -7,15 +7,17 @@
 **Demo URL:** —
 **Day-7 gate:** not yet assessed
 **Spike:** Q1/Q2 done. **Q1 failed for 4 of 5 Skills** — the MCP's upstream data
-fetching is dead on their side. Q3/Q4 not assessable with one live source.
+fetching is dead on their side. Q3 answered for the one live source (direction stable,
+conviction not noise). Q4 not assessable with one live source.
 **Decision taken:** build the pipeline against what is live, probe for recovery every 6h,
 **hard gate Sept 15**. Still Crosscheck — not a pivot.
 
 ## Built
 
 - [x] **Ingest** — fan-out to five Skills, parallel, cached, unavailability reported
-- [~] **Analyse** — Pass 1 normalisation written and Zod-validated, **never executed**
-      (no `ANTHROPIC_API_KEY` on this machine). Pass 2 conflict detection not started.
+- [x] **Analyse, Pass 1** — normalisation running against live data on Gemini,
+      Zod-validated, cached. Verified stable across 5 repeat runs and across two models.
+- [ ] **Analyse, Pass 2** — conflict detection + materiality ranking not started.
 - [ ] **Report** — brief rendering not started
 - [ ] Deployed, link verified in a private window
 
@@ -59,6 +61,9 @@ fetching is dead on their side. Q3/Q4 not assessable with one live source.
   Degradation is a returned result, not an error path.
 - `lib/normalise.ts`, `lib/schema.ts`, `lib/llm.ts` — Pass 1 per-Skill, Zod-validated,
   one retry then mark the source unavailable. LLM over plain `fetch`, no SDK dependency.
+  Results cached per ticker + time bucket, same TTL as the fan-out so raw data and its
+  normalisation cannot drift apart. A rate-limited run is deliberately **not** cached, so
+  a transient 429 cannot pin a false "unavailable" for the rest of the bucket.
 - `app/api/crosscheck/route.ts` + `app/page.tsx` — shows every MCP call and its latency,
   and an explicit "N of 5 sources reporting" count. Fan-out is visible, not behind a
   spinner. Ticker input is validated; the route is read-only.
@@ -89,11 +94,14 @@ Live TA divergence across timeframes, which is real product material even with o
   - Confirmed persistent across retries ~25 min apart.
 - **Per-Skill availability:** `technical-analysis` working (via klines); `macro-analyst`,
   `market-intel`, `news-briefing`, `sentiment-analyst` all dead.
-- **Pass 1 has never actually run.** No `ANTHROPIC_API_KEY` is set on this machine, so the
-  normalisation prompt, the Zod schema and the retry path are untested against a real
-  completion. First thing to do once a key exists.
-- **Conviction stability is unassessed.** 05-prompts.md says drop the field if it is noise.
-  That test needs more than one live source.
+- **Free-tier Gemini rate limits are a live demo risk.** One five-source fan-out exhausts
+  `gemini-3.8-flash`'s free RPM (observed 429 with `RetryInfo: 34s`). Mitigated three ways:
+  Pass 1 defaults to `gemini-2.5-flash`, which has headroom; results are cached; and the
+  backoff honours the server's own `retryDelay` instead of guessing. Still worth a paid key
+  before judging — a judge reloading the page repeatedly is exactly the failure case.
+- **Pass 1 is only proven against one source, the most structured one.** The four
+  prose-heavy Skills are the hard cases for both `direction` and `conviction` and remain
+  untested. Do not assume the prompt generalises.
 - **The MCP's own `technical_analysis` tool returns wrong numbers. Do not use it.** Verified
   against our engine and an independent hand calculation on the same 200 candles: Bollinger
   `upper`/`lower` swapped (upper 76206 < lower 79353), `bandwidth` sign-flipped, `position`
@@ -129,7 +137,15 @@ Live TA divergence across timeframes, which is real product material even with o
    Fixed; Wilder yields 842.34, which is the buggy MCP tool's value.
 8. Windows `ENOTEMPTY` corrupted `node_modules` twice → clean reinstall. Fixed.
 9. `create-next-app` created a nested git repo → removed, one repo at the root. Fixed.
-10. MCP upstream fetch dead for 4 of 5 Skills → **unfixed, not fixable by us.**
+10. `.env.local` parsed as empty: the file is CRLF, and JS regex `.` does not match ``,
+    so every line failed to match. Split on `/?
+/`. Fixed.
+11. Pass 1 truncated mid-JSON at 2048 output tokens → these models spend reasoning tokens
+    from the same output budget. Raised to 8192. Fixed.
+12. A real key was nearly put in `.env.local.example`, which is deliberately **not**
+    gitignored so the template ships. Caught before any commit; the template now carries a
+    loud warning and `.env.local` was created ready to fill. Nothing leaked.
+13. MCP upstream fetch dead for 4 of 5 Skills → **unfixed, not fixable by us.**
 
 ## The decision and the gate
 
@@ -150,8 +166,10 @@ Reachable from this machine, but it guts the Skill-integration story, which is g
 ## Stack
 
 - Next.js 16 + TypeScript + Tailwind 4 + Zod 4, in `crosscheck/`. shadcn/ui pending.
-- Models: Pass 1 `claude-sonnet-5` (extraction, five in parallel), Pass 2 `claude-opus-5`
-  (reasoning). Both overridable by env var. Neither pass has run yet.
+- Models: **Gemini** (the key available). Pass 1 `gemini-2.5-flash`, Pass 2
+  `gemini-3.1-pro-preview` (not wired yet). Pinned explicitly, not `-latest` aliases, so a
+  judged demo stays reproducible. Claude Opus 5 does the build. The form's mandatory
+  "Role of the LLM in Your Project" field must say exactly this.
 - APIs / Skills: bitget-signal installed (5 Skills). **1 of 5 has live data.**
 
 ## Validation data
@@ -159,12 +177,23 @@ Reachable from this machine, but it guts the Skill-integration story, which is g
 - Testers recruited: 0
 - Testers run: 0
 
+## SPIKE Q3 — answered, with a caveat
+
+`npx tsx scripts/stability.ts 5`, identical cached input, temperature 0:
+
+- `direction` **stable** — `neutral` on all 5 runs, and `neutral` again on a second model.
+- `conviction` **not noise** — 0.35, 0.35, 0.40, 0.40, 0.35 (spread 0.05). **Keep the field.**
+- `evidence` prose varies in length (324-415 chars) but always cites figures.
+
+Caveat: one source, and the most structured one. Re-run this the moment a second Skill
+revives — the prose-heavy sources are where `direction` is most likely to wobble.
+
 ## Next session starts with
 
 1. `cat spike/raw/_RECOVERY.log` — did the MCP recover?
-2. Put `ANTHROPIC_API_KEY` in `crosscheck/.env.local` and run Pass 1 for the first time.
-   It is written but unproven.
-3. Then Pass 2 (conflict detection + materiality ranking) using the matrix in
-   03-skill-integration.md, plus the four test cases in 05-prompts.md — case 2
-   (strong agreement, must not invent conflict) matters most.
+2. Pass 2: conflict detection + materiality ranking. Encode the matrix from
+   03-skill-integration.md **in TS** — it is a lookup, not a judgment, so the model
+   explains conflicts it is handed rather than deciding which matter.
+3. The four test cases from 05-prompts.md as fixtures in `spike/cases/` — case 2
+   (strong agreement, must not invent conflict) matters most; a judge will probe it.
 4. Change the spec's AAPL demo case to a crypto major.
