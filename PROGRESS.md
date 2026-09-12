@@ -6,125 +6,153 @@
 **Deployed:** no
 **Demo URL:** —
 **Day-7 gate:** not yet assessed
-**Spike:** Q1 run. **FAILED for 4 of 5 Skills.** Q3/Q4 not attempted — no data to
-normalise or compare. Decision required before any app code.
+**Spike:** Q1/Q2 done. **Q1 failed for 4 of 5 Skills** — the MCP's upstream data
+fetching is dead on their side. Q3/Q4 not assessable with one live source.
+**Decision taken:** build the pipeline against what is live, probe for recovery every 6h,
+**hard gate Sept 15**. Still Crosscheck — not a pivot.
 
 ## Built
 
-- [ ] Ingest
-- [ ] Analyse
-- [ ] Report
+- [x] **Ingest** — fan-out to five Skills, parallel, cached, unavailability reported
+- [~] **Analyse** — Pass 1 normalisation written and Zod-validated, **never executed**
+      (no `ANTHROPIC_API_KEY` on this machine). Pass 2 conflict detection not started.
+- [ ] **Report** — brief rendering not started
 - [ ] Deployed, link verified in a private window
 
 ## Done this session
 
+### Spike
+
 - **Old blocker resolved.** `api.bitget.com` is still DNS-blocked locally, but the MCP
   serves Bitget OHLCV: `crypto_derivatives(action="klines", exchange="bitget")`. No
   non-Bitget data source introduced.
-  - `spike/ta.py` rewritten: takes klines from the MCP and runs the
-    `technical-analysis` Skill's own 23-indicator engine over them (the Skill's own
-    Template B "local data" path). Verified on 200 real 4h BTC candles. `python
-    spike/ta.py selfcheck` is the regression check.
-  - Worth knowing: the `technical-analysis` Skill calls **no MCP tool at all** — it is
-    pure local Python + `api.bitget.com`. That is why it alone was blocked.
-- **`spike/mcp.py`** — minimal streamable-HTTP MCP client, urllib only. This is the path
-  the Next.js API routes will use. Two gotchas found:
-  - Cloudflare 403s urllib's default User-Agent; must send one.
-  - Responses are SSE (`text/event-stream`), not plain JSON.
-  - No API key, no account. Server identifies as `market-data-mcp` v1.26.0. Handbook
-    claim confirmed.
-- **Q1/Q2 sweep** (`spike/sweep.py`): 26 calls covering every MCP tool the five Skills
-  depend on. Raw payloads in `spike/raw/`, status table in `spike/raw/_STATUS.txt`.
+- `spike/mcp.py` — streamable-HTTP MCP client. No API key; server is `market-data-mcp`
+  v1.26.0, so the handbook's no-auth claim is confirmed. Two gotchas: Cloudflare 403s
+  urllib's default User-Agent, and responses are SSE not JSON.
+- `spike/sweep.py` — Q1/Q2: 26 calls across every tool the five Skills use. Raw payloads
+  in `spike/raw/`, status table in `spike/raw/_STATUS.txt`.
+- `spike/ta.py` — rewritten to feed MCP klines into the `technical-analysis` Skill's own
+  23-indicator Python engine (the Skill's own Template B path). Verified on 200 real 4h
+  BTC candles. `python spike/ta.py selfcheck` is the regression check.
+- `spike/probe.py` — recovery probe, one representative call per Skill plus a ccxt
+  control. Appends to `spike/raw/_RECOVERY.log`. **Scheduled task `crosscheck-mcp-probe`
+  runs it every 6h until Sept 16.** Remove with:
+  `Unregister-ScheduledTask -TaskName 'crosscheck-mcp-probe' -Confirm:$false`
+
+### App (`crosscheck/`, Next.js 16 + React 19 + Tailwind 4 + Zod 4)
+
+- `lib/mcp.ts` — MCP client. **Unique JSON-RPC ids and one session per Skill.** Sharing
+  an id across concurrent calls on one session made the transport return one call's reply
+  for another: a `defi_analytics` call came back holding another call's kline data and was
+  scored as a healthy source. Silent cross-contamination, caught only because the payload
+  looked wrong. Per-call timeout 12s, because dead upstreams hang 16–41s.
+- `lib/liveness.ts` + 14-case test — the load-bearing check. The MCP answers HTTP 200 with
+  `{"error": ""}` on failure, so liveness is explicit and pinned to real observed payloads.
+  Includes the all-null-plus-static-prose shape that produced a false "recovered" reading
+  in the first version of the probe.
+- `lib/indicators.ts` + test — TS port of the Skill's Python engine, **all 10 values match
+  it exactly**. Two conventions had to be matched: Bollinger uses sample stdev (ddof=1),
+  and ATR is `EMA(TR, 14)` including the first bar, not Wilder smoothing.
+- `lib/skills.ts` — the five Skills, their tools (grepped from each installed SKILL.md,
+  not guessed), what each measures, and each one's independence from price action.
+- `lib/fanout.ts` — parallel, cached by ticker + time bucket, in-memory only.
+  Degradation is a returned result, not an error path.
+- `lib/normalise.ts`, `lib/schema.ts`, `lib/llm.ts` — Pass 1 per-Skill, Zod-validated,
+  one retry then mark the source unavailable. LLM over plain `fetch`, no SDK dependency.
+- `app/api/crosscheck/route.ts` + `app/page.tsx` — shows every MCP call and its latency,
+  and an explicit "N of 5 sources reporting" count. Fan-out is visible, not behind a
+  spinner. Ticker input is validated; the route is read-only.
+- `BUILD.md` written. First commit made; `.env.local` verified gitignored beforehand.
+
+### Verified working end to end
+
+`POST /api/crosscheck {"ticker":"BTC"}` → 200, `1/5 reporting`, cache hit on repeat (21ms).
+Live TA divergence across timeframes, which is real product material even with one source:
+
+| | 4h | 1d |
+|---|---|---|
+| RSI(14) | 42.89 | 55.35 |
+| MACD hist | +40.06 (crossed up 2 bars ago) | −751.05 |
+| MA7 vs MA99 | 77313 < 78659 | 78197 > 67115 |
 
 ## Not built / known broken
 
-- **BLOCKER (new, worse): the MCP's upstream data fetching is dead except for exchange
-  data.** 2 of 26 calls returned real data. Both ccxt-backed (`crypto_derivatives`,
-  `technical_analysis`). Every other upstream fails: CoinGecko, Yahoo, FRED, 44 RSS
-  feeds, alternative.me (Fear & Greed), Binance futures, DeFiLlama, DexScreener,
-  mempool.space, Weibo, AKShare.
-  - **Not our network.** `bitget-signal` is `type: "http"` → remote server at
-    `datahub.noxiaohao.com`. All fetching happens server-side. **A Vercel deploy will
-    not fix this** — it calls the same MCP.
-  - **Not a region block.** Chinese upstreams fail too (`weibo: provider:
-    "all_failed"`, `cn_market` aborted after 300s silence).
-  - Tool dispatch itself is fine (`news_feed action="sources"` returns its static
-    44-feed list). It is specifically outbound fetch.
-  - Failures are silent: mostly `{"error": ""}` with an empty message, so a naive
-    client reads them as success. Any code we write must treat empty-string `error`
-    and empty `items` as failure.
-  - Dead calls burn **16–41s** each before giving up; one exceeded 120s. Live ccxt
-    calls are ~1s.
-- **Per-Skill data availability:**
-
-  | Skill | MCP tools it needs | Status |
-  |---|---|---|
-  | `technical-analysis` | none (local engine) + klines | **working** via `ta.py` |
-  | `macro-analyst` | macro_indicators, rates_yields, cross_asset, global_assets, global_data, cn_market, tradfi_news | **all dead** |
-  | `market-intel` | crypto_market, defi_analytics, dex_market, network_status, news_feed, derivatives_sentiment | **all dead** |
-  | `news-briefing` | news_feed, social_trending, tradfi_news, derivatives_sentiment | **all dead** |
-  | `sentiment-analyst` | sentiment_index, derivatives_sentiment | **all dead** |
-
-  One source of five has data. Crosscheck compares five views; it cannot compare one.
-- **The MCP's own `technical_analysis` tool returns wrong numbers.** Do not use it.
-  Verified against `ta.py` and an independent hand calculation on the same 200 candles:
-  - Bollinger `upper` and `lower` are **swapped** (upper 76206 < lower 79353);
-    `bandwidth` sign-flipped; `position` reported `"above_upper"` at `pct_b` 0.35 for
-    every symbol tested.
-  - MACD signal line wrong (`+21.95` vs true `-477.57`), so `histogram` sign flips and
-    it reported `"death_cross"` on a bar that had **crossed up** one bar earlier.
-  - It also emits `"verdict": "STRONG BEARISH"` / `bull_signals` / `bear_signals`. Our
-    no-verdict rule means we would have to strip that anyway.
-  - The Skill's own local engine is correct and richer (23 indicators, full series,
-    `last_cross_up_bars_ago` / `trend_streak` context). Use the Skill, not the tool.
-- **Equities are not supported.** Spec's headline demo is AAPL; it has to change.
-  - All five Skill descriptions are crypto-only. `macro-analyst` is explicitly framed
-    as "is the macro backdrop a tailwind for **BTC**?"
-  - `market-intel` has no equity path even in principle: on-chain flows, DeFi TVL, DEX,
-    crypto-ETF flows. `sentiment-analyst` likewise: Fear & Greed is a crypto-only
-    index, long/short ratios are crypto futures.
-  - Only `macro-analyst` (`global_assets`, `cn_market`) and `news-briefing` (keyword
-    filter over CNBC feeds) could touch an equity — and both tools are dead.
-  - The spec's own AAPL example applies crypto concepts to a stock ("ETF flow direction
-    Thursday", "net inflows"), which does not hold up.
-- Local network: exchange domains (`api.bitget.com`, `api.binance.com`) and
-  `mempool.space` are DNS/connect-blocked from this machine. **Everything else is
-  reachable locally** — CoinGecko, alternative.me, Yahoo, FRED, cointelegraph,
-  api.llama.fi all answer. The local box and the remote MCP are near-exact inverses.
+- **BLOCKER: the MCP's upstream fetching is dead except for exchange data.** 2 of 26 calls
+  returned real data, both ccxt-backed (`crypto_derivatives`, `technical_analysis`). Dead:
+  CoinGecko, Yahoo, FRED, all 44 RSS feeds, alternative.me (Fear & Greed), Binance futures,
+  DeFiLlama, DexScreener, mempool.space, Weibo, AKShare.
+  - **Not our network.** `bitget-signal` is `type: "http"` → remote server; all fetching is
+    server-side. **A Vercel deploy will not fix it.**
+  - **Not a region block.** Chinese upstreams fail too (`weibo: "all_failed"`; `cn_market`
+    aborted after 300s).
+  - Tool dispatch is fine — `news_feed action="sources"` returns its static 44-feed list.
+  - Confirmed persistent across retries ~25 min apart.
+- **Per-Skill availability:** `technical-analysis` working (via klines); `macro-analyst`,
+  `market-intel`, `news-briefing`, `sentiment-analyst` all dead.
+- **Pass 1 has never actually run.** No `ANTHROPIC_API_KEY` is set on this machine, so the
+  normalisation prompt, the Zod schema and the retry path are untested against a real
+  completion. First thing to do once a key exists.
+- **Conviction stability is unassessed.** 05-prompts.md says drop the field if it is noise.
+  That test needs more than one live source.
+- **The MCP's own `technical_analysis` tool returns wrong numbers. Do not use it.** Verified
+  against our engine and an independent hand calculation on the same 200 candles: Bollinger
+  `upper`/`lower` swapped (upper 76206 < lower 79353), `bandwidth` sign-flipped, `position`
+  `"above_upper"` at `pct_b` 0.35; MACD signal line wrong (+21.95 vs true −477.57), so it
+  reported `"death_cross"` on a bar that had crossed **up**. It also emits
+  `"verdict": "STRONG BEARISH"`, which our no-verdict rule forbids anyway.
+- **Equities are not supported — the spec's AAPL headline must change.** All five Skills are
+  crypto-only; `macro-analyst` is framed as "is macro a tailwind for **BTC**?" `market-intel`
+  and `sentiment-analyst` have no equity path even in principle (on-chain flows, DeFi TVL,
+  crypto Fear & Greed, crypto futures). Only `macro-analyst` and `news-briefing` could touch
+  a stock and both are dead. The spec's own example applies crypto concepts to AAPL
+  ("ETF flow direction Thursday", "net inflows").
+- Local network: exchange domains and `mempool.space` are blocked from this machine;
+  **everything else is reachable** (CoinGecko, alternative.me, Yahoo, FRED, cointelegraph,
+  api.llama.fi). The local box and the remote MCP are near-exact inverses.
+- The app lives in `crosscheck/`, not the repo root: npm rejects a package name derived
+  from the folder `BITGET VETT`. **Vercel Root Directory must be set to `crosscheck`.**
+- `crosscheck/CLAUDE.md` + `AGENTS.md` are create-next-app boilerplate, not ours.
+- Port 3000 is occupied by another project's dev server (Hindsight). Use `-p 3100` locally.
+- shadcn/ui not installed yet — deferred until the brief needs real components.
 
 ## Problems hit and how they were fixed
 
-1. `pandas`/`numpy` missing → `pip install pandas numpy`. Fixed.
-2. `api.bitget.com` DNS-blocked → klines now come from the MCP. Fixed.
-3. urllib 403 from Cloudflare → send a `User-Agent`. Fixed.
+1. `pandas`/`numpy` missing → installed. Fixed.
+2. `api.bitget.com` DNS-blocked → klines from the MCP. Fixed.
+3. urllib 403 from Cloudflare → send a User-Agent. Fixed.
 4. MCP responses are SSE not JSON → parse `data:` lines. Fixed.
-5. MCP upstream fetch dead for 4 of 5 Skills → **unfixed, not fixable by us.**
+5. Probe false-positived "recovered" on an all-null payload with a static `note` string
+   → liveness now requires a numeric or collection value. Fixed, and pinned in a test.
+6. Shared JSON-RPC id + shared session → replies crossed between calls. Unique ids, one
+   session per Skill. Fixed.
+7. ATR mismatched the Skill engine → it uses `EMA(TR,14)` including bar 0, not Wilder.
+   Fixed; Wilder yields 842.34, which is the buggy MCP tool's value.
+8. Windows `ENOTEMPTY` corrupted `node_modules` twice → clean reinstall. Fixed.
+9. `create-next-app` created a nested git repo → removed, one repo at the root. Fixed.
+10. MCP upstream fetch dead for 4 of 5 Skills → **unfixed, not fixable by us.**
 
-## Decision needed (blocks all build work)
+## The decision and the gate
 
-Three options, no build until one is picked:
+Building the pipeline now, because fan-out → normalise → detect → brief is source-agnostic:
+if the MCP recovers, the fan-out simply starts returning five and nothing is rewritten.
+Building against a real 4-of-5 outage also means the degradation path required by
+03-skill-integration.md is built first rather than retrofitted.
+`01-bitget-tools.md:40` supports this: *"Integrating 2–3 Skills well beats name-dropping all 5."*
 
-1. **Wait / retry.** The failure may be a transient outage on their server (v1.26.0
-   dispatches fine, ~8 unrelated upstreams all fail at once). Re-run `python
-   spike/sweep.py` before committing. Cheap, but burns days against a Sept 20 date with
-   no control over the outcome.
-2. **Fall back to Weekend Desk.** Day 1 is the right day to do this. Preserves the
-   deadline.
-3. **Reduce Crosscheck to what the live data supports** — internal divergence *within*
-   `technical-analysis` across timeframes and indicators (4h says death cross, 1d says
-   golden cross; the 23-indicator set disagreeing with itself). Honest and demoable, but
-   it is one Skill, not five, and "number of Skill integrations" is an explicit judging
-   criterion. Significantly weaker entry.
+**Gate — Sept 15, end of day.** If four Skills are still dead, choose between shipping
+Crosscheck honestly degraded and falling back to **Hindsight** (`01-bitget-tools.md:31`:
+it uses `technical-analysis`, the one live Skill). **Not Weekend Desk** — `01-bitget-tools.md:30`
+says it leans on `news-briefing` + `macro-analyst`, the two most thoroughly dead Skills.
 
 **Not doing:** substituting direct CoinGecko/Yahoo/FRED/RSS calls for the dead tools.
-Reachable from here, but it guts the Skill-integration story, which is the thing being
-graded.
+Reachable from this machine, but it guts the Skill-integration story, which is graded.
 
 ## Stack
 
-- Frameworks: Next.js + TypeScript + Tailwind + shadcn/ui (not yet scaffolded)
-- Models used and what for: Claude Opus 5 — build; normalisation + conflict passes TBD
-- APIs / Skills integrated: bitget-signal installed (5 Skills). **1 of 5 has live data.**
+- Next.js 16 + TypeScript + Tailwind 4 + Zod 4, in `crosscheck/`. shadcn/ui pending.
+- Models: Pass 1 `claude-sonnet-5` (extraction, five in parallel), Pass 2 `claude-opus-5`
+  (reasoning). Both overridable by env var. Neither pass has run yet.
+- APIs / Skills: bitget-signal installed (5 Skills). **1 of 5 has live data.**
 
 ## Validation data
 
@@ -133,5 +161,10 @@ graded.
 
 ## Next session starts with
 
-Re-run `python spike/sweep.py` to see whether the MCP upstream recovered, then take the
-decision above. Do not scaffold the app first.
+1. `cat spike/raw/_RECOVERY.log` — did the MCP recover?
+2. Put `ANTHROPIC_API_KEY` in `crosscheck/.env.local` and run Pass 1 for the first time.
+   It is written but unproven.
+3. Then Pass 2 (conflict detection + materiality ranking) using the matrix in
+   03-skill-integration.md, plus the four test cases in 05-prompts.md — case 2
+   (strong agreement, must not invent conflict) matters most.
+4. Change the spec's AAPL demo case to a crypto major.
