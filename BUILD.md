@@ -100,6 +100,26 @@ bucket). Measured cold with 4 of 5 Skills dead: fan-out 14s (the dead Skills eac
 `deepseek-v4-pro` for Pass 1 pushed a cold query to 58s, which is why both passes use
 `deepseek-flash`.
 
+## Demo mode
+
+The UI has a **Live / Recorded snapshot** toggle. Live is the default.
+
+`spike/capture.py` recorded a real five-source snapshot to `crosscheck/src/data/snapshot.json`
+because the MCP's upstream fetching is down and no live moment has had all five Skills
+reporting. It pulled current data from the same public providers the MCP is built on, and
+took technical-analysis from the Bitget MCP itself.
+
+Two things that must stay true:
+- **The product never calls those providers.** `capture.py` is an offline, one-time script.
+  `crosscheck/` only reads the committed JSON.
+- **A snapshot is never shown as live.** The response always carries `capturedAt` plus the
+  capture note, and the UI renders a permanent badge above the brief.
+
+Only the upstream data is recorded — normalisation, conflict detection, ranking and the
+brief all run for real on top of it. Demo mode takes ~17s cold (no dead-Skill timeouts).
+
+Re-capture with `python spike/capture.py`.
+
 ## Known state (2026-09-12)
 
 Four of five Skills return no data: the MCP's upstream fetching is down on their side.

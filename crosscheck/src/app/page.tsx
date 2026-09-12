@@ -16,6 +16,8 @@ type Result = {
   sources: Source[]; normalised: Normalised[] | null; brief: Brief | null;
   analyseError: string | null; models: { extract: string; reason: string };
   timings: { fanoutMs: number; normaliseMs: number; conflictMs: number; totalMs: number };
+  mode: "live" | "demo";
+  snapshot: { capturedAt: string; note: string; ticker: string } | null;
 };
 
 const AGREEMENT: Record<Brief["agreement_level"], { label: string; cls: string }> = {
@@ -43,6 +45,7 @@ function Pill({ children, className = "" }: { children: React.ReactNode; classNa
 
 export default function Home() {
   const [ticker, setTicker] = useState("BTC");
+  const [mode, setMode] = useState<"live" | "demo">("live");
   const [busy, setBusy] = useState(false);
   const [res, setRes] = useState<Result | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -54,7 +57,7 @@ export default function Home() {
       const r = await fetch("/api/crosscheck", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ ticker }),
+        body: JSON.stringify({ ticker, mode }),
       });
       const body = await r.json();
       if (!r.ok) throw new Error(body.error ?? `HTTP ${r.status}`);
@@ -97,12 +100,46 @@ export default function Home() {
         <span className="self-center text-xs text-neutral-500">Crypto majors — BTC, ETH, SOL</span>
       </form>
 
+      {/* Live is the default. Demo exists because the upstream Skill data is currently
+          degraded, and it is labelled everywhere it appears. */}
+      <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+        <span className="text-neutral-500">Data:</span>
+        <div className="inline-flex overflow-hidden rounded-md border border-neutral-300 dark:border-neutral-700">
+          {(["live", "demo"] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => setMode(m)}
+              aria-pressed={mode === m}
+              className={`px-3 py-1 font-medium ${
+                mode === m
+                  ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900"
+                  : "text-neutral-600 dark:text-neutral-400"
+              }`}
+            >
+              {m === "live" ? "Live" : "Recorded snapshot"}
+            </button>
+          ))}
+        </div>
+        <span className="text-neutral-500">
+          {mode === "live"
+            ? "Queries the Skills now. Four of five are currently returning no data."
+            : "A recorded five-source capture, so the full comparison can be shown."}
+        </span>
+      </div>
+
       {err && <p className="mt-4 rounded-md bg-rose-50 p-3 text-sm text-rose-800 dark:bg-rose-950/50 dark:text-rose-200">{err}</p>}
 
       {res && (
         <>
           {/* ---------- headline ---------- */}
           <section className="mt-8 border-t border-neutral-200 pt-6 dark:border-neutral-800">
+            {res.mode === "demo" && res.snapshot && (
+              <div className="mb-4 rounded-md border border-sky-300 bg-sky-50 p-3 text-xs leading-relaxed text-sky-900 dark:border-sky-800 dark:bg-sky-950/50 dark:text-sky-200">
+                <span className="font-semibold">Recorded snapshot — not live data.</span>{" "}
+                Captured {new Date(res.snapshot.capturedAt).toLocaleString()}. {res.snapshot.note}
+              </div>
+            )}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
               <h2 className="text-lg font-semibold">{res.ticker}</h2>
               {brief && <Pill className={AGREEMENT[brief.agreement_level].cls}>{AGREEMENT[brief.agreement_level].label}</Pill>}
@@ -110,7 +147,8 @@ export default function Home() {
                 {res.reporting} of {res.total} sources reporting
               </span>
               <span className="text-xs text-neutral-500">
-                {res.cached ? "cached" : "live"} · {new Date(res.fetchedAt).toLocaleTimeString()}
+                {res.mode === "demo" ? "recorded" : res.cached ? "cached" : "live"} ·{" "}
+                {new Date(res.fetchedAt).toLocaleTimeString()}
               </span>
             </div>
 

@@ -12,6 +12,7 @@
  */
 import { NextResponse } from "next/server";
 import { fanout } from "@/lib/fanout";
+import { hasSnapshot, snapshotFanout, snapshotMeta } from "@/lib/snapshot";
 import { normaliseAllCached } from "@/lib/normalise";
 import { buildBriefCached } from "@/lib/conflicts";
 import { MODEL_EXTRACT, MODEL_REASON } from "@/lib/llm";
@@ -25,9 +26,11 @@ const hasKey = () => Boolean(process.env.DEEPSEEK_API_KEY || process.env.GEMINI_
 
 export async function POST(req: Request) {
   let ticker: string;
+  let mode: "live" | "demo";
   try {
-    const body = (await req.json()) as { ticker?: unknown };
+    const body = (await req.json()) as { ticker?: unknown; mode?: unknown };
     ticker = String(body.ticker ?? "").trim().toUpperCase();
+    mode = body.mode === "demo" ? "demo" : "live";
   } catch {
     return NextResponse.json({ error: "invalid JSON body" }, { status: 400 });
   }
@@ -36,10 +39,19 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Ticker must be 2-10 letters or digits, e.g. BTC" }, { status: 400 });
   }
 
+  if (mode === "demo" && !hasSnapshot(ticker)) {
+    return NextResponse.json(
+      { error: `No recorded snapshot for ${ticker}. Demo mode has ${snapshotMeta.ticker} only — switch to live.` },
+      { status: 400 },
+    );
+  }
+
   // Stage timings are part of the output, not a debug aid: the demo is meant to show the
   // fan-out rather than hide it, and a slow stage should be visible instead of guessed at.
   const t0 = Date.now();
-  const fan = await fanout(ticker);
+  // Demo mode replaces ONLY the upstream data. Normalisation, conflict detection, ranking
+  // and the brief all run for real on top of the recording.
+  const fan = mode === "demo" ? snapshotFanout() : await fanout(ticker);
   const tFanout = Date.now() - t0;
 
   let normalised = null;
@@ -53,10 +65,10 @@ export async function POST(req: Request) {
   } else {
     try {
       const t1 = Date.now();
-      normalised = await normaliseAllCached(ticker, fan.sources);
+      normalised = await normaliseAllCached(`${mode}:${ticker}`, fan.sources);
       tNormalise = Date.now() - t1;
       const t2 = Date.now();
-      brief = await buildBriefCached(ticker, normalised, fan.total);
+      brief = await buildBriefCached(ticker, normalised, fan.total, `${mode}:${ticker}`);
       tConflict = Date.now() - t2;
     } catch (e) {
       analyseError = e instanceof Error ? e.message : String(e);
@@ -68,6 +80,9 @@ export async function POST(req: Request) {
     normalised,
     brief,
     analyseError,
+    mode,
+    // Always sent in demo mode so the UI cannot render a recording without saying so.
+    snapshot: mode === "demo" ? snapshotMeta : null,
     models: { extract: MODEL_EXTRACT, reason: MODEL_REASON },
     timings: { fanoutMs: tFanout, normaliseMs: tNormalise, conflictMs: tConflict, totalMs: Date.now() - t0 },
   });
