@@ -3,8 +3,8 @@
 ## Status
 
 **Day:** 1 / 12  (2026-09-12)
-**Deployed:** no
-**Demo URL:** —
+**Deployed:** yes
+**Demo URL:** https://crosscheck-two.vercel.app (stable production alias)
 **Day-7 gate:** not yet assessed
 **Spike:** Q1/Q2 done. **Q1 failed for 4 of 5 Skills** — the MCP's upstream data
 fetching is dead on their side. Q3 answered for the one live source (direction stable,

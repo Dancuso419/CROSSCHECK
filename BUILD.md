@@ -73,9 +73,19 @@ python spike/probe.py                # has the dead MCP recovered? appends to sp
 `liveness.test.ts` matters most. The MCP returns HTTP 200 with `{"error": ""}` when an
 upstream fails, so anything that only checks status codes reads failure as success.
 
+## Deployed
+
+**https://crosscheck-two.vercel.app** — the stable production alias. It always points at the
+latest production deployment, so it is the link to submit. Per-deployment URLs
+(`crosscheck-<hash>-...`) change every push and should never be handed out.
+
 ## Deploy (Vercel)
 
-1. Import the repo. **Root Directory: `crosscheck`.**
+1. Import the repo. **Root Directory: `crosscheck`.** Without it a git push builds from the
+   repo root, finds no `app/` directory and fails — while a CLI deploy run from inside
+   `crosscheck/` still succeeds, so the two paths disagree and the failure looks random.
+   Set it on the project (Settings, Build & Deployment, Root Directory) or via the API:
+   `PATCH /v9/projects/<id>` with `{"rootDirectory":"crosscheck"}`.
 2. Add `DEEPSEEK_API_KEY` as an environment variable (all environments).
 3. Deploy. Framework preset Next.js; no build-command override needed.
 
