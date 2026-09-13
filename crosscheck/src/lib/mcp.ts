@@ -12,7 +12,13 @@ const MCP_URL = process.env.BITGET_MCP_URL ?? "https://datahub.noxiaohao.com/mcp
 
 // Dead upstreams take 16-41s to time out server-side. A cold demo must not hang on
 // them, so every call is capped well below that and a timeout is just another dead source.
-const CALL_TIMEOUT_MS = Number(process.env.BITGET_MCP_TIMEOUT_MS ?? 12_000);
+//
+// 8s, not 12s: with four of five Skills down, every one of them burns this cap in full, so
+// the cap IS most of the cold-path latency (14s of a 30s query). Live calls are nowhere
+// near it — Bitget klines answer in 1-2s and the slowest healthy call measured was 2.9s —
+// so 8s still leaves roughly a 3x margin over the worst real response. Raise it if a
+// genuine source ever starts timing out.
+const CALL_TIMEOUT_MS = Number(process.env.BITGET_MCP_TIMEOUT_MS ?? 8_000);
 
 export type McpResult =
   | { ok: true; payload: unknown; latencyMs: number }

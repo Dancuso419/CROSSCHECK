@@ -40,7 +40,7 @@ unavailable.
 | `DEEPSEEK_API_KEY` | yes (default provider) | — | Server-side only, never exposed to the browser |
 | `GEMINI_API_KEY` | no | — | Only needed if `MODEL_*` points at a `gemini-*` id |
 | `BITGET_MCP_URL` | no | `https://datahub.noxiaohao.com/mcp` | The research MCP |
-| `BITGET_MCP_TIMEOUT_MS` | no | `12000` | Per-call cap. Dead upstreams hang 16–41s; this stops a cold demo stalling |
+| `BITGET_MCP_TIMEOUT_MS` | no | `8000` | Per-call cap. Dead upstreams hang 16–41s; this stops a cold demo stalling. Live calls answer in 1–3s |
 | `CROSSCHECK_CACHE_TTL_MS` | no | `300000` | In-memory cache bucket, keyed by ticker. No database |
 | `MODEL_EXTRACT` | no | `deepseek-chat` | Pass 1. Provider inferred from the id: `deepseek-*` then DeepSeek, else Gemini |
 | `MODEL_REASON` | no | `deepseek-chat` | Pass 2. `gemini-3.5-flash` and `deepseek-reasoner` also pass the full suite |
