@@ -110,9 +110,18 @@ async function main() {
       if (/wait and see/i.test(c.what_would_resolve_it)) problems.push(`${c.sources.join(" x ")}: vague resolver`);
     }
     // No-verdict scan over all generated prose.
+    // headline and in_plain_terms are written for a newcomer, which is precisely where an
+    // accidental recommendation is most likely to appear — plain language invites advice.
     const prose = [
+      brief.headline,
       brief.consensus_summary,
-      ...brief.conflicts.flatMap((c) => [c.description, c.case_for_a, c.case_for_b, c.what_would_resolve_it]),
+      ...brief.conflicts.flatMap((c) => [
+        c.in_plain_terms,
+        c.description,
+        c.case_for_a,
+        c.case_for_b,
+        c.what_would_resolve_it,
+      ]),
     ].join(" \n");
     for (const [re, label] of FORBIDDEN) {
       const hit = prose.match(re);

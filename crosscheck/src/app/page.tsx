@@ -114,6 +114,28 @@ function DirectionMark({ direction }: { direction: string }) {
   );
 }
 
+/* Conviction as a filled bar. "0.35" means nothing to someone new; a bar that is
+   a third full is read instantly. Ten cells so the value stays countable. */
+function ConvictionBar({ value }: { value: number }) {
+  const filled = Math.round(Math.max(0, Math.min(1, value)) * 10);
+  return (
+    <svg width="52" height="9" viewBox="0 0 52 9" aria-hidden className="shrink-0">
+      {Array.from({ length: 10 }, (_, i) => (
+        <rect
+          key={i}
+          x={i * 5.2 + 0.5}
+          y={0.5}
+          width={4.2}
+          height={8}
+          fill={i < filled ? "currentColor" : "none"}
+          stroke="currentColor"
+          strokeWidth={0.7}
+        />
+      ))}
+    </svg>
+  );
+}
+
 function CallMark({ status }: { status: string }) {
   return (
     <svg width="9" height="9" viewBox="0 0 9 9" aria-hidden className="shrink-0">
@@ -970,12 +992,73 @@ export default function Home() {
                 </figure>
               )}
 
-              {brief && (
-                /* A drop cap: the summary is the page's one long read, and an editorial
-                   page marks where the reading starts. */
-                <p className="mx-auto mt-9 max-w-[70ch] text-left text-[0.98rem] leading-[1.62] [&::first-letter]:float-left [&::first-letter]:mt-[0.1em] [&::first-letter]:mr-[0.07em] [&::first-letter]:font-[family-name:var(--font-display)] [&::first-letter]:text-[3.1em] [&::first-letter]:leading-[0.78]">
-                  {brief.consensus_summary}
+              {/* At a glance, before any prose: who said what, how strongly, over what
+                  horizon. Five rows replaces five paragraphs for a reader who just wants
+                  to know where the sources stand. */}
+              {res.normalised && res.normalised.some((n) => n.status === "ok") && (
+                <div className="mx-auto mt-9 max-w-[46rem] overflow-x-auto text-left">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="border-b border-[var(--frame)]">
+                        <th className="py-2 pr-4 text-left"><Label>Source</Label></th>
+                        <th className="py-2 pr-4 text-left"><Label>Reads</Label></th>
+                        <th className="py-2 pr-4 text-left"><Label>How strongly</Label></th>
+                        <th className="py-2 text-left"><Label>Looking ahead</Label></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {res.normalised.map((n) => (
+                        <tr key={n.skill} className="border-b border-[var(--rule)]">
+                          <td className="py-2.5 pr-4 font-[family-name:var(--font-data)] text-[0.76rem]">
+                            {n.skill}
+                          </td>
+                          {n.status === "ok" ? (
+                            <>
+                              <td className="py-2.5 pr-4">
+                                <span className="flex items-center gap-2 text-[0.84rem]">
+                                  <DirectionMark direction={n.value.direction} />
+                                  {n.value.direction}
+                                </span>
+                              </td>
+                              <td className="py-2.5 pr-4">
+                                <span className="flex items-center gap-2 text-[var(--ink-2)]">
+                                  <ConvictionBar value={n.value.conviction} />
+                                  <span className="font-[family-name:var(--font-data)] text-[0.72rem]">
+                                    {n.value.conviction.toFixed(2)}
+                                  </span>
+                                </span>
+                              </td>
+                              <td className="py-2.5 text-[0.84rem] text-[var(--ink-2)]">{n.value.timeframe}</td>
+                            </>
+                          ) : (
+                            <td colSpan={3} className="py-2.5 text-[0.82rem] italic text-[var(--ink-3)]">
+                              did not report
+                            </td>
+                          )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {brief && brief.headline && (
+                <p className="mx-auto mt-9 max-w-[40ch] font-[family-name:var(--font-display)] text-[clamp(1.15rem,2.6vw,1.6rem)] leading-snug">
+                  {brief.headline}
                 </p>
+              )}
+
+              {brief && (
+                /* The full summary is dense by design — it cites every figure. It stays,
+                   but it is no longer the first thing a newcomer has to wade through. */
+                <details className="mx-auto mt-7 max-w-[70ch] text-left">
+                  <summary className="cursor-pointer list-none text-[0.8rem] text-[var(--ink-3)] underline decoration-dotted underline-offset-[4px] hover:text-[var(--ink-2)]">
+                    Read the full summary, with every figure cited
+                  </summary>
+                  <p className="mt-4 text-[0.96rem] leading-[1.62] [&::first-letter]:float-left [&::first-letter]:mt-[0.1em] [&::first-letter]:mr-[0.07em] [&::first-letter]:font-[family-name:var(--font-display)] [&::first-letter]:text-[3.1em] [&::first-letter]:leading-[0.78]">
+                    {brief.consensus_summary}
+                  </p>
+                </details>
               )}
             </div>
 
@@ -1011,7 +1094,18 @@ export default function Home() {
                           {c.why_it_matters}
                         </p>
 
-                        <p className="mt-4 max-w-[70ch] text-[0.93rem] leading-[1.6]">{c.description}</p>
+                        {c.in_plain_terms && (
+                          <p className="mt-4 max-w-[66ch] text-[1rem] leading-[1.58]">{c.in_plain_terms}</p>
+                        )}
+
+                        <details className="mt-3">
+                          <summary className="cursor-pointer list-none text-[0.78rem] text-[var(--ink-3)] underline decoration-dotted underline-offset-[4px] hover:text-[var(--ink-2)]">
+                            The detail, with figures
+                          </summary>
+                          <p className="mt-3 max-w-[70ch] text-[0.9rem] leading-[1.6] text-[var(--ink-2)]">
+                            {c.description}
+                          </p>
+                        </details>
 
                         {/* the two cases, divided by a rule rather than boxed */}
                         <div className="mt-7 grid gap-x-8 gap-y-6 sm:grid-cols-2">

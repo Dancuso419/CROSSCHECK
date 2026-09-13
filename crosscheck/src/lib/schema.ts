@@ -31,6 +31,9 @@ export type NormaliseOutcome =
  *  afterwards, so the model cannot promote a low-materiality pair or invent a conflict. */
 export const ConflictExplanation = z.object({
   sources: z.tuple([z.string(), z.string()]),
+  /* One sentence a newcomer can follow, no jargon and no figures. The technical
+     description stays, but it stops being the first thing anyone has to parse. */
+  in_plain_terms: z.string().min(1),
   description: z.string().min(1),
   case_for_a: z.string().min(1),
   case_for_b: z.string().min(1),
@@ -38,6 +41,9 @@ export const ConflictExplanation = z.object({
 });
 
 export const Pass2Output = z.object({
+  /* The one line to read if you read nothing else. Still not a verdict: it says what
+     the sources are doing, never what the reader should do about it. */
+  headline: z.string().min(1),
   consensus_summary: z.string().min(1),
   conflicts: z.array(ConflictExplanation),
 });
@@ -47,6 +53,7 @@ export type Pass2Output = z.infer<typeof Pass2Output>;
 export type Brief = {
   ticker: string;
   agreement_level: "strong_agreement" | "mixed" | "sharp_conflict";
+  headline: string;
   consensus_summary: string;
   reporting: number;
   total: number;
@@ -55,6 +62,7 @@ export type Brief = {
     materiality: "high" | "medium" | "low";
     why_it_matters: string;
     is_timeframe_divergence: boolean;
+    in_plain_terms: string;
     description: string;
     case_for_a: string;
     case_for_b: string;

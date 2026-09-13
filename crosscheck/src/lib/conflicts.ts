@@ -38,10 +38,12 @@ ${JSON.stringify(
 
 Return ONLY valid JSON matching this schema:
 {
+  "headline": string,
   "consensus_summary": string,
   "conflicts": [
     {
       "sources": [string, string],
+      "in_plain_terms": string,
       "description": string,
       "case_for_a": string,
       "case_for_b": string,
@@ -51,6 +53,14 @@ Return ONLY valid JSON matching this schema:
 }
 
 Rules:
+- "headline" is one sentence, under 20 words, that a person who has never traded could
+  follow. No figures, no indicator names, no jargon. Say what the sources are doing --
+  agreeing, splitting, or talking about different time horizons -- never what the reader
+  should do about it. Good: "Four of the five agree; only the crowd is leaning the other
+  way." Bad anything that implies an action or a price.
+- "in_plain_terms" is one sentence per conflict, same register: no figures, no indicator
+  names. Explain what the two sources are actually arguing about, in the way you would to
+  a friend. The technical detail belongs in "description", not here.
 - Return exactly one entry per conflict in the list above, with the same "sources" pair,
   in the same order. If that list is empty, return an empty "conflicts" array.
 - Never invent a conflict that is not in the list. If the sources broadly agree, say so
@@ -85,6 +95,7 @@ export async function buildBrief(ticker: string, outcomes: NormaliseOutcome[], t
   // No live source means there is nothing to compare; do not spend a call inviting the
   // model to narrate an empty set.
   let parsed: Pass2Output = {
+    headline: sources.length === 0 ? `No sources reported for ${ticker}.` : "",
     consensus_summary:
       sources.length === 0
         ? `No sources reported for ${ticker}, so no comparison is possible. ${unavailable_sources.length} of ${total} Skills were unavailable.`
@@ -113,6 +124,7 @@ export async function buildBrief(ticker: string, outcomes: NormaliseOutcome[], t
   return {
     ticker,
     agreement_level: level,
+    headline: parsed.headline,
     consensus_summary: parsed.consensus_summary,
     reporting: sources.length,
     total,
@@ -123,6 +135,7 @@ export async function buildBrief(ticker: string, outcomes: NormaliseOutcome[], t
         materiality: c.materiality,
         why_it_matters: c.why,
         is_timeframe_divergence: c.is_timeframe_divergence,
+        in_plain_terms: got?.in_plain_terms ?? "",
         description: got?.description ?? "(no explanation returned for this conflict)",
         case_for_a: got?.case_for_a ?? "",
         case_for_b: got?.case_for_b ?? "",

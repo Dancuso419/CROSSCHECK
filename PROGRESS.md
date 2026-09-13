@@ -95,7 +95,15 @@ Live TA divergence across timeframes, which is real product material even with o
   - **Not a region block.** Chinese upstreams fail too (`weibo: "all_failed"`; `cn_market`
     aborted after 300s).
   - Tool dispatch is fine — `news_feed action="sources"` returns its static 44-feed list.
-  - Confirmed persistent across retries ~25 min apart.
+  - Confirmed persistent across retries ~25 min apart, and still dead 28h later.
+  - **Our endpoint is verified correct, not guessed.** `@bitget-ai/bitget-signal` 1.2.0
+    (latest, published 15 Jun 2026) is what we run, and its own CHANGELOG says: "The HTTP
+    MCP backend URL is unchanged (`https://datahub.noxiaohao.com/mcp`)" and "Unchanged: The
+    `bitget-signal` MCP backend URL... No API key required." The latest package tarball
+    contains that same URL and no other. There is no newer endpoint to move to — the
+    outage is Bitget's.
+  - Canonical repo is now `Bitget-AI/bitget-signal` (moved out of the monorepo). The URL
+    printed in Bitget's own shipped SKILL.md headers, `bitget-official/agent-hub`, 404s.
 - **Per-Skill availability:** `technical-analysis` working (via klines); `macro-analyst`,
   `market-intel`, `news-briefing`, `sentiment-analyst` all dead.
 - **Free-tier Gemini rate limits are a live demo risk.** One five-source fan-out exhausts
