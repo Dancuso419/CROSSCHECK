@@ -25,11 +25,11 @@ type Result = {
 };
 
 const SOURCES = [
-  ["macro-analyst", "Fed policy, rates, cross-asset structure. Months."],
-  ["market-intel", "ETF flows, exchange reserves, stablecoin supply. Weeks."],
-  ["news-briefing", "Narrative and catalyst. Days."],
-  ["sentiment-analyst", "Fear and greed, positioning, funding. Days."],
-  ["technical-analysis", "Trend, momentum, volatility. Intraday."],
+  ["macro-analyst", "The economy", "Interest rates, inflation, the strength of the dollar. Slow to move, and it sets the weather everything else trades in."],
+  ["market-intel", "The money", "What large institutions are actually doing — fund inflows, coins leaving exchanges, stablecoins being readied to buy with."],
+  ["news-briefing", "The story", "What is being reported, and which narrative is forming around it before it shows up in the price."],
+  ["sentiment-analyst", "The crowd", "Fear and greed, and how heavily ordinary traders are betting in one direction."],
+  ["technical-analysis", "The chart", "Trend, momentum and volatility read straight off the candles. Fastest to move, and the easiest to over-read."],
 ] as const;
 
 const SCENARIOS = [
@@ -426,13 +426,17 @@ export default function Home() {
 
         {/* ====================================================== hero ==== */}
         <div className={`band py-14 text-center sm:py-20 ${PAD}`}>
-          <h1 className="mx-auto max-w-[26ch] font-[family-name:var(--font-display)] text-[clamp(2.1rem,5.4vw,3.9rem)] leading-[1.04] tracking-[-0.022em]">
-            Five research sources, and the disagreements that matter
+          <h1 className="mx-auto max-w-[24ch] font-[family-name:var(--font-display)] text-[clamp(2.1rem,5.4vw,3.9rem)] leading-[1.04] tracking-[-0.022em]">
+            Five kinds of research on one coin, and every place they disagree
           </h1>
-          <p className="mx-auto mt-6 max-w-[64ch] text-[0.95rem] leading-relaxed text-[var(--ink-2)]">
-            Crosscheck queries five independent Bitget research Skills on one ticker, ranks
-            where they contradict each other by how much each contradiction is worth, and
-            shows what would have to be true for each side to be right.
+          <p className="mx-auto mt-7 max-w-[68ch] text-[1.02rem] leading-[1.6] text-[var(--ink-2)]">
+            The economy, the money, the news, the crowd and the chart rarely say the same thing
+            about a coin at the same time. Crosscheck asks all five, then shows you exactly where
+            they contradict each other, which contradictions are worth your attention, and what to
+            watch to find out who was right.
+          </p>
+          <p className="mx-auto mt-4 max-w-[56ch] text-[0.9rem] leading-relaxed text-[var(--ink-3)]">
+            It never tells you to buy or sell. That part stays yours.
           </p>
         </div>
 
@@ -441,11 +445,12 @@ export default function Home() {
           {/* left: what is being asked */}
           <div className={`py-10 ${PAD}`}>
             <Label>The five sources</Label>
-            <ul className="mt-4 space-y-3">
-              {SOURCES.map(([name, what]) => (
+            <ul className="mt-4 space-y-4">
+              {SOURCES.map(([name, plain, what]) => (
                 <li key={name}>
-                  <div className="font-[family-name:var(--font-data)] text-[0.78rem]">{name}</div>
-                  <div className="mt-0.5 text-[0.8rem] leading-snug text-[var(--ink-3)]">{what}</div>
+                  <div className="font-[family-name:var(--font-display)] text-[1.02rem] leading-none">{plain}</div>
+                  <div className="mt-1 font-[family-name:var(--font-data)] text-[0.7rem] text-[var(--ink-3)]">{name}</div>
+                  <div className="mt-1.5 max-w-[38ch] text-[0.81rem] leading-snug text-[var(--ink-2)]">{what}</div>
                 </li>
               ))}
             </ul>
@@ -686,26 +691,104 @@ export default function Home() {
               ))}
             </div>
 
-            {/* ================================= honest status ============= */}
-            <div className={`band py-10 ${PAD}`}>
-              <Opener label="As of today" title="What is actually working" />
-              <div className="grid gap-x-12 gap-y-5 sm:grid-cols-2">
-                <p className="max-w-[48ch] text-[0.86rem] leading-relaxed text-[var(--ink-2)]">
-                  The research MCP behind the five Skills is currently returning no data for four
-                  of them. That is an outage on the provider's side, not in this application. Live
-                  mode says so plainly and names every gap, rather than quietly showing four fifths
-                  of a picture and calling it a brief.
-                </p>
-                <p className="max-w-[48ch] text-[0.86rem] leading-relaxed text-[var(--ink-2)]">
-                  <span className="font-[family-name:var(--font-display)] italic">Recorded</span>{" "}
-                  runs the whole pipeline over a real five-source capture.{" "}
-                  <span className="font-[family-name:var(--font-display)] italic">Illustrative</span>{" "}
-                  runs it over the same constructed fixtures the test suite asserts against. Both
-                  are labelled wherever they appear, and only the upstream data is stand-in —
-                  the normalisation, the ranking and the brief run for real on top of it.
-                </p>
+            {/* =================================== a worked morning ======== */}
+            <div className={`band py-12 ${PAD}`}>
+              <Opener label="Why this exists" title="Two true things that point opposite ways" />
+              <div className="grid gap-x-12 gap-y-8 lg:grid-cols-[1fr_1fr]">
+                <div>
+                  <p className="max-w-[52ch] text-[0.95rem] leading-[1.62] text-[var(--ink-2)]">
+                    You open two research notes on the same morning. The first says institutions
+                    have been buying for a week and coins are leaving exchanges. The second says
+                    inflation came in hot, rate expectations moved, and the setup is broken.
+                  </p>
+                  <p className="mt-4 max-w-[52ch] text-[0.95rem] leading-[1.62] text-[var(--ink-2)]">
+                    Both are accurate. They are describing different forces over different lengths
+                    of time. But you have to act once, so you pick the one that matches what you
+                    already believed, and you call that research.
+                  </p>
+                </div>
+                <div>
+                  <p className="max-w-[52ch] text-[0.95rem] leading-[1.62] text-[var(--ink-2)]">
+                    Every tool built on these sources will hide that from you. It will average the
+                    five into one confident sentence, because one sentence is easier to sell than
+                    a contradiction. The disagreement was the most useful thing on the page and it
+                    is the first thing thrown away.
+                  </p>
+                  <p className="mt-4 max-w-[52ch] font-[family-name:var(--font-display)] text-[1.1rem] leading-snug">
+                    Crosscheck keeps the contradiction, ranks it, and tells you what would settle
+                    it.
+                  </p>
+                </div>
               </div>
             </div>
+
+            {/* ================================ how to read a brief ======== */}
+            <div className={`band pt-10 ${PAD}`}>
+              <Opener label="Anatomy" title="How to read what comes back" />
+            </div>
+            <div className="band cells sm:grid-cols-2 lg:grid-cols-3">
+              {[
+                ["The count", "How many of the five actually answered, and whether they agree. Two of five reporting is a much weaker picture than five of five, so the number is stated before anything else."],
+                ["The plate", "One figure showing every source at once. Left to right is how far ahead it is looking; up and down is whether it reads bullish or bearish. Lines join the sources that disagree."],
+                ["The summary", "A plain paragraph naming who said what, citing the actual figures each one used. Every claim traces back to a named source."],
+                ["The disagreements", "Listed with the most consequential first. Each one says who disagrees, how much that particular pairing is worth, and what the disagreement is actually about."],
+                ["Both cases", "For each disagreement, what would have to be true for either side to turn out right. Not a prediction — a pair of conditions you can check."],
+                ["What resolves it", "One observable thing that would settle the argument: a data release, a flow figure, a level on the chart. Never “wait and see”."],
+              ].map(([title, body], i) => (
+                <div key={title} className={`py-9 ${PAD}`}>
+                  <div className="flex items-baseline gap-3">
+                    <span aria-hidden className="font-[family-name:var(--font-display)] text-[1.7rem] leading-none text-[var(--ink-3)]">
+                      {i + 1}
+                    </span>
+                    <h3 className="font-[family-name:var(--font-display)] text-[1.1rem] leading-tight">{title}</h3>
+                  </div>
+                  <p className="mt-3 max-w-[40ch] text-[0.84rem] leading-relaxed text-[var(--ink-2)]">{body}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* ========================================= the glossary ====== */}
+            <div className={`band py-12 ${PAD}`}>
+              <Opener label="Plain English" title="Four words this page uses" />
+              <dl className="grid gap-x-12 gap-y-7 sm:grid-cols-2">
+                {[
+                  ["Horizon", "How far ahead a source is looking. The chart talks about the next few hours; the economy talks about the next few months. Two sources can disagree completely and both be right if their horizons are far enough apart."],
+                  ["Conviction", "How strongly a source states its own view, from 0 to 1. It measures confidence, not correctness — a source can be loudly wrong."],
+                  ["Materiality", "How much a particular disagreement is worth knowing about. The crowd contradicting the chart is close to meaningless, because both are read from the same price. Institutional money contradicting the economy is worth stopping for."],
+                  ["Timeframe divergence", "A disagreement that is not really a disagreement: two sources pointing opposite ways about two different stretches of time. Marked separately so it is never counted as a fight."],
+                ].map(([term, def]) => (
+                  <div key={term}>
+                    <dt className="font-[family-name:var(--font-display)] text-[1.12rem]">{term}</dt>
+                    <dd className="mt-2 max-w-[48ch] text-[0.86rem] leading-relaxed text-[var(--ink-2)]">{def}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+
+            {/* ============================================ who for ======== */}
+            <div className={`band py-12 ${PAD}`}>
+              <div className="grid gap-x-12 gap-y-6 lg:grid-cols-[1.2fr_1fr]">
+                <div>
+                  <h2 className="max-w-[24ch] font-[family-name:var(--font-display)] text-[clamp(1.5rem,3vw,2.1rem)] leading-tight tracking-[-0.015em]">
+                    Built for the trader who already reads too much
+                  </h2>
+                  <p className="mt-5 max-w-[56ch] text-[0.95rem] leading-[1.62] text-[var(--ink-2)]">
+                    If you follow a chart account, a macro newsletter and crypto Twitter, you are
+                    not short of opinions. You are short of a way to tell which of their
+                    contradictions is signal and which is two people talking about different
+                    weeks. That is the entire job of this page.
+                  </p>
+                </div>
+                <div className="self-end">
+                  <p className="max-w-[44ch] text-[0.86rem] leading-relaxed text-[var(--ink-3)]">
+                    It is read-only and always will be. There is no account, no connected wallet
+                    and no order button anywhere in it — nothing here can touch an exchange,
+                    by construction rather than by promise.
+                  </p>
+                </div>
+              </div>
+            </div>
+
           </>
         )}
 
