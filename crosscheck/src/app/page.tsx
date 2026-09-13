@@ -992,53 +992,52 @@ export default function Home() {
                 </figure>
               )}
 
-              {/* At a glance, before any prose: who said what, how strongly, over what
-                  horizon. Five rows replaces five paragraphs for a reader who just wants
-                  to know where the sources stand. */}
+              {/* The split, as a picture. Which camp each source is in, how hard it is
+                  leaning, and how far ahead it is looking — before a word of prose. */}
               {res.normalised && res.normalised.some((n) => n.status === "ok") && (
-                <div className="mx-auto mt-9 max-w-[46rem] overflow-x-auto text-left">
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr className="border-b border-[var(--frame)]">
-                        <th className="py-2 pr-4 text-left"><Label>Source</Label></th>
-                        <th className="py-2 pr-4 text-left"><Label>Reads</Label></th>
-                        <th className="py-2 pr-4 text-left"><Label>How strongly</Label></th>
-                        <th className="py-2 text-left"><Label>Looking ahead</Label></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {res.normalised.map((n) => (
-                        <tr key={n.skill} className="border-b border-[var(--rule)]">
-                          <td className="py-2.5 pr-4 font-[family-name:var(--font-data)] text-[0.76rem]">
-                            {n.skill}
-                          </td>
-                          {n.status === "ok" ? (
-                            <>
-                              <td className="py-2.5 pr-4">
-                                <span className="flex items-center gap-2 text-[0.84rem]">
-                                  <DirectionMark direction={n.value.direction} />
-                                  {n.value.direction}
-                                </span>
-                              </td>
-                              <td className="py-2.5 pr-4">
-                                <span className="flex items-center gap-2 text-[var(--ink-2)]">
-                                  <ConvictionBar value={n.value.conviction} />
-                                  <span className="font-[family-name:var(--font-data)] text-[0.72rem]">
-                                    {n.value.conviction.toFixed(2)}
-                                  </span>
-                                </span>
-                              </td>
-                              <td className="py-2.5 text-[0.84rem] text-[var(--ink-2)]">{n.value.timeframe}</td>
-                            </>
-                          ) : (
-                            <td colSpan={3} className="py-2.5 text-[0.82rem] italic text-[var(--ink-3)]">
-                              did not report
-                            </td>
-                          )}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="mx-auto mt-9 max-w-[46rem] text-left">
+                  <div className="grid grid-cols-3 border-y border-[var(--frame)]">
+                    {(["bearish", "neutral", "bullish"] as const).map((dir, di) => {
+                      const inCamp = (res.normalised ?? []).flatMap((n) =>
+                        n.status === "ok" && n.value.direction === dir ? [n] : [],
+                      );
+                      return (
+                        <div key={dir} className={di > 0 ? "border-l border-[var(--rule)] p-3 sm:p-4" : "p-3 sm:p-4"}>
+                          <div className="flex items-center gap-1.5">
+                            <DirectionMark direction={dir} />
+                            <Label>{dir}</Label>
+                            <span className="ml-auto font-[family-name:var(--font-display)] text-[1.15rem] leading-none">
+                              {inCamp.length}
+                            </span>
+                          </div>
+                          <ul className="mt-3 space-y-2.5">
+                            {inCamp.length === 0 && (
+                              <li className="text-[0.75rem] italic text-[var(--ink-3)]">none</li>
+                            )}
+                            {inCamp.map((n) => (
+                              <li key={n.skill}>
+                                <div className="font-[family-name:var(--font-data)] text-[0.7rem] leading-tight">
+                                  {n.skill}
+                                </div>
+                                {n.status === "ok" && (
+                                  <div className="mt-1 flex items-center gap-1.5 text-[var(--ink-2)]">
+                                    <ConvictionBar value={n.value.conviction} />
+                                    <span className="text-[0.65rem] text-[var(--ink-3)]">{n.value.timeframe}</span>
+                                  </div>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {(res.normalised ?? []).some((n) => n.status === "unavailable") && (
+                    <p className="mt-2 text-[0.72rem] text-[var(--ink-3)]">
+                      Not reporting:{" "}
+                      {(res.normalised ?? []).filter((n) => n.status === "unavailable").map((n) => n.skill).join(", ")}
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -1068,69 +1067,105 @@ export default function Home() {
                 <Opener label={`${brief.conflicts.length} found`} title="Disagreements, most material first" />
                 <ol>
                   {brief.conflicts.map((c, i) => (
-                    <li key={i} className="grid grid-cols-[2.2rem_1fr] gap-x-4 border-b border-[var(--rule)] py-8 last:border-0 sm:grid-cols-[3.6rem_1fr] sm:gap-x-8">
-                      {/* the ordinal carries information: this list is ranked */}
-                      <span aria-hidden className="font-[family-name:var(--font-display)] text-[2.6rem] leading-[0.7] text-[var(--ink-3)] sm:text-[3.2rem]">
-                        {i + 1}
-                      </span>
-
-                      <div>
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                          <h3 className="font-[family-name:var(--font-data)] text-[0.88rem]">
-                            {c.sources[0]} <span className="text-[var(--ink-3)]">vs</span> {c.sources[1]}
-                          </h3>
-                          <span className="flex items-center gap-1.5">
-                            <MaterialityMark level={c.materiality} />
-                            <Label>{c.materiality}</Label>
+                    <li key={i} className="border-b border-[var(--rule)] last:border-0">
+                      <details open={i === 0} className="group">
+                        <summary className="grid cursor-pointer list-none grid-cols-[1.6rem_1fr] gap-x-3 py-5 sm:grid-cols-[2.4rem_1fr] sm:gap-x-5">
+                          <span
+                            aria-hidden
+                            className="font-[family-name:var(--font-display)] text-[1.6rem] leading-[0.8] text-[var(--ink-3)] sm:text-[2rem]"
+                          >
+                            {i + 1}
                           </span>
-                          {c.is_timeframe_divergence && (
-                            <span className="border border-[var(--rule)] px-1.5 py-px">
-                              <Label>timeframe divergence</Label>
+                          <span>
+                            <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+                              <span className="font-[family-name:var(--font-data)] text-[0.78rem]">
+                                {c.sources[0]} <span className="text-[var(--ink-3)]">vs</span> {c.sources[1]}
+                              </span>
+                              <span className="flex items-center gap-1.5">
+                                <MaterialityMark level={c.materiality} />
+                                <Label>{c.materiality}</Label>
+                              </span>
+                              {c.is_timeframe_divergence && (
+                                <span className="border border-[var(--rule)] px-1.5 py-px">
+                                  <Label>both can be right</Label>
+                                </span>
+                              )}
+                              <span className="ml-auto text-[0.7rem] text-[var(--ink-3)] group-open:hidden">
+                                open
+                              </span>
                             </span>
-                          )}
-                        </div>
+                            {c.in_plain_terms && (
+                              <span className="mt-2 block max-w-[62ch] text-[0.95rem] leading-[1.55]">
+                                {c.in_plain_terms}
+                              </span>
+                            )}
+                          </span>
+                        </summary>
 
-                        <p className="mt-2 max-w-[68ch] font-[family-name:var(--font-display)] text-[0.95rem] italic leading-snug text-[var(--ink-2)]">
-                          {c.why_it_matters}
-                        </p>
-
-                        {c.in_plain_terms && (
-                          <p className="mt-4 max-w-[66ch] text-[1rem] leading-[1.58]">{c.in_plain_terms}</p>
-                        )}
-
-                        <details className="mt-3">
-                          <summary className="cursor-pointer list-none text-[0.78rem] text-[var(--ink-3)] underline decoration-dotted underline-offset-[4px] hover:text-[var(--ink-2)]">
-                            The detail, with figures
-                          </summary>
-                          <p className="mt-3 max-w-[70ch] text-[0.9rem] leading-[1.6] text-[var(--ink-2)]">
-                            {c.description}
-                          </p>
-                        </details>
-
-                        {/* the two cases, divided by a rule rather than boxed */}
-                        <div className="mt-7 grid gap-x-8 gap-y-6 sm:grid-cols-2">
-                          {([[c.sources[0], c.case_for_a], [c.sources[1], c.case_for_b]] as const).map(
-                            ([name, text], k) => (
-                              <div key={name} className={k === 1 ? "sm:border-l sm:border-[var(--rule)] sm:pl-8" : ""}>
-                                <Label>For {name} to be right</Label>
-                                <p className="mt-2 text-[0.87rem] leading-[1.6] text-[var(--ink-2)]">{text || "—"}</p>
-                              </div>
-                            ),
-                          )}
-                        </div>
-
-                        {c.what_would_resolve_it && (
-                          <div className="mt-7">
-                            <Hair delay={120} />
-                            <p className="mt-3 max-w-[70ch] text-[0.9rem] leading-[1.6]">
-                              <span className="font-[family-name:var(--font-display)] italic">What resolves it. </span>
-                              {c.what_would_resolve_it}
+                        <div className="grid grid-cols-[1.6rem_1fr] gap-x-3 pb-7 sm:grid-cols-[2.4rem_1fr] sm:gap-x-5">
+                          <span aria-hidden />
+                          <div>
+                            <p className="max-w-[64ch] font-[family-name:var(--font-display)] text-[0.9rem] italic leading-snug text-[var(--ink-2)]">
+                              {c.why_it_matters}
                             </p>
+
+                            {/* The two cases, as a balance rather than two paragraphs. */}
+                            <div className="mt-5 grid gap-x-7 gap-y-5 sm:grid-cols-2">
+                              {([[c.sources[0], c.case_for_a], [c.sources[1], c.case_for_b]] as const).map(
+                                ([name, text], k) => (
+                                  <div key={name} className={k === 1 ? "sm:border-l sm:border-[var(--rule)] sm:pl-7" : ""}>
+                                    <Label>For {name} to be right</Label>
+                                    <p className="mt-2 text-[0.85rem] leading-[1.6] text-[var(--ink-2)]">{text || "—"}</p>
+                                  </div>
+                                ),
+                              )}
+                            </div>
+
+                            <details className="mt-5">
+                              <summary className="cursor-pointer list-none text-[0.76rem] text-[var(--ink-3)] underline decoration-dotted underline-offset-[4px] hover:text-[var(--ink-2)]">
+                                The detail, with figures
+                              </summary>
+                              <p className="mt-3 max-w-[70ch] text-[0.88rem] leading-[1.6] text-[var(--ink-2)]">
+                                {c.description}
+                              </p>
+                            </details>
                           </div>
-                        )}
-                      </div>
+                        </div>
+                      </details>
                     </li>
                   ))}
+                </ol>
+              </div>
+            )}
+
+            {brief && brief.conflicts.some((c) => c.what_would_resolve_it) && (
+              <div className={`band arrive py-9 sm:py-12 ${PAD}`}>
+                <Opener label="The actionable part" title="What to watch" />
+                <p className="max-w-[64ch] text-[0.84rem] leading-relaxed text-[var(--ink-3)]">
+                  Each disagreement resolves itself the moment one of these prints. Nothing here is
+                  a recommendation — they are the observables that would settle the argument.
+                </p>
+                <ol className="mt-5">
+                  {brief.conflicts
+                    .filter((c) => c.what_would_resolve_it)
+                    .map((c, i) => (
+                      <li
+                        key={i}
+                        className="grid grid-cols-[1.4rem_1fr] gap-x-3 border-b border-[var(--rule)] py-3.5 last:border-0 sm:grid-cols-[1.8rem_1fr]"
+                      >
+                        <span aria-hidden className="pt-0.5">
+                          <MaterialityMark level={c.materiality} />
+                        </span>
+                        <span>
+                          <span className="font-[family-name:var(--font-data)] text-[0.7rem] text-[var(--ink-3)]">
+                            {c.sources[0]} vs {c.sources[1]}
+                          </span>
+                          <span className="mt-1 block max-w-[66ch] text-[0.89rem] leading-[1.55]">
+                            {c.what_would_resolve_it}
+                          </span>
+                        </span>
+                      </li>
+                    ))}
                 </ol>
               </div>
             )}
