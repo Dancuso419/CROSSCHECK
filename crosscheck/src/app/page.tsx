@@ -182,8 +182,8 @@ function CoinMark({ symbol, size = 40, strokeWidth = 1.6 }: { symbol: string; si
    Turn these up if the field should be livelier — DRIFT_SECONDS down for faster
    travel, TURN_SECONDS down for faster rotation. Both are deliberately slow: motion
    in the periphery of a prose-heavy page competes with reading. */
-const DRIFT_SECONDS = 22;
-const TURN_SECONDS = 130;
+const DRIFT_SECONDS = 11;
+const TURN_SECONDS = 60;
 
 const WATERMARKS = [
   { symbol: "BTC", top: "2%", left: "-4%", size: 300, r: -8, path: "a", k: 1.0 },
