@@ -488,20 +488,17 @@ export default function Home() {
         </div>
 
         {/* ====================================================== hero ==== */}
-        {/* Display leading that works at 3.9rem is cramped at 2.1rem over three lines, and
-            a centred eight-line deck outweighs the headline it is supporting. Both get a
-            separate mobile setting; text-balance evens the rag so centring still reads. */}
-        <div className={`band pt-12 pb-11 text-center sm:py-20 ${PAD}`}>
-          <h1 className="mx-auto max-w-[24ch] text-balance font-[family-name:var(--font-display)] text-[clamp(2rem,5.4vw,3.9rem)] leading-[1.13] tracking-[-0.018em] sm:leading-[1.04] sm:tracking-[-0.022em]">
+        <div className={`band py-10 text-center sm:py-20 ${PAD}`}>
+          <h1 className="mx-auto max-w-[24ch] font-[family-name:var(--font-display)] text-[clamp(2.1rem,5.4vw,3.9rem)] leading-[1.04] tracking-[-0.022em]">
             Five kinds of research on one coin, and every place they disagree
           </h1>
-          <p className="mx-auto mt-7 max-w-[44ch] text-pretty text-[0.94rem] leading-[1.62] text-[var(--ink-2)] sm:mt-8 sm:max-w-[68ch] sm:text-[1.02rem] sm:leading-[1.6]">
+          <p className="mx-auto mt-7 max-w-[68ch] text-[1.02rem] leading-[1.6] text-[var(--ink-2)]">
             The economy, the money, the news, the crowd and the chart rarely say the same thing
             about a coin at the same time. Crosscheck asks all five, then shows you exactly where
             they contradict each other, which contradictions are worth your attention, and what to
             watch to find out who was right.
           </p>
-          <p className="mx-auto mt-10 max-w-[40ch] text-pretty text-[0.86rem] leading-relaxed text-[var(--ink-3)] sm:mt-7 sm:max-w-[56ch] sm:text-[0.9rem]">
+          <p className="mx-auto mt-4 max-w-[56ch] text-[0.9rem] leading-relaxed text-[var(--ink-3)]">
             It never tells you to buy or sell. That part stays yours.
           </p>
         </div>
