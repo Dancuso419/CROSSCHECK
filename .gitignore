@@ -3,3 +3,6 @@ __pycache__/
 spike/raw/*.json
 !spike/raw/_klines_only.json
 .DS_Store
+
+# strategy notes: kept locally, never published
+private/
