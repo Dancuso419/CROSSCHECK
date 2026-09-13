@@ -31,7 +31,7 @@ const RECORDED = ["BTC", "ETH", "SOL"];
 
 const SOURCES = [
   ["macro-analyst", "The economy", "Interest rates, inflation, the strength of the dollar. Slow to move, and it sets the weather everything else trades in."],
-  ["market-intel", "The money", "What large institutions are actually doing — fund inflows, coins leaving exchanges, stablecoins being readied to buy with."],
+  ["market-intel", "The money", "What large institutions are actually doing: fund inflows, coins leaving exchanges, stablecoins being readied to buy with."],
   ["news-briefing", "The story", "What is being reported, and which narrative is forming around it before it shows up in the price."],
   ["sentiment-analyst", "The crowd", "Fear and greed, and how heavily ordinary traders are betting in one direction."],
   ["technical-analysis", "The chart", "Trend, momentum and volatility read straight off the candles. Fastest to move, and the easiest to over-read."],
@@ -47,7 +47,7 @@ const SCENARIOS = [
 const MODES = [
   { id: "live", label: "Live", note: "Queries the Skills now. Four of five are returning no data." },
   { id: "demo", label: "Recorded", note: "Real market data, captured and held. Not live." },
-  { id: "scenario", label: "Illustrative", note: "Constructed inputs — the fixtures the tests assert against." },
+  { id: "scenario", label: "Illustrative", note: "Constructed inputs, the same fixtures the tests assert against." },
 ] as const;
 
 /* The landing's worked example. Same numbers as the sharp-conflict fixture the
@@ -700,10 +700,10 @@ export default function Home() {
             </div>
             <div className="band cells arrive sm:grid-cols-2 lg:grid-cols-4">
               {[
-                ["Fan out", "One ticker goes to all five Skills at once. Every call, its status and its latency are printed below the brief — the gathering is shown, not hidden behind a spinner."],
+                ["Fan out", "One ticker goes to all five Skills at once. Every call, its status and its latency are printed below the brief, so the gathering is shown rather than hidden behind a spinner."],
                 ["Normalise", "Each Skill's raw output becomes one comparable claim: a direction, how strongly it is held, the horizon it describes, and the figures it cites. One pass per source, so a malformed answer cannot corrupt the others."],
                 ["Detect and rank", "Code decides which pairs actually conflict and what each conflict is worth. A model is never asked to find disagreement, which is why agreement can be reported as agreement."],
-                ["Brief", "Each disagreement is explained with both cases — what would have to be true for either side to be right — and one observable that would settle it."],
+                ["Brief", "Each disagreement is explained with both cases, meaning what would have to be true for either side to be right, plus one observable that would settle it."],
               ].map(([title, body], i) => (
                 <div key={title} className={`py-7 sm:py-9 ${PAD}`}>
                   <div className="flex items-baseline gap-3">
@@ -723,7 +723,7 @@ export default function Home() {
               <p className="max-w-[74ch] text-[0.88rem] leading-relaxed text-[var(--ink-2)]">
                 Anyone can count disagreements. The judgment is knowing which ones carry
                 information. Sentiment and technicals contradict each other constantly and it means
-                almost nothing — both are derived from the same candles. Capital flow
+                almost nothing, because both are derived from the same candles. Capital flow
                 contradicting macro structure means something, because the two are genuinely
                 independent. That judgment is this table, and the table is the code: the page reads
                 it from the same module the ranking runs on, so what is published here and what
@@ -765,7 +765,7 @@ export default function Home() {
               <p className="mt-6 max-w-[74ch] text-[0.84rem] leading-relaxed text-[var(--ink-3)]">
                 One rule sits on top of the table. Two sources pointing opposite ways across
                 horizons two or more steps apart are usually not contradicting each other at all
-                — bearish over months and bullish intraday can both be true. Those are marked
+                at all. Bearish over months and bullish intraday can both be true, and those are marked
                 as timeframe divergence and never counted as a sharp conflict.
               </p>
             </div>
@@ -836,7 +836,7 @@ export default function Home() {
                 ["The plate", "One figure showing every source at once. Left to right is how far ahead it is looking; up and down is whether it reads bullish or bearish. Lines join the sources that disagree."],
                 ["The summary", "A plain paragraph naming who said what, citing the actual figures each one used. Every claim traces back to a named source."],
                 ["The disagreements", "Listed with the most consequential first. Each one says who disagrees, how much that particular pairing is worth, and what the disagreement is actually about."],
-                ["Both cases", "For each disagreement, what would have to be true for either side to turn out right. Not a prediction — a pair of conditions you can check."],
+                ["Both cases", "For each disagreement, what would have to be true for either side to turn out right. Not a prediction, just a pair of conditions you can check."],
                 ["What resolves it", "One observable thing that would settle the argument: a data release, a flow figure, a level on the chart. Never “wait and see”."],
               ].map(([title, body], i) => (
                 <div key={title} className={`py-7 sm:py-9 ${PAD}`}>
@@ -857,7 +857,7 @@ export default function Home() {
               <dl className="grid gap-x-12 gap-y-6 sm:grid-cols-2">
                 {[
                   ["Horizon", "How far ahead a source is looking. The chart talks about the next few hours; the economy talks about the next few months. Two sources can disagree completely and both be right if their horizons are far enough apart."],
-                  ["Conviction", "How strongly a source states its own view, from 0 to 1. It measures confidence, not correctness — a source can be loudly wrong."],
+                  ["Conviction", "How strongly a source states its own view, from 0 to 1. It measures confidence, not correctness, and a source can be loudly wrong."],
                   ["Materiality", "How much a particular disagreement is worth knowing about. The crowd contradicting the chart is close to meaningless, because both are read from the same price. Institutional money contradicting the economy is worth stopping for."],
                   ["Timeframe divergence", "A disagreement that is not really a disagreement: two sources pointing opposite ways about two different stretches of time. Marked separately so it is never counted as a fight."],
                 ].map(([term, def]) => (
@@ -886,7 +886,7 @@ export default function Home() {
                 <div className="self-end">
                   <p className="max-w-[44ch] text-[0.86rem] leading-relaxed text-[var(--ink-3)]">
                     It is read-only and always will be. There is no account, no connected wallet
-                    and no order button anywhere in it — nothing here can touch an exchange,
+                    and no order button anywhere in it. Nothing here can touch an exchange,
                     by construction rather than by promise.
                   </p>
                 </div>
@@ -939,7 +939,7 @@ export default function Home() {
                   )}
                   {res.mode === "scenario" && res.scenario && (
                     <>
-                      Constructed data, not real market data — “{res.scenario.title}”.{" "}
+                      Constructed data, not real market data. “{res.scenario.title}”.{" "}
                       {res.scenario.teaches} Conflict detection, ranking and the brief run for real
                       on these inputs; normalisation is skipped because the sources arrive already
                       normalised.
@@ -1115,7 +1115,7 @@ export default function Home() {
                                 ([name, text], k) => (
                                   <div key={name} className={k === 1 ? "sm:border-l sm:border-[var(--rule)] sm:pl-7" : ""}>
                                     <Label>For {name} to be right</Label>
-                                    <p className="mt-2 text-[0.85rem] leading-[1.6] text-[var(--ink-2)]">{text || "—"}</p>
+                                    <p className="mt-2 text-[0.85rem] leading-[1.6] text-[var(--ink-2)]">{text || "not stated"}</p>
                                   </div>
                                 ),
                               )}
@@ -1143,7 +1143,7 @@ export default function Home() {
                 <Opener label="The actionable part" title="What to watch" />
                 <p className="max-w-[64ch] text-[0.84rem] leading-relaxed text-[var(--ink-3)]">
                   Each disagreement resolves itself the moment one of these prints. Nothing here is
-                  a recommendation — they are the observables that would settle the argument.
+                  a recommendation. They are the observables that would settle the argument.
                 </p>
                 <ol className="mt-5">
                   {brief.conflicts
@@ -1177,7 +1177,7 @@ export default function Home() {
                   No directional disagreement between the sources that reported.
                 </p>
                 <p className="mx-auto mt-4 max-w-[62ch] text-[0.88rem] leading-relaxed text-[var(--ink-2)]">
-                  That is the finding. Nothing has been manufactured to fill this space — a page
+                  That is the finding. Nothing has been manufactured to fill this space, because a page
                   that always finds conflict is a page nobody should trust.
                 </p>
               </div>
@@ -1299,7 +1299,7 @@ export default function Home() {
         <div className={`flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 py-5 ${PAD}`}>
           <p className="max-w-[66ch] text-[0.78rem] leading-relaxed text-[var(--ink-3)]">
             Crosscheck reports disagreement between sources. It issues no verdict, no direction
-            call and no price target, and it is read-only — it cannot place an order.
+            call and no price target, and it is read-only, so it cannot place an order.
           </p>
           <Label>Bitget AI Base Camp S2 · Open Theme</Label>
         </div>

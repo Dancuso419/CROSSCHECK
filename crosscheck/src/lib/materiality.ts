@@ -24,7 +24,7 @@ const MATRIX: Record<string, { materiality: Materiality; why: string }> = {
   },
   "market-intel|sentiment-analyst": {
     materiality: "high",
-    why: "Smart money against the crowd — the classic informative divergence.",
+    why: "Smart money against the crowd, the classic informative divergence.",
   },
   "market-intel|technical-analysis": {
     materiality: "high",
@@ -36,7 +36,7 @@ const MATRIX: Record<string, { materiality: Materiality; why: string }> = {
   },
   "macro-analyst|technical-analysis": {
     materiality: "medium",
-    why: "Different timeframes — often not a real conflict.",
+    why: "Different timeframes, so often not a real conflict.",
   },
   "news-briefing|sentiment-analyst": {
     materiality: "medium",

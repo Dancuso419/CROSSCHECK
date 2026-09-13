@@ -28,7 +28,7 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Crosscheck — multi-source disagreement desk",
+  title: "Crosscheck, a multi-source disagreement desk",
   description:
     "Queries five independent research Skills on one ticker and shows where they disagree and why it matters. Reports disagreement, never a verdict.",
 };

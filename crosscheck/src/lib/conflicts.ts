@@ -69,13 +69,14 @@ Rules:
   Name the first source in the pair as A and the second as B.
 - Where "is_timeframe_divergence" is true, say explicitly that both sources can be correct
   at once because they describe different horizons. Do not present it as a contradiction.
-- "what_would_resolve_it" must name a specific observable — a data release, a flow print,
+- "what_would_resolve_it" must name a specific observable: a data release, a flow print,
   a price level. Never "wait and see".
 - Every claim must trace to the "evidence" field of a named source. No unattributed
   assertions, and no outside knowledge.
 - Never recommend an action. No buy, sell, hold, entry, target, stop, or price forecast.
 - "consensus_summary" must state how many sources reported and must not imply a direction
-  the sources did not collectively express.`;
+  the sources did not collectively express.
+- Never use em dashes in any field. Use a comma, a colon, or a full stop instead.`;
 }
 
 /**

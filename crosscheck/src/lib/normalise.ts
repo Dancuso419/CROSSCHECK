@@ -33,10 +33,11 @@ Rules:
 - "evidence" must quote specific figures, indicators, or events from the raw output.
   Never generalise. If the raw output gives no specifics, evidence is "none stated".
 - Return "neutral" freely. Do not force a direction the source did not express.
-- "conviction" reflects how strongly THIS SOURCE states its view — not how right it is.
+- "conviction" reflects how strongly THIS SOURCE states its view, not how right it is.
 - "internal_divergence": if the source contains sub-signals pointing different ways
   (common for technical indicator sets), describe it. Otherwise null.
-- Do not incorporate outside knowledge. Only what is in the raw output.`;
+- Do not incorporate outside knowledge. Only what is in the raw output.
+- Never use em dashes. Use a comma, a colon, or a full stop instead.`;
 }
 
 /** Validated, or the source is marked unavailable. One retry, then give up — never

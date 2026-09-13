@@ -35,7 +35,7 @@ export const SCENARIOS: Scenario[] = [
     id: "sharp-conflict",
     title: "Flows against macro",
     teaches:
-      "Five sources split two ways. The ranking puts market-intel against macro-analyst first — two genuinely independent views — and pushes sentiment against technical last, because both derive from the same candles.",
+      "Five sources split two ways. The ranking puts market-intel against macro-analyst first, two genuinely independent views, and pushes sentiment against technical last, because both derive from the same candles.",
     outcomes: sharp as NormaliseOutcome[],
   },
   {

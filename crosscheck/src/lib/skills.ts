@@ -3,7 +3,7 @@
  *
  * `measures` is the one-line description fed to the Pass-1 normalisation prompt
  * (05-prompts.md: WHAT THIS SOURCE MEASURES). Wording is from 03-skill-integration.md,
- * including each source's known bias — the crowd lags price, flows lead it — because that
+ * including each source's known bias , the crowd lags price, flows lead it , because that
  * framing is what makes the conflict ranking defensible rather than arbitrary.
  *
  * Tool lists were derived by grepping each installed SKILL.md, not guessed.
@@ -34,7 +34,7 @@ export const SKILLS: SkillDef[] = [
   {
     name: "macro-analyst",
     measures:
-      "Fed policy, rates, and cross-asset correlation (BTC vs DXY / Nasdaq / Gold). The slow-moving structural view; usually the contrarian voice when price has run, because macro rarely moves as fast as sentiment.",
+      "Fed policy, rates, and cross-asset correlation (BTC vs DXY / Nasdaq / Gold). The slow-moving structural view, usually the contrarian voice when price has run, because macro rarely moves as fast as sentiment.",
     timeframe: "months",
     independence: "high",
     // Rates and macro releases are genuinely market-wide: they describe the weather
@@ -48,7 +48,7 @@ export const SKILLS: SkillDef[] = [
   {
     name: "market-intel",
     measures:
-      "ETF flows, whale activity, exchange reserves, DeFi TVL and institutional positioning. The most independent of the five: flows are actual capital movement, not opinion or a derivative of price. When this conflicts with anything, the conflict is informative.",
+      "ETF flows, whale activity, exchange reserves, DeFi TVL and institutional positioning. The most independent of the five, because flows are actual capital movement rather than opinion or a derivative of price. When this conflicts with anything, the conflict is informative.",
     timeframe: "weeks",
     independence: "high",
     // Market cap and stablecoin supply are structural and market-wide. Network health
@@ -67,7 +67,7 @@ export const SKILLS: SkillDef[] = [
   {
     name: "news-briefing",
     measures:
-      "News aggregation and narrative synthesis. The catalyst layer: it explains why the other four are saying what they say. Most prose-heavy and hardest to map to a direction, so neutral is the honest answer more often than not.",
+      "News aggregation and narrative synthesis. The catalyst layer, which explains why the other four are saying what they say. Most prose-heavy and hardest to map to a direction, so neutral is the honest answer more often than not.",
     timeframe: "days",
     independence: "medium",
     calls: (t) => [
@@ -77,7 +77,7 @@ export const SKILLS: SkillDef[] = [
   {
     name: "sentiment-analyst",
     measures:
-      "Fear & Greed index, long/short ratio, open interest and funding. The crowd. Frequently a lagging derivative of price, so treat with suspicion: its agreement with technical-analysis is near-worthless as confirmation since both are downstream of the same candles.",
+      "Fear & Greed index, long/short ratio, open interest and funding. The crowd. Frequently a lagging derivative of price, so treat with suspicion, since its agreement with technical-analysis is near-worthless as confirmation since both are downstream of the same candles.",
     timeframe: "days",
     independence: "low",
     calls: (t) => [
@@ -92,7 +92,7 @@ export const SKILLS: SkillDef[] = [
       "Price-action indicators across trend, momentum and volatility, on two timeframes. The most structured of the five. An indicator set at war with itself is meaningful in its own right, so internal divergence is reported rather than averaged away.",
     timeframe: "intraday",
     independence: "low",
-    // This Skill calls no MCP tool of its own — it is local Python + api.bitget.com.
+    // This Skill calls no MCP tool of its own , it is local Python + api.bitget.com.
     // We take Bitget klines from the MCP and run indicators.ts over them instead.
     calls: (t) => [
       { tool: "crypto_derivatives", args: { action: "klines", symbol: pair(t), timeframe: "4h", limit: 200, exchange: "bitget" } },
