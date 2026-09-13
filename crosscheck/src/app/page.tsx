@@ -488,7 +488,7 @@ export default function Home() {
         </div>
 
         {/* ====================================================== hero ==== */}
-        <div className={`band py-10 text-center sm:py-20 ${PAD}`}>
+        <div className={`band pt-16 pb-10 text-center sm:pt-28 sm:pb-20 ${PAD}`}>
           <h1 className="mx-auto max-w-[24ch] font-[family-name:var(--font-display)] text-[clamp(2.1rem,5.4vw,3.9rem)] leading-[1.04] tracking-[-0.022em]">
             Five kinds of research on one coin, and every place they disagree
           </h1>
