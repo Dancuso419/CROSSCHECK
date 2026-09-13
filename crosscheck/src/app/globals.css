@@ -144,24 +144,32 @@ select {
   will-change: transform;
 }
 
-/* Three paths so nothing moves in lockstep. */
+/* Three paths so nothing moves in lockstep. Amplitude is large on purpose: at a
+   couple of vw the marks barely shifted against their own 300px size and the field
+   read as rotation only. These wander a few hundred pixels, crossing the sheet and
+   clipping out at its edges, which is what makes the field feel alive. */
 @keyframes drift-a {
   0%   { transform: translate(0, 0); }
-  25%  { transform: translate(2.6vw, -1.8vh); }
-  50%  { transform: translate(1.1vw, 2.4vh); }
-  75%  { transform: translate(-2.1vw, 0.9vh); }
+  20%  { transform: translate(17vw, -12vh); }
+  40%  { transform: translate(7vw, 14vh); }
+  60%  { transform: translate(-14vw, 6vh); }
+  80%  { transform: translate(-6vw, -15vh); }
   100% { transform: translate(0, 0); }
 }
 @keyframes drift-b {
   0%   { transform: translate(0, 0); }
-  30%  { transform: translate(-2.4vw, 2.1vh); }
-  60%  { transform: translate(1.8vw, 1.2vh); }
+  22%  { transform: translate(-15vw, 10vh); }
+  45%  { transform: translate(12vw, 16vh); }
+  68%  { transform: translate(19vw, -9vh); }
+  85%  { transform: translate(-5vw, -14vh); }
   100% { transform: translate(0, 0); }
 }
 @keyframes drift-c {
   0%   { transform: translate(0, 0); }
-  40%  { transform: translate(1.9vw, 2.6vh); }
-  70%  { transform: translate(-1.4vw, -2.2vh); }
+  18%  { transform: translate(10vw, 17vh); }
+  42%  { transform: translate(-17vw, 8vh); }
+  64%  { transform: translate(-9vw, -16vh); }
+  88%  { transform: translate(15vw, -7vh); }
   100% { transform: translate(0, 0); }
 }
 
