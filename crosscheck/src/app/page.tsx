@@ -450,7 +450,7 @@ export default function Home() {
         </div>
 
         {/* ====================================================== hero ==== */}
-        <div className={`band py-14 text-center sm:py-20 ${PAD}`}>
+        <div className={`band py-10 text-center sm:py-20 ${PAD}`}>
           <h1 className="mx-auto max-w-[24ch] font-[family-name:var(--font-display)] text-[clamp(2.1rem,5.4vw,3.9rem)] leading-[1.04] tracking-[-0.022em]">
             Five kinds of research on one coin, and every place they disagree
           </h1>
@@ -468,7 +468,7 @@ export default function Home() {
         {/* ================================ three cells: the pitch ======== */}
         <div className="band cells sm:grid-cols-[1fr_1.25fr_1fr]">
           {/* left: what is being asked */}
-          <div className={`py-10 ${PAD}`}>
+          <div className={`py-8 sm:py-10 ${PAD}`}>
             <Label>The five sources</Label>
             <ul className="mt-4 space-y-4">
               {SOURCES.map(([name, plain, what]) => (
@@ -482,7 +482,7 @@ export default function Home() {
           </div>
 
           {/* centre: the argument and the action */}
-          <div className={`flex flex-col justify-center py-10 text-center sm:py-14 ${PAD}`}>
+          <div className={`flex flex-col justify-center py-9 text-center sm:py-14 ${PAD}`}>
             <h2 className="mx-auto max-w-[20ch] font-[family-name:var(--font-display)] text-[clamp(1.6rem,3.4vw,2.3rem)] leading-[1.08] tracking-[-0.018em]">
               Consensus is the risk
             </h2>
@@ -492,17 +492,32 @@ export default function Home() {
             </p>
 
             <form onSubmit={run} className="mt-8">
-              <div className="flex items-end justify-center gap-2.5">
-                <Label className="pb-1.5">Ticker</Label>
-                <input
-                  value={ticker}
-                  onChange={(e) => setTicker(e.target.value.toUpperCase())}
-                  placeholder="BTC"
-                  spellCheck={false}
-                  aria-label="Ticker"
-                  className="w-[5.5rem] border-0 border-b border-[var(--frame)] bg-transparent pb-1 text-center font-[family-name:var(--font-display)] text-[1.5rem] font-medium leading-none tracking-[-0.01em] outline-none"
-                />
-              </div>
+              {mode === "live" ? (
+                <div className="flex items-end justify-center gap-2.5">
+                  <Label className="pb-1.5">Ticker</Label>
+                  <input
+                    value={ticker}
+                    onChange={(e) => setTicker(e.target.value.toUpperCase())}
+                    placeholder="BTC"
+                    spellCheck={false}
+                    aria-label="Ticker"
+                    className="w-[5.5rem] border-0 border-b border-[var(--frame)] bg-transparent pb-1 text-center font-[family-name:var(--font-display)] text-[1.5rem] font-medium leading-none tracking-[-0.01em] outline-none"
+                  />
+                </div>
+              ) : (
+                /* A control that cannot change the outcome should not look editable. */
+                <div className="flex flex-col items-center gap-1.5">
+                  <Label>{mode === "demo" ? "Recorded ticker" : "Not tied to a ticker"}</Label>
+                  <span className="font-[family-name:var(--font-display)] text-[1.5rem] font-medium leading-none text-[var(--ink-2)]">
+                    {mode === "demo" ? "BTC" : "Constructed example"}
+                  </span>
+                  <span className="max-w-[34ch] text-center text-[0.72rem] leading-snug text-[var(--ink-3)]">
+                    {mode === "demo"
+                      ? "One five-source capture exists, and it is of BTC. Switch to Live to query another ticker."
+                      : "These cases are built to exercise the ranking, so no real ticker is involved. Switch to Live to query one."}
+                  </span>
+                </div>
+              )}
 
               <div className="mt-5 flex flex-wrap items-center justify-center gap-x-2.5 gap-y-2">
                 {MODES.map((m, i) => (
@@ -555,7 +570,7 @@ export default function Home() {
           </div>
 
           {/* right: what it refuses to do */}
-          <div className={`py-10 ${PAD}`}>
+          <div className={`py-8 sm:py-10 ${PAD}`}>
             <Label>What it refuses</Label>
             <ul className="mt-4 space-y-4 text-[0.83rem] leading-snug text-[var(--ink-2)]">
               <li>
@@ -583,8 +598,12 @@ export default function Home() {
         {!res && !busy && (
           <>
             <div className={`band cells py-0 sm:grid-cols-[1.35fr_1fr]`}>
-              <figure className={`py-10 ${PAD}`}>
-                <SourcePlate sources={EXAMPLE_SOURCES} links={EXAMPLE_LINKS} />
+              <figure className={`py-8 sm:py-10 ${PAD}`}>
+                <div className="-mx-1 overflow-x-auto pb-1">
+                  <div className="min-w-[34rem]">
+                    <SourcePlate sources={EXAMPLE_SOURCES} links={EXAMPLE_LINKS} />
+                  </div>
+                </div>
                 <figcaption className="mt-4 text-[0.78rem] leading-relaxed text-[var(--ink-3)]">
                   <span className="font-[family-name:var(--font-display)] italic text-[var(--ink-2)]">
                     Example, constructed.{" "}
@@ -595,7 +614,7 @@ export default function Home() {
                 </figcaption>
               </figure>
 
-              <div className={`flex flex-col justify-center py-10 ${PAD}`}>
+              <div className={`flex flex-col justify-center py-8 sm:py-10 ${PAD}`}>
                 <p className="font-[family-name:var(--font-display)] text-[clamp(1.2rem,2.6vw,1.7rem)] leading-snug">
                   “Manufactured consensus hides the fact that the sources are in conflict.”
                 </p>
@@ -616,7 +635,7 @@ export default function Home() {
         {/* ================================== how it works =============== */}
         {!res && !busy && (
           <>
-            <div className={`band pt-10 ${PAD}`}>
+            <div className={`band pt-8 sm:pt-10 ${PAD}`}>
               <Opener label="Four steps" title="What happens when you press it" />
             </div>
             <div className="band cells arrive sm:grid-cols-2 lg:grid-cols-4">
@@ -626,7 +645,7 @@ export default function Home() {
                 ["Detect and rank", "Code decides which pairs actually conflict and what each conflict is worth. A model is never asked to find disagreement, which is why agreement can be reported as agreement."],
                 ["Brief", "Each disagreement is explained with both cases — what would have to be true for either side to be right — and one observable that would settle it."],
               ].map(([title, body], i) => (
-                <div key={title} className={`py-9 ${PAD}`}>
+                <div key={title} className={`py-7 sm:py-9 ${PAD}`}>
                   <div className="flex items-baseline gap-3">
                     <span aria-hidden className="font-[family-name:var(--font-display)] text-[2.1rem] leading-none text-[var(--ink-3)]">
                       {i + 1}
@@ -692,7 +711,7 @@ export default function Home() {
             </div>
 
             {/* =================================== covered assets ========== */}
-            <div className={`band pt-10 ${PAD}`}>
+            <div className={`band pt-8 sm:pt-10 ${PAD}`}>
               <Opener label="Crypto majors" title="What you can ask about" />
             </div>
             <div className="band cells arrive sm:grid-cols-3">
@@ -701,7 +720,7 @@ export default function Home() {
                 ["ETH", "Same five sources, same ranking. Horizon and conviction are read per source, never inherited from BTC."],
                 ["SOL", "Covered on the same path. Anything outside the majors has thinner source coverage, and the brief will say so."],
               ].map(([sym, body]) => (
-                <div key={sym} className={`py-10 ${PAD}`}>
+                <div key={sym} className={`py-8 sm:py-10 ${PAD}`}>
                   <div className="flex items-center gap-4">
                     <span className="text-[var(--ink)]">
                       <CoinMark symbol={sym} size={44} />
@@ -719,7 +738,7 @@ export default function Home() {
             {/* =================================== a worked morning ======== */}
             <div className={`band arrive py-12 ${PAD}`}>
               <Opener label="Why this exists" title="Two true things that point opposite ways" />
-              <div className="grid gap-x-12 gap-y-8 lg:grid-cols-[1fr_1fr]">
+              <div className="grid gap-x-12 gap-y-6 lg:grid-cols-[1fr_1fr]">
                 <div>
                   <p className="max-w-[52ch] text-[0.95rem] leading-[1.62] text-[var(--ink-2)]">
                     You open two research notes on the same morning. The first says institutions
@@ -748,7 +767,7 @@ export default function Home() {
             </div>
 
             {/* ================================ how to read a brief ======== */}
-            <div className={`band pt-10 ${PAD}`}>
+            <div className={`band pt-8 sm:pt-10 ${PAD}`}>
               <Opener label="Anatomy" title="How to read what comes back" />
             </div>
             <div className="band cells arrive sm:grid-cols-2 lg:grid-cols-3">
@@ -760,7 +779,7 @@ export default function Home() {
                 ["Both cases", "For each disagreement, what would have to be true for either side to turn out right. Not a prediction — a pair of conditions you can check."],
                 ["What resolves it", "One observable thing that would settle the argument: a data release, a flow figure, a level on the chart. Never “wait and see”."],
               ].map(([title, body], i) => (
-                <div key={title} className={`py-9 ${PAD}`}>
+                <div key={title} className={`py-7 sm:py-9 ${PAD}`}>
                   <div className="flex items-baseline gap-3">
                     <span aria-hidden className="font-[family-name:var(--font-display)] text-[1.7rem] leading-none text-[var(--ink-3)]">
                       {i + 1}
@@ -775,7 +794,7 @@ export default function Home() {
             {/* ========================================= the glossary ====== */}
             <div className={`band arrive py-12 ${PAD}`}>
               <Opener label="Plain English" title="Four words this page uses" />
-              <dl className="grid gap-x-12 gap-y-7 sm:grid-cols-2">
+              <dl className="grid gap-x-12 gap-y-6 sm:grid-cols-2">
                 {[
                   ["Horizon", "How far ahead a source is looking. The chart talks about the next few hours; the economy talks about the next few months. Two sources can disagree completely and both be right if their horizons are far enough apart."],
                   ["Conviction", "How strongly a source states its own view, from 0 to 1. It measures confidence, not correctness — a source can be loudly wrong."],
@@ -792,7 +811,7 @@ export default function Home() {
 
             {/* ============================================ who for ======== */}
             <div className={`band arrive py-12 ${PAD}`}>
-              <div className="grid gap-x-12 gap-y-6 lg:grid-cols-[1.2fr_1fr]">
+              <div className="grid gap-x-12 gap-y-5 lg:grid-cols-[1.2fr_1fr]">
                 <div>
                   <h2 className="max-w-[24ch] font-[family-name:var(--font-display)] text-[clamp(1.5rem,3vw,2.1rem)] leading-tight tracking-[-0.015em]">
                     Built for the trader who already reads too much
@@ -852,7 +871,7 @@ export default function Home() {
           <div id="brief">
             {/* provenance, stated before anything it could be mistaken for */}
             {res.mode !== "live" && (
-              <div className={`band py-5 ${PAD}`}>
+              <div className={`band py-4 sm:py-5 ${PAD}`}>
                 <Label>{res.mode === "demo" ? "Recorded snapshot" : "Illustrative example"}</Label>
                 <p className="mt-2 max-w-[74ch] text-[0.82rem] leading-relaxed text-[var(--ink-2)]">
                   {res.mode === "demo" && res.snapshot && (
@@ -871,7 +890,7 @@ export default function Home() {
             )}
 
             {/* headline: the count at display scale, centred like the hero */}
-            <div className={`band py-12 text-center ${PAD}`}>
+            <div className={`band py-10 sm:py-12 text-center ${PAD}`}>
               <div className="mb-3 flex items-center justify-center gap-3">
                 <Label>
                   {res.mode === "demo" ? "Recorded" : res.mode === "scenario" ? "Illustrative" : res.cached ? "Cached" : "Live"}
@@ -879,8 +898,10 @@ export default function Home() {
                   {new Date(res.fetchedAt).toLocaleTimeString()}
                 </Label>
               </div>
-              <h2 className="font-[family-name:var(--font-display)] text-[clamp(2rem,6vw,3.4rem)] leading-[1] tracking-[-0.024em]">
-                {res.ticker} · {res.reporting} of {res.total}
+              <h2 className="font-[family-name:var(--font-display)] text-[clamp(1.7rem,6vw,3.4rem)] leading-[1.05] tracking-[-0.024em]">
+                {res.mode === "scenario" && res.scenario ? res.scenario.title : res.ticker}
+                <span className="text-[var(--ink-3)]"> · </span>
+                {res.reporting} of {res.total}
               </h2>
               <p className="mt-2 font-[family-name:var(--font-display)] text-[clamp(1rem,2.2vw,1.4rem)] italic text-[var(--ink-2)]">
                 {brief ? AGREEMENT[brief.agreement_level] : "sources reporting"}
@@ -893,7 +914,8 @@ export default function Home() {
               )}
 
               {res.normalised && res.normalised.some((n) => n.status === "ok") && (
-                <figure className="mx-auto mt-10 max-w-[52rem]">
+                <figure className="mx-auto mt-8 max-w-[52rem] overflow-x-auto sm:mt-10">
+                  <div className="min-w-[34rem]">
                   <SourcePlate
                     sources={res.normalised.flatMap((n) =>
                       n.status === "ok"
@@ -906,6 +928,7 @@ export default function Home() {
                       is_timeframe_divergence: c.is_timeframe_divergence,
                     })) ?? []}
                   />
+                  </div>
                 </figure>
               )}
 
@@ -982,7 +1005,7 @@ export default function Home() {
 
             {/* agreement reported as agreement, not dressed as drama */}
             {brief && brief.conflicts.length === 0 && !res.analyseError && (
-              <div className={`band py-12 text-center ${PAD}`}>
+              <div className={`band py-10 sm:py-12 text-center ${PAD}`}>
                 <p className="mx-auto max-w-[46ch] font-[family-name:var(--font-display)] text-[clamp(1.15rem,2.4vw,1.55rem)] leading-snug">
                   No directional disagreement between the sources that reported.
                 </p>

@@ -42,3 +42,6 @@ next-env.d.ts
 
 # keep the template committable; the real .env.local stays ignored by .env* above
 !.env.local.example
+
+.vercel
+.env*
