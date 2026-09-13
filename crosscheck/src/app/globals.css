@@ -119,6 +119,10 @@ select {
   position: relative;
   background: var(--sheet);
   overflow: hidden; /* clips the watermarks to the page */
+  /* Absolutely-positioned children otherwise paint above static siblings, which
+     put the watermark field over the reading copy. Isolating here lets the field
+     sit at z-index -1: above the sheet's own ground, below every word. */
+  isolation: isolate;
 }
 
 /* Engraved watermarks. Protocol marks at plate scale, held far below the text the
@@ -132,6 +136,7 @@ select {
 
 .watermark {
   position: absolute;
+  z-index: -1;
   color: var(--ink);
   opacity: 0.055;
   pointer-events: none;
