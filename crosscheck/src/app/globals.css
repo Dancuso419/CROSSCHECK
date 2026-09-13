@@ -119,10 +119,6 @@ select {
   position: relative;
   background: var(--sheet);
   overflow: hidden; /* clips the watermarks to the page */
-  /* Absolutely-positioned children otherwise paint above static siblings, which
-     put the watermark field over the reading copy. Isolating here lets the field
-     sit at z-index -1: above the sheet's own ground, below every word. */
-  isolation: isolate;
 }
 
 /* Engraved watermarks. Protocol marks at plate scale, held far below the text the
@@ -136,7 +132,6 @@ select {
 
 .watermark {
   position: absolute;
-  z-index: -1;
   color: var(--ink);
   opacity: 0.055;
   pointer-events: none;
@@ -205,22 +200,6 @@ select {
   border-bottom: 1px solid var(--frame);
 }
 
-/* An inverted segment. The dark is already in the palette — it is the field the
-   sheet lies on — so turning two bands over to it gives the page a spine you can
-   feel while scrolling without introducing a single new colour. Tokens are
-   redefined rather than overridden per element, so everything inside adapts. */
-.invert {
-  --sheet: #1c1b18;
-  --sheet-sunken: #121110;
-  --ink: #e6e3d7;
-  --ink-2: #b5b1a1;
-  --ink-3: #938f80;
-  --rule: #3b382f;
-  --frame: #3b382f;
-  background: #1c1b18;
-  color: var(--ink);
-}
-
 .cells {
   display: grid;
 }
@@ -246,69 +225,20 @@ select {
 
 @supports (animation-timeline: view()) {
   @keyframes arrive {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: none; }
-  }
-
-  /* A rule laid down across the top of a segment as it arrives. The page's
-     structure becomes the animation: the same "things arrive by being drawn"
-     grammar the hairlines and the plate already use, applied to segmentation. */
-  @keyframes rule-wipe {
-    from { transform: scaleX(0); }
-    to { transform: scaleX(1); }
-  }
-
-  @keyframes arrive-fig {
-    from { opacity: 0; transform: scale(0.975); }
-    to { opacity: 1; transform: none; }
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
 
   .arrive {
-    position: relative;
     animation: arrive linear both;
     animation-timeline: view();
     animation-range: entry 0% entry 34%;
-  }
-
-  .arrive::before {
-    content: "";
-    position: absolute;
-    top: -1px;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: var(--ink);
-    transform-origin: left center;
-    animation: rule-wipe linear both;
-    animation-timeline: view();
-    animation-range: entry 0% entry 26%;
-  }
-
-  /* Cell grids deal themselves left to right rather than arriving as a slab. */
-  .arrive-cells > * {
-    animation: arrive linear both;
-    animation-timeline: view();
-  }
-  .arrive-cells > *:nth-child(1) { animation-range: entry 0% entry 26%; }
-  .arrive-cells > *:nth-child(2) { animation-range: entry 4% entry 32%; }
-  .arrive-cells > *:nth-child(3) { animation-range: entry 8% entry 38%; }
-  .arrive-cells > *:nth-child(4) { animation-range: entry 12% entry 44%; }
-  .arrive-cells > *:nth-child(5) { animation-range: entry 16% entry 50%; }
-  .arrive-cells > *:nth-child(6) { animation-range: entry 20% entry 56%; }
-
-  /* The matrix builds a row at a time. Each row owns its own view timeline, so
-     the stagger comes from the scroll itself rather than from invented delays. */
-  .arrive-rows tbody tr {
-    animation: arrive linear both;
-    animation-timeline: view();
-    animation-range: entry 0% entry 42%;
-  }
-
-  /* A figure scales up rather than rising: it is an object, not a paragraph. */
-  .arrive-fig {
-    animation: arrive-fig linear both;
-    animation-timeline: view();
-    animation-range: entry 0% entry 40%;
   }
 }
 
@@ -359,11 +289,7 @@ select {
   .rule-travel {
     animation-duration: 3s;
   }
-  .arrive,
-  .arrive::before,
-  .arrive-cells > *,
-  .arrive-rows tbody tr,
-  .arrive-fig {
+  .arrive {
     animation: none;
   }
 }
