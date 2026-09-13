@@ -124,26 +124,18 @@ function CallMark({ status }: { status: string }) {
    the assets they name, and at plate scale as watermarks under the page.     */
 
 const COINS: Record<string, { name: string; d: string }> = {
-  BTC: {
-    name: "Bitcoin",
-    d: "M13 11h11c5 0 5 8 0 8H13m0 0h12c6 0 6 9 0 9H13m0-17v17M17.5 7v25M22.5 7v25",
-  },
-  ETH: {
-    name: "Ethereum",
-    d: "M20 4 30 21 20 27 10 21ZM20 30 30 23 20 36 10 23Z",
-  },
-  SOL: {
-    name: "Solana",
-    d: "M13 9h18l-4 4.5H9ZM9 17.5h18l4 4.5H13ZM13 26h18l-4 4.5H9Z",
-  },
-  BNB: {
-    name: "BNB Chain",
-    d: "M20 5 35 20 20 35 5 20ZM20 13.5 26.5 20 20 26.5 13.5 20Z",
-  },
-  USDT: {
-    name: "Tether",
-    d: "M9 9h22M20 9v23M13.5 17.5h13",
-  },
+  BTC: { name: "Bitcoin", d: "M13 11h11c5 0 5 8 0 8H13m0 0h12c6 0 6 9 0 9H13m0-17v17M17.5 7v25M22.5 7v25" },
+  ETH: { name: "Ethereum", d: "M20 4 30 21 20 27 10 21ZM20 30 30 23 20 36 10 23Z" },
+  SOL: { name: "Solana", d: "M13 9h18l-4 4.5H9ZM9 17.5h18l4 4.5H13ZM13 26h18l-4 4.5H9Z" },
+  BNB: { name: "BNB Chain", d: "M20 5 35 20 20 35 5 20ZM20 13.5 26.5 20 20 26.5 13.5 20Z" },
+  USDT: { name: "Tether", d: "M9 9h22M20 9v23M13.5 17.5h13" },
+  XRP: { name: "XRP", d: "M8 8c6 9 18 9 24 0M8 32c6-9 18-9 24 0" },
+  ADA: { name: "Cardano", d: "M20 15.5a4.5 4.5 0 1 0 .1 0ZM20 4a3 3 0 1 0 .1 0ZM20 33a3 3 0 1 0 .1 0ZM7 12a3 3 0 1 0 .1 0ZM33 12a3 3 0 1 0 .1 0ZM7 25a3 3 0 1 0 .1 0ZM33 25a3 3 0 1 0 .1 0Z" },
+  DOGE: { name: "Dogecoin", d: "M15 9h7c8 0 8 22 0 22h-7V9M9 20h12" },
+  LINK: { name: "Chainlink", d: "M20 5 33 12.5v15L20 35 7 27.5v-15ZM20 13 27 17v6l-7 4-7-4v-6Z" },
+  AVAX: { name: "Avalanche", d: "M20 5 35 33H5ZM24 33l-5-9-5 9" },
+  DOT: { name: "Polkadot", d: "M20 6c5 0 9 2.2 9 5s-4 5-9 5-9-2.2-9-5 4-5 9-5ZM11 22c2.5-4.3 6.6-6.4 9-5s1.6 6-0.9 10.3-6.6 6.4-9 5-1.6-6 .9-10.3ZM29 22c2.5 4.3 3.3 8.9.9 10.3s-6.5-.7-9-5-3.3-8.9-.9-10.3 6.5.7 9 5Z" },
+  LTC: { name: "Litecoin", d: "M23 8h-5l-4 16h13M9 21l13-4.5" },
 };
 
 function CoinMark({ symbol, size = 40, strokeWidth = 1.6 }: { symbol: string; size?: number; strokeWidth?: number }) {
@@ -156,19 +148,34 @@ function CoinMark({ symbol, size = 40, strokeWidth = 1.6 }: { symbol: string; si
   );
 }
 
-/* Watermark field. Positions are hand-placed into the page's quiet regions
-   rather than tiled, so no mark ever lands under a measure of reading copy. */
+/* Watermark field. Hand-placed into the page’s quiet regions rather than tiled,
+   so no mark ever lands under a measure of reading copy. Each one drifts on one of
+   three paths and turns inside that drift, on periods that never line up.
+
+   Turn these up if the field should be livelier — DRIFT_SECONDS down for faster
+   travel, TURN_SECONDS down for faster rotation. Both are deliberately slow: motion
+   in the periphery of a prose-heavy page competes with reading. */
+const DRIFT_SECONDS = 46;
+const TURN_SECONDS = 300;
+
 const WATERMARKS = [
-  { symbol: "BTC", top: "3%", left: "-3%", size: 300, rotate: -8 },
-  { symbol: "ETH", top: "26%", right: "-4%", size: 340, rotate: 10 },
-  { symbol: "SOL", top: "56%", left: "-4%", size: 280, rotate: -5 },
-  { symbol: "BNB", top: "78%", right: "-3%", size: 300, rotate: 7 },
-  { symbol: "USDT", top: "92%", left: "6%", size: 240, rotate: -11 },
+  { symbol: "BTC", top: "2%", left: "-4%", size: 300, r: -8, path: "a", k: 1.0 },
+  { symbol: "ETH", top: "12%", right: "-3%", size: 330, r: 10, path: "b", k: 1.3 },
+  { symbol: "XRP", top: "23%", left: "4%", size: 220, r: -14, path: "c", k: 0.8 },
+  { symbol: "SOL", top: "33%", left: "-3%", size: 280, r: -5, path: "b", k: 1.5 },
+  { symbol: "LINK", top: "40%", right: "5%", size: 250, r: 12, path: "a", k: 0.9 },
+  { symbol: "ADA", top: "51%", right: "-4%", size: 300, r: 6, path: "c", k: 1.2 },
+  { symbol: "DOGE", top: "60%", left: "6%", size: 230, r: -10, path: "a", k: 1.6 },
+  { symbol: "BNB", top: "69%", right: "3%", size: 290, r: 7, path: "b", k: 1.1 },
+  { symbol: "AVAX", top: "78%", left: "-2%", size: 260, r: -6, path: "c", k: 1.4 },
+  { symbol: "DOT", top: "86%", right: "6%", size: 240, r: 9, path: "a", k: 0.85 },
+  { symbol: "USDT", top: "93%", left: "5%", size: 230, r: -11, path: "b", k: 1.25 },
+  { symbol: "LTC", top: "97%", right: "-3%", size: 250, r: 5, path: "c", k: 1.05 },
 ] as const;
 
 function Watermarks() {
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-0">
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
       {WATERMARKS.map((w, i) => (
         <div
           key={i}
@@ -177,10 +184,20 @@ function Watermarks() {
             top: w.top,
             left: "left" in w ? w.left : undefined,
             right: "right" in w ? w.right : undefined,
-            transform: `rotate(${w.rotate}deg)`,
+            animation: `drift-${w.path} ${DRIFT_SECONDS * w.k}s ease-in-out ${-i * 3}s infinite`,
           }}
         >
-          <CoinMark symbol={w.symbol} size={w.size} strokeWidth={0.7} />
+          <div
+            className="wm-turn"
+            style={
+              {
+                "--r": `${w.r}deg`,
+                "--turn": `${TURN_SECONDS * w.k}s`,
+              } as React.CSSProperties
+            }
+          >
+            <CoinMark symbol={w.symbol} size={w.size} strokeWidth={0.7} />
+          </div>
         </div>
       ))}
     </div>
@@ -294,20 +311,28 @@ function SourcePlate({ sources, links }: { sources: PlateSource[]; links: PlateL
             key={i}
             d={`M${a.x} ${a.y} Q ${mx} ${my} ${b.x} ${b.y}`}
             fill="none" stroke="var(--ink)" strokeWidth={weight(l.materiality)}
-            strokeDasharray={l.is_timeframe_divergence ? "5 4" : "none"}
             opacity={l.materiality === "low" ? 0.45 : 0.85}
+            className={l.is_timeframe_divergence ? undefined : "plate-link"}
+            strokeDasharray={l.is_timeframe_divergence ? "5 4" : undefined}
+            style={
+              l.is_timeframe_divergence
+                ? undefined
+                : ({ "--len": 520, animationDelay: `${260 + i * 130}ms` } as React.CSSProperties)
+            }
           />
         );
       })}
 
       {/* the sources */}
-      {sources.map((s) => {
+      {sources.map((s, i) => {
         const p = pos.get(s.source);
         if (!p) return null;
         const k = size(s.conviction);
         return (
           <g key={s.source}>
             <rect
+              className="plate-mark"
+              style={{ animationDelay: `${i * 90}ms` }}
               x={p.x - k / 2} y={p.y - k / 2} width={k} height={k}
               fill={s.direction === "neutral" ? "var(--sheet)" : "var(--ink)"}
               stroke="var(--ink)" strokeWidth={1.1}
@@ -594,7 +619,7 @@ export default function Home() {
             <div className={`band pt-10 ${PAD}`}>
               <Opener label="Four steps" title="What happens when you press it" />
             </div>
-            <div className="band cells sm:grid-cols-2 lg:grid-cols-4">
+            <div className="band cells arrive sm:grid-cols-2 lg:grid-cols-4">
               {[
                 ["Fan out", "One ticker goes to all five Skills at once. Every call, its status and its latency are printed below the brief — the gathering is shown, not hidden behind a spinner."],
                 ["Normalise", "Each Skill's raw output becomes one comparable claim: a direction, how strongly it is held, the horizon it describes, and the figures it cites. One pass per source, so a malformed answer cannot corrupt the others."],
@@ -614,7 +639,7 @@ export default function Home() {
             </div>
 
             {/* ============================= the materiality matrix ======== */}
-            <div className={`band py-10 ${PAD}`}>
+            <div className={`band arrive py-10 ${PAD}`}>
               <Opener label="The defensible part" title="Which disagreements are worth your attention" />
               <p className="max-w-[74ch] text-[0.88rem] leading-relaxed text-[var(--ink-2)]">
                 Anyone can count disagreements. The judgment is knowing which ones carry
@@ -670,7 +695,7 @@ export default function Home() {
             <div className={`band pt-10 ${PAD}`}>
               <Opener label="Crypto majors" title="What you can ask about" />
             </div>
-            <div className="band cells sm:grid-cols-3">
+            <div className="band cells arrive sm:grid-cols-3">
               {[
                 ["BTC", "The deepest coverage. All five Skills have something to say, and the technical plate runs on Bitget's own 4h and 1d candles."],
                 ["ETH", "Same five sources, same ranking. Horizon and conviction are read per source, never inherited from BTC."],
@@ -692,7 +717,7 @@ export default function Home() {
             </div>
 
             {/* =================================== a worked morning ======== */}
-            <div className={`band py-12 ${PAD}`}>
+            <div className={`band arrive py-12 ${PAD}`}>
               <Opener label="Why this exists" title="Two true things that point opposite ways" />
               <div className="grid gap-x-12 gap-y-8 lg:grid-cols-[1fr_1fr]">
                 <div>
@@ -726,7 +751,7 @@ export default function Home() {
             <div className={`band pt-10 ${PAD}`}>
               <Opener label="Anatomy" title="How to read what comes back" />
             </div>
-            <div className="band cells sm:grid-cols-2 lg:grid-cols-3">
+            <div className="band cells arrive sm:grid-cols-2 lg:grid-cols-3">
               {[
                 ["The count", "How many of the five actually answered, and whether they agree. Two of five reporting is a much weaker picture than five of five, so the number is stated before anything else."],
                 ["The plate", "One figure showing every source at once. Left to right is how far ahead it is looking; up and down is whether it reads bullish or bearish. Lines join the sources that disagree."],
@@ -748,7 +773,7 @@ export default function Home() {
             </div>
 
             {/* ========================================= the glossary ====== */}
-            <div className={`band py-12 ${PAD}`}>
+            <div className={`band arrive py-12 ${PAD}`}>
               <Opener label="Plain English" title="Four words this page uses" />
               <dl className="grid gap-x-12 gap-y-7 sm:grid-cols-2">
                 {[
@@ -766,7 +791,7 @@ export default function Home() {
             </div>
 
             {/* ============================================ who for ======== */}
-            <div className={`band py-12 ${PAD}`}>
+            <div className={`band arrive py-12 ${PAD}`}>
               <div className="grid gap-x-12 gap-y-6 lg:grid-cols-[1.2fr_1fr]">
                 <div>
                   <h2 className="max-w-[24ch] font-[family-name:var(--font-display)] text-[clamp(1.5rem,3vw,2.1rem)] leading-tight tracking-[-0.015em]">
@@ -803,7 +828,7 @@ export default function Home() {
         {/* ========================================== in-flight fan-out ===
             Shown while it happens rather than hidden behind a spinner.     */}
         {busy && (
-          <div className={`band py-10 ${PAD}`}>
+          <div className={`band arrive py-10 ${PAD}`}>
             <Opener label="In flight" title="Querying five Skills" />
             <ul>
               {SOURCES.map(([name]) => (
@@ -895,7 +920,7 @@ export default function Home() {
 
             {/* --------------------------------------- disagreements ----- */}
             {brief && brief.conflicts.length > 0 && (
-              <div className={`band py-10 ${PAD}`}>
+              <div className={`band arrive py-10 ${PAD}`}>
                 <Opener label={`${brief.conflicts.length} found`} title="Disagreements, most material first" />
                 <ol>
                   {brief.conflicts.map((c, i) => (
@@ -970,7 +995,7 @@ export default function Home() {
 
             {/* ------------------------------- internal divergence ------- */}
             {brief && brief.internal_divergences.length > 0 && (
-              <div className={`band py-10 ${PAD}`}>
+              <div className={`band arrive py-10 ${PAD}`}>
                 <Opener label="Medium materiality" title="Sources disagreeing with themselves" />
                 <ul>
                   {brief.internal_divergences.map((d) => (
@@ -988,7 +1013,7 @@ export default function Home() {
 
             {/* ----------------------------------------- named gaps ------ */}
             {brief && brief.unavailable_sources.length > 0 && (
-              <div className={`band py-10 ${PAD}`}>
+              <div className={`band arrive py-10 ${PAD}`}>
                 <Opener label={`${brief.unavailable_sources.length} of ${res.total}`} title="Did not report" />
                 <p className="max-w-[64ch] text-[0.84rem] leading-relaxed text-[var(--ink-3)]">
                   A missing view changes the conflict picture, so every gap is named rather than
@@ -1006,7 +1031,7 @@ export default function Home() {
             )}
 
             {/* -------------------------------------------- appendix ----- */}
-            <div className={`band py-10 ${PAD}`}>
+            <div className={`band arrive py-10 ${PAD}`}>
               <Opener label="Provenance" title="How this was gathered" />
               <p className="max-w-[70ch] text-[0.83rem] leading-relaxed text-[var(--ink-3)]">
                 Five Skills queried in parallel. Normalisation on {res.models.extract}, conflict

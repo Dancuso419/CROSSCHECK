@@ -121,15 +121,79 @@ select {
   overflow: hidden; /* clips the watermarks to the page */
 }
 
-/* Engraved watermarks. Protocol marks drawn at plate scale and held far below the
-   text, the way a printed sheet carries ornament: present when you look for it,
-   invisible when you are reading. */
+/* Engraved watermarks. Protocol marks at plate scale, held far below the text the
+   way a printed sheet carries ornament.
+
+   They drift rather than bounce. Motion in the periphery of a page this
+   prose-heavy competes with reading, and a product whose whole claim is that it
+   does not manufacture drama should not have a screensaver behind it. Slow,
+   long-period, out of phase with each other, so the field is alive without ever
+   pulling the eye. Dial DRIFT-* below if it should be livelier. */
+
 .watermark {
   position: absolute;
   color: var(--ink);
-  opacity: 0.05;
+  opacity: 0.055;
   pointer-events: none;
   user-select: none;
+  will-change: transform;
+}
+
+/* Three paths so nothing moves in lockstep. */
+@keyframes drift-a {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(2.6vw, -1.8vh); }
+  50%  { transform: translate(1.1vw, 2.4vh); }
+  75%  { transform: translate(-2.1vw, 0.9vh); }
+  100% { transform: translate(0, 0); }
+}
+@keyframes drift-b {
+  0%   { transform: translate(0, 0); }
+  30%  { transform: translate(-2.4vw, 2.1vh); }
+  60%  { transform: translate(1.8vw, 1.2vh); }
+  100% { transform: translate(0, 0); }
+}
+@keyframes drift-c {
+  0%   { transform: translate(0, 0); }
+  40%  { transform: translate(1.9vw, 2.6vh); }
+  70%  { transform: translate(-1.4vw, -2.2vh); }
+  100% { transform: translate(0, 0); }
+}
+
+/* The mark itself turns slowly inside its drifting wrapper, so the two periods
+   never line up and the field never visibly repeats. */
+@keyframes turn {
+  from { transform: rotate(var(--r, 0deg)); }
+  to   { transform: rotate(calc(var(--r, 0deg) + 360deg)); }
+}
+
+.wm-turn {
+  animation: turn var(--turn, 260s) linear infinite;
+}
+
+/* ---- the plate draws itself in when a brief lands -------------------------
+   Same grammar as the hairlines: things on this page arrive by being drawn,
+   never by fading up. You watch the disagreements get found.               */
+
+@keyframes link-draw {
+  from { stroke-dashoffset: var(--len, 400); }
+  to   { stroke-dashoffset: 0; }
+}
+
+.plate-link {
+  stroke-dasharray: var(--len, 400);
+  animation: link-draw 900ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+@keyframes mark-in {
+  from { transform: scale(0.4); }
+  to   { transform: scale(1); }
+}
+
+.plate-mark {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: mark-in 520ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
 .band {
@@ -150,6 +214,31 @@ select {
   .cells > * + * {
     border-top: 0;
     border-left: 1px solid var(--frame);
+  }
+}
+
+/* ---- bands arrive as you reach them ---------------------------------------
+   Scroll-driven CSS rather than an IntersectionObserver, for one reason that
+   matters more than elegance: a JS-gated reveal hides the whole page if the
+   script fails to run. Behind @supports, a browser without scroll timelines
+   simply shows everything, which is the correct failure. */
+
+@supports (animation-timeline: view()) {
+  @keyframes arrive {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .arrive {
+    animation: arrive linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 34%;
   }
 }
 
@@ -188,10 +277,19 @@ select {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rule-draw {
+  .rule-draw,
+  .wm-turn,
+  .plate-link,
+  .plate-mark {
     animation: none;
+  }
+  .watermark {
+    animation: none !important;
   }
   .rule-travel {
     animation-duration: 3s;
+  }
+  .arrive {
+    animation: none;
   }
 }

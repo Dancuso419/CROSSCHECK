@@ -93,11 +93,28 @@ One set, one stroke weight, all authored SVG. No emoji, no icon font.
 
 ## Motion
 
-One authored moment: when a brief lands, hairlines draw themselves left to right
-(`scaleX`, 820ms, exponential ease-out) from an already-visible default — the type never
-fades in, only the rules arrive. In-flight Skills carry a travelling marker rather than a
-pulse: a pulse says *busy*, a traverse says *fetching*. Both respect
-`prefers-reduced-motion`.
+One grammar, used four ways: **things on this page arrive by being drawn.** Nothing fades
+up, nothing bounces, and there is no overshoot easing anywhere — every curve is
+`cubic-bezier(0.16, 1, 0.3, 1)`.
+
+- **Hairlines** draw left to right when a brief lands (`scaleX`, 820ms) from an
+  already-visible default. The type is there the whole time; only the rules arrive.
+- **The plate** draws itself: conflict links stroke on over 900ms, staggered, so you watch
+  the disagreements get found; marks scale up behind them.
+- **In-flight Skills** carry a travelling marker rather than a pulse. A pulse says *busy*;
+  a traverse says *fetching*.
+- **Landing bands** arrive on scroll via `animation-timeline: view()`, behind `@supports`.
+  Scroll-driven CSS rather than an IntersectionObserver for one reason worth more than
+  elegance: a JS-gated reveal hides the entire page if the script fails. Without scroll
+  timelines the browser simply shows everything, which is the correct failure.
+
+The watermark field **drifts rather than bounces**. Twelve marks on three drift paths, each
+turning inside its own drift on a period that never lines up with its travel, all far out of
+phase. `DRIFT_SECONDS` and `TURN_SECONDS` in `page.tsx` are the dials. Deliberately slow:
+motion in the periphery of a prose-heavy page competes with reading, and a product whose
+claim is that it does not manufacture drama should not have a screensaver behind it.
+
+Every one of these is switched off under `prefers-reduced-motion`.
 
 ## Browser surfaces
 
