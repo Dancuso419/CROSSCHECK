@@ -583,7 +583,7 @@ export default function Home() {
         {!res && !busy && (
           <>
             <div className={`band cells py-0 sm:grid-cols-[1.35fr_1fr]`}>
-              <figure className={`py-10 ${PAD}`}>
+              <figure className={`arrive-fig py-10 ${PAD}`}>
                 <SourcePlate sources={EXAMPLE_SOURCES} links={EXAMPLE_LINKS} />
                 <figcaption className="mt-4 text-[0.78rem] leading-relaxed text-[var(--ink-3)]">
                   <span className="font-[family-name:var(--font-display)] italic text-[var(--ink-2)]">
@@ -619,7 +619,7 @@ export default function Home() {
             <div className={`band pt-10 ${PAD}`}>
               <Opener label="Four steps" title="What happens when you press it" />
             </div>
-            <div className="band cells arrive sm:grid-cols-2 lg:grid-cols-4">
+            <div className="band cells arrive arrive-cells sm:grid-cols-2 lg:grid-cols-4">
               {[
                 ["Fan out", "One ticker goes to all five Skills at once. Every call, its status and its latency are printed below the brief — the gathering is shown, not hidden behind a spinner."],
                 ["Normalise", "Each Skill's raw output becomes one comparable claim: a direction, how strongly it is held, the horizon it describes, and the figures it cites. One pass per source, so a malformed answer cannot corrupt the others."],
@@ -652,7 +652,7 @@ export default function Home() {
               </p>
 
               <div className="mt-8 overflow-x-auto">
-                <table className="w-full border-collapse text-left">
+                <table className="arrive-rows w-full border-collapse text-left">
                   <thead>
                     <tr className="border-b border-[var(--frame)]">
                       <th className="py-2 pr-4"><Label>Pairing</Label></th>
@@ -695,7 +695,7 @@ export default function Home() {
             <div className={`band pt-10 ${PAD}`}>
               <Opener label="Crypto majors" title="What you can ask about" />
             </div>
-            <div className="band cells arrive sm:grid-cols-3">
+            <div className="band cells arrive arrive-cells sm:grid-cols-3">
               {[
                 ["BTC", "The deepest coverage. All five Skills have something to say, and the technical plate runs on Bitget's own 4h and 1d candles."],
                 ["ETH", "Same five sources, same ranking. Horizon and conviction are read per source, never inherited from BTC."],
@@ -717,7 +717,7 @@ export default function Home() {
             </div>
 
             {/* =================================== a worked morning ======== */}
-            <div className={`band arrive py-12 ${PAD}`}>
+            <div className={`band invert arrive py-14 ${PAD}`}>
               <Opener label="Why this exists" title="Two true things that point opposite ways" />
               <div className="grid gap-x-12 gap-y-8 lg:grid-cols-[1fr_1fr]">
                 <div>
@@ -751,7 +751,7 @@ export default function Home() {
             <div className={`band pt-10 ${PAD}`}>
               <Opener label="Anatomy" title="How to read what comes back" />
             </div>
-            <div className="band cells arrive sm:grid-cols-2 lg:grid-cols-3">
+            <div className="band cells arrive arrive-cells sm:grid-cols-2 lg:grid-cols-3">
               {[
                 ["The count", "How many of the five actually answered, and whether they agree. Two of five reporting is a much weaker picture than five of five, so the number is stated before anything else."],
                 ["The plate", "One figure showing every source at once. Left to right is how far ahead it is looking; up and down is whether it reads bullish or bearish. Lines join the sources that disagree."],
@@ -791,7 +791,7 @@ export default function Home() {
             </div>
 
             {/* ============================================ who for ======== */}
-            <div className={`band arrive py-12 ${PAD}`}>
+            <div className={`band invert arrive py-14 ${PAD}`}>
               <div className="grid gap-x-12 gap-y-6 lg:grid-cols-[1.2fr_1fr]">
                 <div>
                   <h2 className="max-w-[24ch] font-[family-name:var(--font-display)] text-[clamp(1.5rem,3vw,2.1rem)] leading-tight tracking-[-0.015em]">

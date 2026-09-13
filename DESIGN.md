@@ -46,6 +46,23 @@ should be authored as its own world, never as a flip of this one.
 Measures are held to 64–74ch. `font-variant-numeric: tabular-nums` is set on `body` so
 figures align in columns.
 
+## Segment rhythm
+
+Twelve bands of identical treatment read as monotony rather than calm, so the landing
+varies them three ways, all within the existing palette and motion grammar:
+
+- **Inverted segments.** `.invert` turns a band over to the dark field colour, redefining
+  the ink tokens rather than overriding per element, so everything inside adapts. Used on
+  the thesis band and the closing band — the two that carry argument rather than
+  information. No new colour enters the system: the dark is the field the sheet lies on.
+- **A rule laid down on arrival.** Each `.arrive` band strokes a 2px ink rule across its
+  top as it enters, on the same scroll timeline. The page's structure becomes the
+  animation.
+- **Entrances by segment type.** Cell grids deal themselves left to right (`.arrive-cells`,
+  staggered by `animation-range` rather than invented delays); the matrix builds a row at a
+  time, each row owning its own view timeline; figures scale rather than rise, because a
+  figure is an object and a paragraph is not.
+
 ## Structure
 
 - `.sheet` — the page. Full bleed, `min-h-dvh`, `overflow: hidden` so the watermarks clip
@@ -135,3 +152,8 @@ prediction patterns.
   (`cells` switches to horizontal dividers below 640px) but has not been verified.
 - The result state's plate and drop cap were built and typecheck clean but were not
   visually confirmed — the session hit a rate limit mid-inspection.
+- **The inverted bands are confirmed only by computed style, not by eye.** The browser
+  capture tool began returning frames that disagreed with the live DOM (reporting the band
+  at a different scroll offset and rendering it pale where `getComputedStyle` reported
+  `rgb(28, 27, 24)`), most likely because the capture pass resolves `animation-timeline:
+  view()` differently. Open the page in a real browser before trusting the inversion.
