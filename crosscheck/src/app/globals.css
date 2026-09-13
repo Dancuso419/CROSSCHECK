@@ -116,8 +116,20 @@ select {
    -------------------------------------------------------------------------- */
 
 .sheet {
+  position: relative;
   background: var(--sheet);
-  border: 1px solid var(--frame);
+  overflow: hidden; /* clips the watermarks to the page */
+}
+
+/* Engraved watermarks. Protocol marks drawn at plate scale and held far below the
+   text, the way a printed sheet carries ornament: present when you look for it,
+   invisible when you are reading. */
+.watermark {
+  position: absolute;
+  color: var(--ink);
+  opacity: 0.05;
+  pointer-events: none;
+  user-select: none;
 }
 
 .band {

@@ -131,3 +131,12 @@ export function agreementLevel(
 }
 
 export const KNOWN_PAIRS = Object.keys(MATRIX) as `${SkillName}|${SkillName}`[];
+
+/** The matrix as the page renders it. Exported rather than retyped in the UI so the
+ *  published table and the ranking that actually runs can never disagree. */
+export const MATERIALITY_TABLE = Object.entries(MATRIX)
+  .map(([pair, v]) => {
+    const [a, b] = pair.split("|");
+    return { a, b, ...v };
+  })
+  .sort((x, y) => ({ high: 0, medium: 1, low: 2 })[x.materiality] - ({ high: 0, medium: 1, low: 2 })[y.materiality]);

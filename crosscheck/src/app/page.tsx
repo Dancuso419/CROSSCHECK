@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Brief } from "@/lib/schema";
+import { MATERIALITY_TABLE } from "@/lib/materiality";
 
 /* ---------------------------------------------------------------- types ---- */
 
@@ -114,6 +115,75 @@ function CallMark({ status }: { status: string }) {
       <rect x={1} y={1} width={7} height={7} strokeWidth={1} stroke="currentColor" fill={status === "ok" ? "currentColor" : "none"} />
       {status === "error" && <path d="M2 2l5 5M7 2l-5 5" stroke="currentColor" strokeWidth={1} />}
     </svg>
+  );
+}
+
+/* ------------------------------------------------------- protocol marks ----
+   Drawn, not glyphs: one 1.6 stroke on a 40-unit box, so they sit in the same
+   ink as every other mark on the sheet. Used twice — at caption scale beside
+   the assets they name, and at plate scale as watermarks under the page.     */
+
+const COINS: Record<string, { name: string; d: string }> = {
+  BTC: {
+    name: "Bitcoin",
+    d: "M13 11h11c5 0 5 8 0 8H13m0 0h12c6 0 6 9 0 9H13m0-17v17M17.5 7v25M22.5 7v25",
+  },
+  ETH: {
+    name: "Ethereum",
+    d: "M20 4 30 21 20 27 10 21ZM20 30 30 23 20 36 10 23Z",
+  },
+  SOL: {
+    name: "Solana",
+    d: "M13 9h18l-4 4.5H9ZM9 17.5h18l4 4.5H13ZM13 26h18l-4 4.5H9Z",
+  },
+  BNB: {
+    name: "BNB Chain",
+    d: "M20 5 35 20 20 35 5 20ZM20 13.5 26.5 20 20 26.5 13.5 20Z",
+  },
+  USDT: {
+    name: "Tether",
+    d: "M9 9h22M20 9v23M13.5 17.5h13",
+  },
+};
+
+function CoinMark({ symbol, size = 40, strokeWidth = 1.6 }: { symbol: string; size?: number; strokeWidth?: number }) {
+  const coin = COINS[symbol];
+  if (!coin) return null;
+  return (
+    <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden className="shrink-0">
+      <path d={coin.d} fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/* Watermark field. Positions are hand-placed into the page's quiet regions
+   rather than tiled, so no mark ever lands under a measure of reading copy. */
+const WATERMARKS = [
+  { symbol: "BTC", top: "3%", left: "-3%", size: 300, rotate: -8 },
+  { symbol: "ETH", top: "26%", right: "-4%", size: 340, rotate: 10 },
+  { symbol: "SOL", top: "56%", left: "-4%", size: 280, rotate: -5 },
+  { symbol: "BNB", top: "78%", right: "-3%", size: 300, rotate: 7 },
+  { symbol: "USDT", top: "92%", left: "6%", size: 240, rotate: -11 },
+] as const;
+
+function Watermarks() {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0">
+      {WATERMARKS.map((w, i) => (
+        <div
+          key={i}
+          className="watermark"
+          style={{
+            top: w.top,
+            left: "left" in w ? w.left : undefined,
+            right: "right" in w ? w.right : undefined,
+            transform: `rotate(${w.rotate}deg)`,
+          }}
+        >
+          <CoinMark symbol={w.symbol} size={w.size} strokeWidth={0.7} />
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -330,11 +400,13 @@ export default function Home() {
   const norm = (skill: string) => res?.normalised?.find((n) => n.skill === skill);
   const activeNote = MODES.find((m) => m.id === mode)!.note;
 
-  const PAD = "px-5 sm:px-8";
+  const PAD = "px-5 sm:px-10 lg:px-16";
 
   return (
-    <main className="min-h-dvh p-3 sm:p-6 lg:p-9">
-      <div className="sheet mx-auto max-w-[80rem]">
+    <main className="min-h-dvh">
+      <div className="sheet min-h-dvh">
+        <Watermarks />
+        {/* Everything below rides above the watermark field. */}
         {/* ================================================== masthead ==== */}
         <div className={`band flex flex-wrap items-center justify-between gap-x-6 gap-y-2 py-3.5 ${PAD}`}>
           <div className="flex items-baseline gap-2.5">
@@ -506,6 +578,132 @@ export default function Home() {
                 <div className="mt-7 text-[var(--ink-3)]">
                   <ArrowDown />
                 </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* ================================== how it works =============== */}
+        {!res && !busy && (
+          <>
+            <div className={`band pt-10 ${PAD}`}>
+              <Opener label="Four steps" title="What happens when you press it" />
+            </div>
+            <div className="band cells sm:grid-cols-2 lg:grid-cols-4">
+              {[
+                ["Fan out", "One ticker goes to all five Skills at once. Every call, its status and its latency are printed below the brief — the gathering is shown, not hidden behind a spinner."],
+                ["Normalise", "Each Skill's raw output becomes one comparable claim: a direction, how strongly it is held, the horizon it describes, and the figures it cites. One pass per source, so a malformed answer cannot corrupt the others."],
+                ["Detect and rank", "Code decides which pairs actually conflict and what each conflict is worth. A model is never asked to find disagreement, which is why agreement can be reported as agreement."],
+                ["Brief", "Each disagreement is explained with both cases — what would have to be true for either side to be right — and one observable that would settle it."],
+              ].map(([title, body], i) => (
+                <div key={title} className={`py-9 ${PAD}`}>
+                  <div className="flex items-baseline gap-3">
+                    <span aria-hidden className="font-[family-name:var(--font-display)] text-[2.1rem] leading-none text-[var(--ink-3)]">
+                      {i + 1}
+                    </span>
+                    <h3 className="font-[family-name:var(--font-display)] text-[1.15rem] leading-tight">{title}</h3>
+                  </div>
+                  <p className="mt-3 max-w-[42ch] text-[0.85rem] leading-relaxed text-[var(--ink-2)]">{body}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* ============================= the materiality matrix ======== */}
+            <div className={`band py-10 ${PAD}`}>
+              <Opener label="The defensible part" title="Which disagreements are worth your attention" />
+              <p className="max-w-[74ch] text-[0.88rem] leading-relaxed text-[var(--ink-2)]">
+                Anyone can count disagreements. The judgment is knowing which ones carry
+                information. Sentiment and technicals contradict each other constantly and it means
+                almost nothing — both are derived from the same candles. Capital flow
+                contradicting macro structure means something, because the two are genuinely
+                independent. That judgment is this table, and the table is the code: the page reads
+                it from the same module the ranking runs on, so what is published here and what
+                actually ranks your brief cannot drift apart.
+              </p>
+
+              <div className="mt-8 overflow-x-auto">
+                <table className="w-full border-collapse text-left">
+                  <thead>
+                    <tr className="border-b border-[var(--frame)]">
+                      <th className="py-2 pr-4"><Label>Pairing</Label></th>
+                      <th className="py-2 pr-4"><Label>Worth</Label></th>
+                      <th className="py-2"><Label>Why</Label></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {MATERIALITY_TABLE.map((row) => (
+                      <tr key={`${row.a}|${row.b}`} className="border-b border-[var(--rule)] align-top">
+                        <td className="py-3 pr-4 font-[family-name:var(--font-data)] text-[0.76rem] leading-snug">
+                          {row.a}
+                          <span className="text-[var(--ink-3)]"> × </span>
+                          {row.b}
+                        </td>
+                        <td className="py-3 pr-4">
+                          <span className="flex items-center gap-1.5">
+                            <MaterialityMark level={row.materiality} />
+                            <Label>{row.materiality}</Label>
+                          </span>
+                        </td>
+                        <td className="max-w-[46ch] py-3 text-[0.84rem] leading-relaxed text-[var(--ink-2)]">
+                          {row.why}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <p className="mt-6 max-w-[74ch] text-[0.84rem] leading-relaxed text-[var(--ink-3)]">
+                One rule sits on top of the table. Two sources pointing opposite ways across
+                horizons two or more steps apart are usually not contradicting each other at all
+                — bearish over months and bullish intraday can both be true. Those are marked
+                as timeframe divergence and never counted as a sharp conflict.
+              </p>
+            </div>
+
+            {/* =================================== covered assets ========== */}
+            <div className={`band pt-10 ${PAD}`}>
+              <Opener label="Crypto majors" title="What you can ask about" />
+            </div>
+            <div className="band cells sm:grid-cols-3">
+              {[
+                ["BTC", "The deepest coverage. All five Skills have something to say, and the technical plate runs on Bitget's own 4h and 1d candles."],
+                ["ETH", "Same five sources, same ranking. Horizon and conviction are read per source, never inherited from BTC."],
+                ["SOL", "Covered on the same path. Anything outside the majors has thinner source coverage, and the brief will say so."],
+              ].map(([sym, body]) => (
+                <div key={sym} className={`py-10 ${PAD}`}>
+                  <div className="flex items-center gap-4">
+                    <span className="text-[var(--ink)]">
+                      <CoinMark symbol={sym} size={44} />
+                    </span>
+                    <div>
+                      <div className="font-[family-name:var(--font-display)] text-[1.5rem] leading-none">{sym}</div>
+                      <div className="mt-1"><Label>{COINS[sym].name}</Label></div>
+                    </div>
+                  </div>
+                  <p className="mt-4 max-w-[40ch] text-[0.85rem] leading-relaxed text-[var(--ink-2)]">{body}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* ================================= honest status ============= */}
+            <div className={`band py-10 ${PAD}`}>
+              <Opener label="As of today" title="What is actually working" />
+              <div className="grid gap-x-12 gap-y-5 sm:grid-cols-2">
+                <p className="max-w-[48ch] text-[0.86rem] leading-relaxed text-[var(--ink-2)]">
+                  The research MCP behind the five Skills is currently returning no data for four
+                  of them. That is an outage on the provider's side, not in this application. Live
+                  mode says so plainly and names every gap, rather than quietly showing four fifths
+                  of a picture and calling it a brief.
+                </p>
+                <p className="max-w-[48ch] text-[0.86rem] leading-relaxed text-[var(--ink-2)]">
+                  <span className="font-[family-name:var(--font-display)] italic">Recorded</span>{" "}
+                  runs the whole pipeline over a real five-source capture.{" "}
+                  <span className="font-[family-name:var(--font-display)] italic">Illustrative</span>{" "}
+                  runs it over the same constructed fixtures the test suite asserts against. Both
+                  are labelled wherever they appear, and only the upstream data is stand-in —
+                  the normalisation, the ranking and the brief run for real on top of it.
+                </p>
               </div>
             </div>
           </>

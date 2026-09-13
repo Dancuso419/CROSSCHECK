@@ -48,7 +48,8 @@ figures align in columns.
 
 ## Structure
 
-- `.sheet` — bordered bone panel, `max-w-[80rem]`, inset from the field.
+- `.sheet` — the page. Full bleed, `min-h-dvh`, `overflow: hidden` so the watermarks clip
+  to it. The charcoal field survives as the `html` backdrop behind overscroll.
 - `.band` — a full-width horizontal division. Sections are bands, not cards.
 - `.cells` — a grid whose children are separated by vertical rules on `sm`+ and horizontal
   rules when stacked. Empty space inside a cell is part of the rhythm.
@@ -67,6 +68,17 @@ carry a `--sheet` halo via `paint-order: stroke` so links never overprint them.
 
 It opens a brief. A worked example — the same numbers as the `sharp-conflict` fixture the
 Pass 2 suite asserts against — anchors the landing, labelled as constructed.
+
+## Protocol marks and the watermark field
+
+Authored SVG on a 40-unit box at a 1.6 stroke, so BTC, ETH, SOL, BNB and USDT sit in the
+same ink as every other mark. Drawn rather than glyphs or a logo file: a coloured brand
+asset would be the only saturated thing on the sheet and would read as sponsorship.
+
+They appear twice. At caption scale beside the assets they name in *What you can ask
+about*. And at plate scale as watermarks — `opacity: 0.05`, hand-placed into the page's
+quiet regions rather than tiled, clipped by the sheet — the way a printed page carries
+ornament: there when you look for it, invisible when you are reading.
 
 ## Drawn marks
 
