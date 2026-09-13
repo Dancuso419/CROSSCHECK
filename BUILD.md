@@ -118,7 +118,8 @@ Two things that must stay true:
 Only the upstream data is recorded — normalisation, conflict detection, ranking and the
 brief all run for real on top of it. Demo mode takes ~17s cold (no dead-Skill timeouts).
 
-Re-capture with `python spike/capture.py`.
+Re-capture with `python spike/capture.py [TICKER ...]` (defaults to BTC ETH SOL). It merges
+by ticker, so re-running one never discards the others.
 
 ### Illustrative scenarios
 

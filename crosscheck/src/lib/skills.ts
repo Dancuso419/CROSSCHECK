@@ -37,10 +37,12 @@ export const SKILLS: SkillDef[] = [
       "Fed policy, rates, and cross-asset correlation (BTC vs DXY / Nasdaq / Gold). The slow-moving structural view; usually the contrarian voice when price has run, because macro rarely moves as fast as sentiment.",
     timeframe: "months",
     independence: "high",
-    calls: () => [
+    // Rates and macro releases are genuinely market-wide: they describe the weather
+    // every asset trades in, so they take no ticker. The correlation does take one.
+    calls: (t) => [
       { tool: "rates_yields", args: { action: "rates_snapshot" } },
       { tool: "macro_indicators", args: { action: "multi_indicator" } },
-      { tool: "cross_asset", args: { action: "correlation", base: "btc", targets: "gold,dxy,ndx,spx", period: "90d" } },
+      { tool: "cross_asset", args: { action: "correlation", base: t.toLowerCase(), targets: "gold,dxy,ndx,spx", period: "90d" } },
     ],
   },
   {
@@ -49,10 +51,17 @@ export const SKILLS: SkillDef[] = [
       "ETF flows, whale activity, exchange reserves, DeFi TVL and institutional positioning. The most independent of the five: flows are actual capital movement, not opinion or a derivative of price. When this conflicts with anything, the conflict is informative.",
     timeframe: "weeks",
     independence: "high",
-    calls: () => [
+    // Market cap and stablecoin supply are structural and market-wide. Network health
+    // is not: asking for BTC mempool while the user typed ETH reports the wrong chain's
+    // congestion as if it were evidence about theirs.
+    calls: (t) => [
       { tool: "crypto_market", args: { action: "global" } },
       { tool: "defi_analytics", args: { action: "stablecoins", limit: 5 } },
-      { tool: "network_status", args: { action: "btc_mempool" } },
+      ...(t === "ETH"
+        ? [{ tool: "network_status", args: { action: "eth_gas" } }]
+        : t === "BTC"
+          ? [{ tool: "network_status", args: { action: "btc_mempool" } }]
+          : []),
     ],
   },
   {

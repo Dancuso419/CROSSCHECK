@@ -209,6 +209,14 @@ select {
   display: grid;
 }
 
+/* Grid items default to min-width:auto, so a cell refuses to shrink below its
+   widest child. That let the plate push a cell to 576px inside a 375px phone,
+   where the sheet's overflow:hidden clipped it instead of the figure scrolling.
+   Allowing cells to shrink is what makes an inner overflow-x-auto work at all. */
+.cells > * {
+  min-width: 0;
+}
+
 /* Vertical rules between cells, none on the outer edges. Stacked on small
    screens, so the divider becomes horizontal rather than disappearing. */
 .cells > * + * {

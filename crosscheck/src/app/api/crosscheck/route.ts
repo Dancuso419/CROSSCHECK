@@ -12,7 +12,7 @@
  */
 import { NextResponse } from "next/server";
 import { fanout } from "@/lib/fanout";
-import { hasSnapshot, snapshotFanout, snapshotMeta } from "@/lib/snapshot";
+import { hasSnapshot, snapshotFanout, snapshotMeta, SNAPSHOT_TICKERS } from "@/lib/snapshot";
 import { getScenario, scenarioFanout, scenarioIndex } from "@/lib/scenarios";
 import { normaliseAllCached } from "@/lib/normalise";
 import { buildBriefCached } from "@/lib/conflicts";
@@ -52,7 +52,7 @@ export async function POST(req: Request) {
 
   if (mode === "demo" && !hasSnapshot(ticker)) {
     return NextResponse.json(
-      { error: `No recorded snapshot for ${ticker}. Demo mode has ${snapshotMeta.ticker} only — switch to live.` },
+      { error: `No recorded snapshot for ${ticker}. Recorded covers ${SNAPSHOT_TICKERS.join(", ")} — switch to Live to query anything else.` },
       { status: 400 },
     );
   }
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
   const t0 = Date.now();
   // Demo mode replaces ONLY the upstream data. Normalisation, conflict detection, ranking
   // and the brief all run for real on top of the recording.
-  const fan = scenario ? scenarioFanout(scenario) : mode === "demo" ? snapshotFanout() : await fanout(ticker);
+  const fan = scenario ? scenarioFanout(scenario) : mode === "demo" ? snapshotFanout(ticker) : await fanout(ticker);
   const tFanout = Date.now() - t0;
   if (scenario) ticker = fan.ticker;
 
@@ -96,7 +96,8 @@ export async function POST(req: Request) {
     analyseError,
     mode,
     // Always sent so the UI cannot render a recording or a construction without saying so.
-    snapshot: mode === "demo" ? snapshotMeta : null,
+    snapshot: mode === "demo" ? snapshotMeta(ticker) : null,
+    snapshotTickers: SNAPSHOT_TICKERS,
     scenario: scenario ? { id: scenario.id, title: scenario.title, teaches: scenario.teaches } : null,
     scenarios: scenarioIndex,
     models: { extract: MODEL_EXTRACT, reason: MODEL_REASON },

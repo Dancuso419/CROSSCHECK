@@ -22,7 +22,12 @@ type Result = {
   mode: "live" | "demo" | "scenario";
   snapshot: { capturedAt: string; note: string; ticker: string } | null;
   scenario: { id: string; title: string; teaches: string } | null;
+  snapshotTickers?: string[];
 };
+
+/* Which tickers have a recording. Mirrors snapshot.json; the route sends the
+   authoritative list back with every response. */
+const RECORDED = ["BTC", "ETH", "SOL"];
 
 const SOURCES = [
   ["macro-analyst", "The economy", "Interest rates, inflation, the strength of the dollar. Slow to move, and it sets the weather everything else trades in."],
@@ -41,7 +46,7 @@ const SCENARIOS = [
 
 const MODES = [
   { id: "live", label: "Live", note: "Queries the Skills now. Four of five are returning no data." },
-  { id: "demo", label: "Recorded", note: "Real market data, captured 12 September. Not live." },
+  { id: "demo", label: "Recorded", note: "Real market data, captured and held. Not live." },
   { id: "scenario", label: "Illustrative", note: "Constructed inputs — the fixtures the tests assert against." },
 ] as const;
 
@@ -399,6 +404,13 @@ export default function Home() {
   const [res, setRes] = useState<Result | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
+  function chooseMode(m: "live" | "demo" | "scenario") {
+    setMode(m);
+    // Recorded only has captures for some tickers, so entering it with an
+    // uncovered ticker would fail on submit. Snap to a covered one instead.
+    if (m === "demo" && !RECORDED.includes(ticker)) setTicker(RECORDED[0]);
+  }
+
   async function run(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
@@ -434,14 +446,18 @@ export default function Home() {
         {/* Everything below rides above the watermark field. */}
         {/* ================================================== masthead ==== */}
         <div className={`band flex flex-wrap items-center justify-between gap-x-6 gap-y-2 py-3.5 ${PAD}`}>
-          <div className="flex items-baseline gap-2.5">
+          <a
+            href="/"
+            aria-label="Crosscheck home"
+            className="flex items-baseline gap-2.5 no-underline transition-opacity hover:opacity-70"
+          >
             <svg width="15" height="15" viewBox="0 0 15 15" aria-hidden>
               <path d="M1 4h13M1 11h13M4.5 1v13M10.5 1v13" stroke="currentColor" strokeWidth={1.2} fill="none" />
             </svg>
             <span className="font-[family-name:var(--font-data)] text-[0.9rem] font-medium tracking-[0.02em]">
               Crosscheck
             </span>
-          </div>
+          </a>
           <Label>
             {res ? `No. ${res.ticker} · ` : ""}
             {new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
@@ -508,12 +524,34 @@ export default function Home() {
                 /* A control that cannot change the outcome should not look editable. */
                 <div className="flex flex-col items-center gap-1.5">
                   <Label>{mode === "demo" ? "Recorded ticker" : "Not tied to a ticker"}</Label>
-                  <span className="font-[family-name:var(--font-display)] text-[1.5rem] font-medium leading-none text-[var(--ink-2)]">
-                    {mode === "demo" ? "BTC" : "Constructed example"}
-                  </span>
+                  {mode === "demo" ? (
+                    <div className="flex items-baseline gap-3">
+                      {RECORDED.map((t, i) => (
+                        <span key={t} className="flex items-baseline gap-3">
+                          {i > 0 && <span aria-hidden className="h-3 w-px self-center bg-[var(--rule)]" />}
+                          <button
+                            type="button"
+                            onClick={() => setTicker(t)}
+                            aria-pressed={ticker === t}
+                            className={`font-[family-name:var(--font-display)] text-[1.35rem] font-medium leading-none transition-colors ${
+                              ticker === t
+                                ? "text-[var(--ink)] underline decoration-[1.5px] underline-offset-[6px]"
+                                : "text-[var(--ink-3)] hover:text-[var(--ink-2)]"
+                            }`}
+                          >
+                            {t}
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="font-[family-name:var(--font-display)] text-[1.5rem] font-medium leading-none text-[var(--ink-2)]">
+                      Constructed example
+                    </span>
+                  )}
                   <span className="max-w-[34ch] text-center text-[0.72rem] leading-snug text-[var(--ink-3)]">
                     {mode === "demo"
-                      ? "One five-source capture exists, and it is of BTC. Switch to Live to query another ticker."
+                      ? "Three five-source captures exist. Switch to Live to query any other ticker."
                       : "These cases are built to exercise the ranking, so no real ticker is involved. Switch to Live to query one."}
                   </span>
                 </div>
@@ -525,7 +563,7 @@ export default function Home() {
                     {i > 0 && <span aria-hidden className="h-3 w-px bg-[var(--rule)]" />}
                     <button
                       type="button"
-                      onClick={() => setMode(m.id)}
+                      onClick={() => chooseMode(m.id)}
                       aria-pressed={mode === m.id}
                       className={`text-[0.82rem] transition-colors ${
                         mode === m.id

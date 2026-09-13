@@ -16,8 +16,9 @@ This is NOT a data path in the product. It runs offline, by hand, and writes a J
 `crosscheck/` never calls these providers. The demo badge states exactly what this is and
 when it ran, so the snapshot is never presented as live.
 
-Usage:  python spike/capture.py
-Writes: crosscheck/src/data/snapshot.json
+Usage:  python spike/capture.py [TICKER ...]     (default: BTC ETH SOL)
+Writes: crosscheck/src/data/snapshot.json, keyed by ticker. Re-running one ticker
+        updates only that entry, so a good capture is never lost to a bad one.
 """
 import json, os, sys, time, urllib.request, xml.etree.ElementTree as ET
 
@@ -76,7 +77,7 @@ def macro():
 
 
 # ---------------------------------------------------------------- market-intel
-def market_intel():
+def market_intel(ticker="BTC"):
     raw, calls = {}, []
 
     def global_data():
@@ -113,6 +114,22 @@ def market_intel():
     if val:
         raw["defi_tvl_by_chain"] = val
 
+    # Network health is chain-specific: BTC mempool says nothing about Ethereum.
+    if ticker in ("BTC", "ETH"):
+        def net():
+            if ticker == "BTC":
+                d = get_json("https://mempool.space/api/v1/fees/recommended")
+                return {"chain": "bitcoin", "recommended_fees_sat_vb": d}
+            d = get_json("https://api.blocknative.com/gasprices/blockprices")
+            b = d["blockPrices"][0]
+            return {"chain": "ethereum", "base_fee_gwei": b.get("baseFeePerGas"),
+                    "estimates": [{"confidence": e["confidence"], "price_gwei": e["price"]} for e in b["estimatedPrices"][:3]]}
+        val, ms, err = timed(net)
+        calls.append(trace("network_status", "btc_fees" if ticker == "BTC" else "eth_gas",
+                           "ok" if val else "dead", ms, err))
+        if val:
+            raw["network_health"] = val
+
     return raw, calls
 
 
@@ -124,8 +141,9 @@ FEEDS = {
 }
 
 
-def news():
+def news(ticker="BTC"):
     raw, calls, items = {}, [], []
+    names = {"BTC": ("bitcoin", "btc"), "ETH": ("ethereum", "eth"), "SOL": ("solana", "sol")}.get(ticker, (ticker.lower(),))
     for name, url in FEEDS.items():
         def f(url=url):
             root = ET.fromstring(get(url, timeout=25))
@@ -133,7 +151,7 @@ def news():
             for it in root.iter("item"):
                 title = (it.findtext("title") or "").strip()
                 date = (it.findtext("pubDate") or "").strip()
-                if title:
+                if title and any(nm in title.lower() for nm in names):
                     out.append({"feed": name, "title": title, "published": date})
                 if len(out) >= 6:
                     break
@@ -170,14 +188,14 @@ def sentiment():
 
 
 # ---------------------------------------------------------------- technical-analysis
-def technical():
+def technical(ticker="BTC"):
     """Straight from the Bitget MCP — this Skill's data path still works."""
     calls = []
     c = Client(timeout=30)
     out = {}
     for tf in ("4h", "1d"):
         t0 = time.time()
-        payload, dt = c.call("crypto_derivatives", {"action": "klines", "symbol": "BTC/USDT",
+        payload, dt = c.call("crypto_derivatives", {"action": "klines", "symbol": f"{ticker}/USDT",
                                                     "timeframe": tf, "limit": 200, "exchange": "bitget"})
         ms = int((time.time() - t0) * 1000)
         ok = isinstance(payload, list) and len(payload) > 100
@@ -189,40 +207,59 @@ def technical():
 
 
 def main():
-    sources = []
-    for skill, fn, tf_note in [
-        ("macro-analyst", macro, None),
-        ("market-intel", market_intel, None),
-        ("news-briefing", news, None),
-        ("sentiment-analyst", sentiment, None),
-        ("technical-analysis", technical, "klines"),
-    ]:
-        print(f"capturing {skill} ...", flush=True)
-        raw, calls = fn()
-        if raw:
-            sources.append({"skill": skill, "status": "ok", "raw": raw, "calls": calls})
-        else:
-            reasons = "; ".join(sorted({c.get("detail", "") for c in calls if c.get("detail")}))
-            sources.append({"skill": skill, "status": "unavailable",
-                            "reason": reasons or "no data returned", "calls": calls})
-        print(f"  -> {sources[-1]['status']} ({len(calls)} calls)")
+    tickers = [t.upper() for t in sys.argv[1:]] or ["BTC", "ETH", "SOL"]
+
+    # Merge rather than overwrite: re-running one ticker must not discard the others.
+    existing = {}
+    if os.path.exists(OUT):
+        try:
+            prev = json.load(open(OUT, encoding="utf-8"))
+            existing = prev.get("tickers", {})
+        except Exception:
+            pass
+
+    for ticker in tickers:
+        print(f"\n=== {ticker} ===")
+        sources = []
+        for skill, fn in [
+            ("macro-analyst", lambda t=ticker: macro()),
+            ("market-intel", lambda t=ticker: market_intel(t)),
+            ("news-briefing", lambda t=ticker: news(t)),
+            ("sentiment-analyst", lambda t=ticker: sentiment()),
+            ("technical-analysis", lambda t=ticker: technical(t)),
+        ]:
+            print(f"capturing {skill} ...", flush=True)
+            raw, calls = fn()
+            if raw:
+                sources.append({"skill": skill, "status": "ok", "raw": raw, "calls": calls})
+            else:
+                reasons = "; ".join(sorted({c.get("detail", "") for c in calls if c.get("detail")}))
+                sources.append({"skill": skill, "status": "unavailable",
+                                "reason": reasons or "no data returned", "calls": calls})
+            print(f"  -> {sources[-1]['status']} ({len(calls)} calls)")
+
+        live = sum(1 for x in sources if x["status"] == "ok")
+        existing[ticker] = {
+            "capturedAt": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+            "reporting": live,
+            "sources": sources,
+        }
+        print(f"  {ticker}: {live}/5 captured")
 
     snapshot = {
-        "capturedAt": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-        "ticker": "BTC",
         "note": (
-            "Recorded snapshot. The bitget-signal MCP's upstream data fetching was down, so the four "
-            "affected Skills' data was captured directly from the same public providers the MCP is built "
-            "on. technical-analysis came from the Bitget MCP itself, whose exchange data path still works. "
-            "This is a recording, not live data, and the product never calls these providers itself."
+            "Recorded snapshot. The bitget-signal MCP's upstream data fetching was down, so the "
+            "affected Skills' data was captured directly from the same public providers the MCP is "
+            "built on. technical-analysis came from the Bitget MCP itself, whose exchange data path "
+            "still works. This is a recording, not live data, and the product never calls these "
+            "providers itself."
         ),
-        "sources": sources,
+        "tickers": existing,
     }
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump(snapshot, f, indent=1)
-    live = sum(1 for s in sources if s["status"] == "ok")
-    print(f"\nwrote {os.path.normpath(OUT)}  —  {live}/5 sources captured")
+    print(f"\nwrote {os.path.normpath(OUT)} — tickers: {', '.join(sorted(existing))}")
 
 
 if __name__ == "__main__":

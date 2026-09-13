@@ -1,22 +1,22 @@
 /**
- * Demo mode: a recorded five-source snapshot.
+ * Demo mode: recorded five-source snapshots.
  *
  * The bitget-signal MCP's upstream fetching has been down since before this project
  * started, so no live moment has ever had all five Skills reporting. The AI Trading Desk
  * track requires one complete research task demonstrated end to end, which one source
- * cannot show. `spike/capture.py` recorded real, current data from the same public
- * providers the MCP is built on; technical-analysis came from the Bitget MCP itself,
+ * cannot show. `spike/capture.py` records real, current data from the same public
+ * providers the MCP is built on; technical-analysis comes from the Bitget MCP itself,
  * whose exchange data path still works.
  *
  * Two rules this file exists to keep:
  *   1. The product never fetches from those providers. This reads a committed JSON file.
  *   2. A snapshot is never presented as live. Every response carries `capturedAt` and the
- *      note below, and the UI badges it permanently.
+ *      capture note, and the UI badges it permanently.
  *
  * Only the upstream data is recorded — normalisation, conflict detection, ranking and the
  * brief all run for real on top of it.
  */
-import raw from "@/data/snapshot.json";
+import data from "@/data/snapshot.json";
 import { computeIndicators, type Candle } from "./indicators";
 import { SKILLS, type SkillName } from "./skills";
 import type { CallTrace, FanoutResult, SourceResult } from "./fanout";
@@ -28,17 +28,27 @@ type SnapshotSource = {
   reason?: string;
   calls: CallTrace[];
 };
-type Snapshot = { capturedAt: string; ticker: string; note: string; sources: SnapshotSource[] };
+type TickerSnapshot = { capturedAt: string; reporting: number; sources: SnapshotSource[] };
+type SnapshotFile = { note: string; tickers: Record<string, TickerSnapshot> };
 
-const snapshot = raw as unknown as Snapshot;
+const file = data as unknown as SnapshotFile;
 
-export const snapshotMeta = { capturedAt: snapshot.capturedAt, note: snapshot.note, ticker: snapshot.ticker };
+/** Which tickers have a recording. Drives the picker, so the UI can only ever offer
+ *  what actually exists rather than failing after the user commits to a choice. */
+export const SNAPSHOT_TICKERS = Object.keys(file.tickers).sort();
 
-/** Only the recorded ticker has a snapshot; anything else must stay on the live path. */
-export const hasSnapshot = (ticker: string) => ticker.toUpperCase() === snapshot.ticker.toUpperCase();
+export const hasSnapshot = (ticker: string) => ticker.toUpperCase() in file.tickers;
 
-export function snapshotFanout(): FanoutResult {
-  const sources: SourceResult[] = snapshot.sources.map((s) => {
+export function snapshotMeta(ticker: string) {
+  const t = file.tickers[ticker.toUpperCase()];
+  return { capturedAt: t?.capturedAt ?? "", note: file.note, ticker: ticker.toUpperCase() };
+}
+
+export function snapshotFanout(ticker: string): FanoutResult {
+  const key = ticker.toUpperCase();
+  const snap = file.tickers[key];
+
+  const sources: SourceResult[] = snap.sources.map((s) => {
     const def = SKILLS.find((d) => d.name === s.skill)!;
     const base = { skill: s.skill as SkillName, measures: def.measures, timeframe: def.timeframe, calls: s.calls };
 
@@ -58,8 +68,8 @@ export function snapshotFanout(): FanoutResult {
   });
 
   return {
-    ticker: snapshot.ticker,
-    fetchedAt: snapshot.capturedAt,
+    ticker: key,
+    fetchedAt: snap.capturedAt,
     cached: false,
     sources,
     reporting: sources.filter((s) => s.status === "ok").length,
