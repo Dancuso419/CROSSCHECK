@@ -3,7 +3,7 @@
  *
  * `measures` is the one-line description fed to the Pass-1 normalisation prompt
  * (05-prompts.md: WHAT THIS SOURCE MEASURES). Wording is from 03-skill-integration.md,
- * including each source's known bias , the crowd lags price, flows lead it , because that
+ * including each source's known bias (the crowd lags price, flows lead it), because that
  * framing is what makes the conflict ranking defensible rather than arbitrary.
  *
  * Tool lists were derived by grepping each installed SKILL.md, not guessed.
@@ -24,9 +24,22 @@ export type SkillDef = {
    *  the same candles as TA, so their agreement is near-worthless as confirmation. */
   independence: "high" | "medium" | "low";
   calls: (ticker: string) => McpCall[];
+  /** Set when this Skill has no data path for a US stock. Reported as unavailable with
+   *  this reason, rather than filling the slot with crypto-wide data that says nothing
+   *  about the stock. */
+  noEquityPath?: string;
 };
 
-/** BTC -> the shapes each upstream wants. Crypto only; see PROGRESS.md on equities. */
+/** US stocks Bitget lists as tokenized contracts. Verified live on 2026-09-14: Bitget
+ *  klines answer for these through the MCP in under a second. ponytail: a fixed list,
+ *  swap for a Bitget markets lookup if the demo ever needs the long tail. */
+export const EQUITIES = new Set([
+  "AAPL", "MSFT", "NVDA", "TSLA", "AMZN", "GOOGL", "META", "NFLX", "AMD",
+  "COIN", "MSTR", "HOOD", "PLTR", "SPY", "QQQ",
+]);
+export const isEquity = (t: string) => EQUITIES.has(t.toUpperCase());
+
+/** BTC or AAPL -> the shapes each upstream wants. */
 const pair = (t: string) => `${t.toUpperCase()}/USDT`;
 const futures = (t: string) => `${t.toUpperCase()}USDT`;
 
@@ -34,7 +47,7 @@ export const SKILLS: SkillDef[] = [
   {
     name: "macro-analyst",
     measures:
-      "Fed policy, rates, and cross-asset correlation (BTC vs DXY / Nasdaq / Gold). The slow-moving structural view, usually the contrarian voice when price has run, because macro rarely moves as fast as sentiment.",
+      "Fed policy, rates, and cross-asset correlation (the asset against the dollar, the Nasdaq, gold and Treasury yields). The slow-moving structural view, usually the contrarian voice when price has run, because macro rarely moves as fast as sentiment.",
     timeframe: "months",
     independence: "high",
     // Rates and macro releases are genuinely market-wide: they describe the weather
@@ -42,7 +55,10 @@ export const SKILLS: SkillDef[] = [
     calls: (t) => [
       { tool: "rates_yields", args: { action: "rates_snapshot" } },
       { tool: "macro_indicators", args: { action: "multi_indicator" } },
-      { tool: "cross_asset", args: { action: "correlation", base: t.toLowerCase(), targets: "gold,dxy,ndx,spx", period: "90d" } },
+      // cross_asset takes a crypto key (btc) or a Yahoo symbol (AAPL).
+      isEquity(t)
+        ? { tool: "cross_asset", args: { action: "correlation", base: t.toUpperCase(), targets: "spx,ndx,dxy,t10y", period: "90d" } }
+        : { tool: "cross_asset", args: { action: "correlation", base: t.toLowerCase(), targets: "gold,dxy,ndx,spx", period: "90d" } },
     ],
   },
   {
@@ -51,6 +67,8 @@ export const SKILLS: SkillDef[] = [
       "ETF flows, whale activity, exchange reserves, DeFi TVL and institutional positioning. The most independent of the five, because flows are actual capital movement rather than opinion or a derivative of price. When this conflicts with anything, the conflict is informative.",
     timeframe: "weeks",
     independence: "high",
+    noEquityPath:
+      "no US stock data path: this Skill reads on-chain flows, stablecoins and crypto market structure, none of which describe a stock",
     // Market cap and stablecoin supply are structural and market-wide. Network health
     // is not: asking for BTC mempool while the user typed ETH reports the wrong chain's
     // congestion as if it were evidence about theirs.
@@ -71,7 +89,9 @@ export const SKILLS: SkillDef[] = [
     timeframe: "days",
     independence: "medium",
     calls: (t) => [
-      { tool: "news_feed", args: { action: "latest", feeds: "cointelegraph,coindesk,decrypt,blockworks", keyword: t, limit: 5 } },
+      isEquity(t)
+        ? { tool: "tradfi_news", args: { action: "news", symbol: t, limit: 5 } }
+        : { tool: "news_feed", args: { action: "latest", feeds: "cointelegraph,coindesk,decrypt,blockworks", keyword: t, limit: 5 } },
     ],
   },
   {
@@ -80,8 +100,9 @@ export const SKILLS: SkillDef[] = [
       "Fear & Greed index, long/short ratio, open interest and funding. The crowd. Frequently a lagging derivative of price, so treat with suspicion, since its agreement with technical-analysis is near-worthless as confirmation since both are downstream of the same candles.",
     timeframe: "days",
     independence: "low",
+    // The Fear & Greed index here is the crypto one, so a stock skips it.
     calls: (t) => [
-      { tool: "sentiment_index", args: { action: "current" } },
+      ...(isEquity(t) ? [] : [{ tool: "sentiment_index", args: { action: "current" } }]),
       { tool: "derivatives_sentiment", args: { action: "long_short", symbol: futures(t), period: "4h" } },
       { tool: "derivatives_sentiment", args: { action: "open_interest", symbol: futures(t), period: "4h" } },
     ],
@@ -92,7 +113,7 @@ export const SKILLS: SkillDef[] = [
       "Price-action indicators across trend, momentum and volatility, on two timeframes. The most structured of the five. An indicator set at war with itself is meaningful in its own right, so internal divergence is reported rather than averaged away.",
     timeframe: "intraday",
     independence: "low",
-    // This Skill calls no MCP tool of its own , it is local Python + api.bitget.com.
+    // This Skill calls no MCP tool of its own: it is local Python over api.bitget.com.
     // We take Bitget klines from the MCP and run indicators.ts over them instead.
     calls: (t) => [
       { tool: "crypto_derivatives", args: { action: "klines", symbol: pair(t), timeframe: "4h", limit: 200, exchange: "bitget" } },

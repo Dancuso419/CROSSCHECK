@@ -16,7 +16,7 @@ This is NOT a data path in the product. It runs offline, by hand, and writes a J
 `crosscheck/` never calls these providers. The demo badge states exactly what this is and
 when it ran, so the snapshot is never presented as live.
 
-Usage:  python spike/capture.py [TICKER ...]     (default: BTC ETH SOL)
+Usage:  python spike/capture.py [TICKER ...]     (default: AAPL NVDA TSLA BTC ETH SOL)
 Writes: crosscheck/src/data/snapshot.json, keyed by ticker. Re-running one ticker
         updates only that entry, so a good capture is never lost to a bad one.
 """
@@ -27,6 +27,13 @@ from mcp import Client
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "crosscheck", "src", "data", "snapshot.json")
 UA = {"User-Agent": "crosscheck-capture/0 (hackathon demo snapshot)"}
+
+
+# Mirrors EQUITIES in crosscheck/src/lib/skills.ts.
+EQUITIES = {"AAPL", "MSFT", "NVDA", "TSLA", "AMZN", "GOOGL", "META", "NFLX", "AMD",
+            "COIN", "MSTR", "HOOD", "PLTR", "SPY", "QQQ"}
+NO_EQUITY_PATH = ("no US stock data path: this Skill reads on-chain flows, stablecoins and "
+                  "crypto market structure, none of which describe a stock")
 
 
 def get(url, timeout=20):
@@ -143,6 +150,18 @@ FEEDS = {
 
 def news(ticker="BTC"):
     raw, calls, items = {}, [], []
+    if ticker in EQUITIES:
+        # Per-ticker headline feed, standing in for tradfi_news, which is what the live
+        # path calls for a stock.
+        def f():
+            root = ET.fromstring(get(f"https://feeds.finance.yahoo.com/rss/2.0/headline?s={ticker}&region=US&lang=en-US", timeout=25))
+            return [{"feed": "yahoo_finance", "title": (it.findtext("title") or "").strip().replace(" — ", ": ").replace("—", ", "),
+                     "published": (it.findtext("pubDate") or "").strip()} for it in root.iter("item")][:8]
+        val, ms, err = timed(f)
+        calls.append(trace("tradfi_news", "news", "ok" if val else "dead", ms, err))
+        if val:
+            raw["headlines"] = val
+        return raw, calls
     names = {"BTC": ("bitcoin", "btc"), "ETH": ("ethereum", "eth"), "SOL": ("solana", "sol")}.get(ticker, (ticker.lower(),))
     for name, url in FEEDS.items():
         def f(url=url):
@@ -167,8 +186,22 @@ def news(ticker="BTC"):
 
 
 # ---------------------------------------------------------------- sentiment-analyst
-def sentiment():
+def sentiment(ticker="BTC"):
     raw, calls = {}, []
+    if ticker in EQUITIES:
+        # The Fear & Greed index is crypto's. The stock market's own fear gauge is the VIX.
+        def vix():
+            d = get_json("https://query1.finance.yahoo.com/v8/finance/chart/%5EVIX?range=1mo&interval=1d")
+            closes = [c for c in d["chart"]["result"][0]["indicators"]["quote"][0]["close"] if c is not None]
+            return {"vix_last": round(closes[-1], 2), "vix_month_ago": round(closes[0], 2),
+                    "vix_1mo_high": round(max(closes), 2), "vix_1mo_low": round(min(closes), 2)}
+        val, ms, err = timed(vix)
+        calls.append(trace("global_assets", "price", "ok" if val else "dead", ms, err))
+        if val:
+            raw["vix"] = val
+        calls.append(trace("derivatives_sentiment", "long_short", "dead", 0,
+                           "positioning data for the tokenized contract unreachable from the capture host"))
+        return raw, calls
 
     def fng():
         d = get_json("https://api.alternative.me/fng/?limit=8")["data"]
@@ -207,7 +240,7 @@ def technical(ticker="BTC"):
 
 
 def main():
-    tickers = [t.upper() for t in sys.argv[1:]] or ["BTC", "ETH", "SOL"]
+    tickers = [t.upper() for t in sys.argv[1:]] or ["AAPL", "NVDA", "TSLA", "BTC", "ETH", "SOL"]
 
     # Merge rather than overwrite: re-running one ticker must not discard the others.
     existing = {}
@@ -223,9 +256,10 @@ def main():
         sources = []
         for skill, fn in [
             ("macro-analyst", lambda t=ticker: macro()),
-            ("market-intel", lambda t=ticker: market_intel(t)),
+            ("market-intel", lambda t=ticker: ({}, [trace("crypto_market", "global", "dead", 0, NO_EQUITY_PATH)])
+                             if t in EQUITIES else market_intel(t)),
             ("news-briefing", lambda t=ticker: news(t)),
-            ("sentiment-analyst", lambda t=ticker: sentiment()),
+            ("sentiment-analyst", lambda t=ticker: sentiment(t)),
             ("technical-analysis", lambda t=ticker: technical(t)),
         ]:
             print(f"capturing {skill} ...", flush=True)
@@ -259,7 +293,7 @@ def main():
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump(snapshot, f, indent=1)
-    print(f"\nwrote {os.path.normpath(OUT)} — tickers: {', '.join(sorted(existing))}")
+    print(f"\nwrote {os.path.normpath(OUT)}: tickers: {', '.join(sorted(existing))}")
 
 
 if __name__ == "__main__":

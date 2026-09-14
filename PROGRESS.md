@@ -120,12 +120,22 @@ Live TA divergence across timeframes, which is real product material even with o
   `"above_upper"` at `pct_b` 0.35; MACD signal line wrong (+21.95 vs true −477.57), so it
   reported `"death_cross"` on a bar that had crossed **up**. It also emits
   `"verdict": "STRONG BEARISH"`, which our no-verdict rule forbids anyway.
-- **Equities are not supported — the spec's AAPL headline must change.** All five Skills are
-  crypto-only; `macro-analyst` is framed as "is macro a tailwind for **BTC**?" `market-intel`
-  and `sentiment-analyst` have no equity path even in principle (on-chain flows, DeFi TVL,
-  crypto Fear & Greed, crypto futures). Only `macro-analyst` and `news-briefing` could touch
-  a stock and both are dead. The spec's own example applies crypto concepts to AAPL
-  ("ETF flow direction Thursday", "net inflows").
+- **US stocks: corrected 2026-09-14.** The day-1 note here said equities were unsupported
+  and the AAPL demo should become a crypto major. That was wrong, and it mattered: the
+  hackathon states it "focuses on AI x US stock trading (including tokenized US stocks)".
+  The mistake was checking only whether the five Skills had a stock path, never whether
+  Bitget itself lists stocks. It does: `crypto_derivatives klines exchange=bitget` returns
+  real candles for AAPL, NVDA, TSLA, COIN, SPY and QQQ in under a second, through the same
+  path that already works for BTC. Now:
+  - `skills.ts` has an `EQUITIES` list. For a stock, technical-analysis runs on Bitget's
+    tokenized-contract candles, macro correlates the stock against SPX/NDX/DXY/10y, news
+    uses `tradfi_news`, sentiment skips the crypto Fear & Greed index, and market-intel
+    is reported unavailable with a stated reason (on-chain flows do not describe a stock)
+    rather than filled with crypto-wide data.
+  - Live AAPL verified end to end: 1 of 5 reporting (same outage), brief built, 25s.
+  - Recorded snapshots added for AAPL, NVDA, TSLA (4 of 5 each). NVDA carries a real
+    cross-source conflict: upbeat headlines against weak 4h price action.
+  - The landing now leads with US stocks; crypto stays supported.
 - Local network: exchange domains and `mempool.space` are blocked from this machine;
   **everything else is reachable** (CoinGecko, alternative.me, Yahoo, FRED, cointelegraph,
   api.llama.fi). The local box and the remote MCP are near-exact inverses.
@@ -254,4 +264,4 @@ revives — the prose-heavy sources are where `direction` is most likely to wobb
    explains conflicts it is handed rather than deciding which matter.
 3. The four test cases from 05-prompts.md as fixtures in `spike/cases/` — case 2
    (strong agreement, must not invent conflict) matters most; a judge will probe it.
-4. Change the spec's AAPL demo case to a crypto major.
+4. ~~Change the spec's AAPL demo case to a crypto major.~~ Reversed 2026-09-14: the hackathon is US-stock-first, and AAPL works.

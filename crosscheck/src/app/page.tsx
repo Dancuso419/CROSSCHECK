@@ -27,13 +27,13 @@ type Result = {
 
 /* Which tickers have a recording. Mirrors snapshot.json; the route sends the
    authoritative list back with every response. */
-const RECORDED = ["BTC", "ETH", "SOL"];
+const RECORDED = ["AAPL", "NVDA", "TSLA", "BTC", "ETH", "SOL"];
 
 const SOURCES = [
   ["macro-analyst", "The economy", "Interest rates, inflation, the strength of the dollar. Slow to move, and it sets the weather everything else trades in."],
-  ["market-intel", "The money", "What large institutions are actually doing: fund inflows, coins leaving exchanges, stablecoins being readied to buy with."],
+  ["market-intel", "The money", "What large holders are actually doing: fund inflows, coins leaving exchanges, stablecoins readied to buy with. Crypto only, and a stock brief says so."],
   ["news-briefing", "The story", "What is being reported, and which narrative is forming around it before it shows up in the price."],
-  ["sentiment-analyst", "The crowd", "Fear and greed, and how heavily ordinary traders are betting in one direction."],
+  ["sentiment-analyst", "The crowd", "How fearful or greedy the market is, and how heavily traders are betting in one direction."],
   ["technical-analysis", "The chart", "Trend, momentum and volatility read straight off the candles. Fastest to move, and the easiest to over-read."],
 ] as const;
 
@@ -45,7 +45,7 @@ const SCENARIOS = [
 ];
 
 const MODES = [
-  { id: "live", label: "Live", note: "Queries the Skills now. Four of five are returning no data." },
+  { id: "live", label: "Live", note: "Queries the Skills now. Most are returning no data; the chart still runs on Bitget's own candles." },
   { id: "demo", label: "Recorded", note: "Real market data, captured and held. Not live." },
   { id: "scenario", label: "Illustrative", note: "Constructed inputs, the same fixtures the tests assert against." },
 ] as const;
@@ -156,13 +156,13 @@ const COINS: Record<string, { name: string; d: string }> = {
   SOL: { name: "Solana", d: "M13 9h18l-4 4.5H9ZM9 17.5h18l4 4.5H13ZM13 26h18l-4 4.5H9Z" },
   BNB: { name: "BNB Chain", d: "M20 5 35 20 20 35 5 20ZM20 13.5 26.5 20 20 26.5 13.5 20Z" },
   USDT: { name: "Tether", d: "M9 9h22M20 9v23M13.5 17.5h13" },
-  XRP: { name: "XRP", d: "M8 8c6 9 18 9 24 0M8 32c6-9 18-9 24 0" },
   ADA: { name: "Cardano", d: "M20 15.5a4.5 4.5 0 1 0 .1 0ZM20 4a3 3 0 1 0 .1 0ZM20 33a3 3 0 1 0 .1 0ZM7 12a3 3 0 1 0 .1 0ZM33 12a3 3 0 1 0 .1 0ZM7 25a3 3 0 1 0 .1 0ZM33 25a3 3 0 1 0 .1 0Z" },
-  DOGE: { name: "Dogecoin", d: "M15 9h7c8 0 8 22 0 22h-7V9M9 20h12" },
   LINK: { name: "Chainlink", d: "M20 5 33 12.5v15L20 35 7 27.5v-15ZM20 13 27 17v6l-7 4-7-4v-6Z" },
   AVAX: { name: "Avalanche", d: "M20 5 35 33H5ZM24 33l-5-9-5 9" },
-  DOT: { name: "Polkadot", d: "M20 6c5 0 9 2.2 9 5s-4 5-9 5-9-2.2-9-5 4-5 9-5ZM11 22c2.5-4.3 6.6-6.4 9-5s1.6 6-0.9 10.3-6.6 6.4-9 5-1.6-6 .9-10.3ZM29 22c2.5 4.3 3.3 8.9.9 10.3s-6.5-.7-9-5-3.3-8.9-.9-10.3 6.5.7 9 5Z" },
-  LTC: { name: "Litecoin", d: "M23 8h-5l-4 16h13M9 21l13-4.5" },
+  // Market marks, not logos: the stock side of the page in the same single stroke.
+  CANDLE: { name: "Candles", d: "M11 6v28M7.5 12h7v14h-7ZM20 4v22M16.5 9h7v11h-7ZM29 12v24M25.5 17h7v13h-7Z" },
+  LINE: { name: "Index", d: "M5 30l8-9 6 5 9-13 7 6M5 35h30" },
+  DOLLAR: { name: "Dollar", d: "M27 12c-2-3-5-4-7-4-4 0-7 2-7 5.5 0 8 14 5 14 13 0 3.5-3 5.5-7 5.5-3 0-6-1.5-8-4.5M20 4v32" },
 };
 
 function CoinMark({ symbol, size = 40, strokeWidth = 1.6 }: { symbol: string; size?: number; strokeWidth?: number }) {
@@ -188,16 +188,16 @@ const TURN_SECONDS = 60;
 const WATERMARKS = [
   { symbol: "BTC", top: "2%", left: "-4%", size: 300, r: -8, path: "a", k: 1.0 },
   { symbol: "ETH", top: "12%", right: "-3%", size: 330, r: 10, path: "b", k: 1.3 },
-  { symbol: "XRP", top: "23%", left: "4%", size: 220, r: -14, path: "c", k: 0.8 },
+  { symbol: "CANDLE", top: "23%", left: "4%", size: 220, r: -14, path: "c", k: 0.8 },
   { symbol: "SOL", top: "33%", left: "-3%", size: 280, r: -5, path: "b", k: 1.5 },
   { symbol: "LINK", top: "40%", right: "5%", size: 250, r: 12, path: "a", k: 0.9 },
   { symbol: "ADA", top: "51%", right: "-4%", size: 300, r: 6, path: "c", k: 1.2 },
-  { symbol: "DOGE", top: "60%", left: "6%", size: 230, r: -10, path: "a", k: 1.6 },
+  { symbol: "LINE", top: "60%", left: "6%", size: 230, r: -10, path: "a", k: 1.6 },
   { symbol: "BNB", top: "69%", right: "3%", size: 290, r: 7, path: "b", k: 1.1 },
   { symbol: "AVAX", top: "78%", left: "-2%", size: 260, r: -6, path: "c", k: 1.4 },
-  { symbol: "DOT", top: "86%", right: "6%", size: 240, r: 9, path: "a", k: 0.85 },
+  { symbol: "DOLLAR", top: "86%", right: "6%", size: 240, r: 9, path: "a", k: 0.85 },
   { symbol: "USDT", top: "93%", left: "5%", size: 230, r: -11, path: "b", k: 1.25 },
-  { symbol: "LTC", top: "97%", right: "-3%", size: 250, r: 5, path: "c", k: 1.05 },
+  { symbol: "CANDLE", top: "97%", right: "-3%", size: 250, r: 5, path: "c", k: 1.05 },
 ] as const;
 
 function Watermarks() {
@@ -419,7 +419,7 @@ function Opener({ label, title, delay = 0 }: { label: string; title: string; del
 /* ----------------------------------------------------------------- page ---- */
 
 export default function Home() {
-  const [ticker, setTicker] = useState("BTC");
+  const [ticker, setTicker] = useState("AAPL");
   const [mode, setMode] = useState<"live" | "demo" | "scenario">("live");
   const [scenario, setScenario] = useState(SCENARIOS[0].id);
   const [busy, setBusy] = useState(false);
@@ -490,13 +490,14 @@ export default function Home() {
         {/* ====================================================== hero ==== */}
         <div className={`band pt-16 pb-10 text-center sm:pt-28 sm:pb-20 ${PAD}`}>
           <h1 className="mx-auto max-w-[24ch] font-[family-name:var(--font-display)] text-[clamp(2.1rem,5.4vw,3.9rem)] leading-[1.04] tracking-[-0.022em]">
-            Five kinds of research on one coin, and every place they disagree
+            Five kinds of research on one stock, and every place they disagree
           </h1>
           <p className="mx-auto mt-7 max-w-[68ch] text-[1.02rem] leading-[1.6] text-[var(--ink-2)]">
             The economy, the money, the news, the crowd and the chart rarely say the same thing
-            about a coin at the same time. Crosscheck asks all five, then shows you exactly where
-            they contradict each other, which contradictions are worth your attention, and what to
-            watch to find out who was right.
+            about Apple or Nvidia at the same time. Crosscheck asks all five, then shows you exactly
+            where they contradict each other, which contradictions are worth your attention, and
+            what to watch to find out who was right. Built for US stocks trading around the clock
+            as tokenized contracts on Bitget, and it reads crypto too.
           </p>
           <p className="mx-auto mt-4 max-w-[56ch] text-[0.9rem] leading-relaxed text-[var(--ink-3)]">
             It never tells you to buy or sell. That part stays yours.
@@ -536,7 +537,7 @@ export default function Home() {
                   <input
                     value={ticker}
                     onChange={(e) => setTicker(e.target.value.toUpperCase())}
-                    placeholder="BTC"
+                    placeholder="AAPL"
                     spellCheck={false}
                     aria-label="Ticker"
                     className="w-[5.5rem] border-0 border-b border-[var(--frame)] bg-transparent pb-1 text-center font-[family-name:var(--font-display)] text-[1.5rem] font-medium leading-none tracking-[-0.01em] outline-none"
@@ -547,8 +548,10 @@ export default function Home() {
                 <div className="flex flex-col items-center gap-1.5">
                   <Label>{mode === "demo" ? "Recorded ticker" : "Not tied to a ticker"}</Label>
                   {mode === "demo" ? (
-                    <div className="flex items-baseline gap-3">
-                      {RECORDED.map((t, i) => (
+                    <div className="flex flex-col items-center gap-2.5">
+                      {[RECORDED.slice(0, 3), RECORDED.slice(3)].map((row) => (
+                      <div key={row[0]} className="flex items-baseline gap-3">
+                      {row.map((t, i) => (
                         <span key={t} className="flex items-baseline gap-3">
                           {i > 0 && <span aria-hidden className="h-3 w-px self-center bg-[var(--rule)]" />}
                           <button
@@ -565,6 +568,8 @@ export default function Home() {
                           </button>
                         </span>
                       ))}
+                      </div>
+                      ))}
                     </div>
                   ) : (
                     <span className="font-[family-name:var(--font-display)] text-[1.5rem] font-medium leading-none text-[var(--ink-2)]">
@@ -573,7 +578,7 @@ export default function Home() {
                   )}
                   <span className="max-w-[34ch] text-center text-[0.72rem] leading-snug text-[var(--ink-3)]">
                     {mode === "demo"
-                      ? "Three five-source captures exist. Switch to Live to query any other ticker."
+                      ? "Real captures for three US stocks and three crypto majors. Switch to Live to query any other ticker."
                       : "These cases are built to exercise the ranking, so no real ticker is involved. Switch to Live to query one."}
                   </span>
                 </div>
@@ -772,22 +777,22 @@ export default function Home() {
 
             {/* =================================== covered assets ========== */}
             <div className={`band pt-8 sm:pt-10 ${PAD}`}>
-              <Opener label="Crypto majors" title="What you can ask about" />
+              <Opener label="US stocks first" title="What you can ask about" />
             </div>
             <div className="band cells arrive sm:grid-cols-3">
               {[
-                ["BTC", "The deepest coverage. All five Skills have something to say, and the technical plate runs on Bitget's own 4h and 1d candles."],
-                ["ETH", "Same five sources, same ranking. Horizon and conviction are read per source, never inherited from BTC."],
-                ["SOL", "Covered on the same path. Anything outside the majors has thinner source coverage, and the brief will say so."],
-              ].map(([sym, body]) => (
-                <div key={sym} className={`py-8 sm:py-10 ${PAD}`}>
+                ["CANDLE", "US stocks", "AAPL · NVDA · TSLA · MSFT · META", "Tokenized on Bitget, so they trade around the clock. The chart runs on Bitget's own 4h and 1d candles for the contract. Four of the five Skills apply; the on-chain one does not describe a stock, and the brief names that gap."],
+                ["LINE", "Index funds", "SPY · QQQ", "The whole market in one ticker. The same five questions, asked of the S&P 500 and the Nasdaq 100, which is where macro and the chart argue most often."],
+                ["BTC", "Crypto", "BTC · ETH · SOL", "All five Skills apply, including on-chain flows. Horizon and conviction are read per source, never inherited from one asset to another."],
+              ].map(([mark, title, syms, body]) => (
+                <div key={title} className={`py-8 sm:py-10 ${PAD}`}>
                   <div className="flex items-center gap-4">
                     <span className="text-[var(--ink)]">
-                      <CoinMark symbol={sym} size={44} />
+                      <CoinMark symbol={mark} size={44} />
                     </span>
                     <div>
-                      <div className="font-[family-name:var(--font-display)] text-[1.5rem] leading-none">{sym}</div>
-                      <div className="mt-1"><Label>{COINS[sym].name}</Label></div>
+                      <div className="font-[family-name:var(--font-display)] text-[1.5rem] leading-none">{title}</div>
+                      <div className="mt-1"><Label>{syms}</Label></div>
                     </div>
                   </div>
                   <p className="mt-4 max-w-[40ch] text-[0.85rem] leading-relaxed text-[var(--ink-2)]">{body}</p>
@@ -802,7 +807,7 @@ export default function Home() {
                 <div>
                   <p className="max-w-[52ch] text-[0.95rem] leading-[1.62] text-[var(--ink-2)]">
                     You open two research notes on the same morning. The first says institutions
-                    have been buying for a week and coins are leaving exchanges. The second says
+                    have been buying for a week and the fund flows back it up. The second says
                     inflation came in hot, rate expectations moved, and the setup is broken.
                   </p>
                   <p className="mt-4 max-w-[52ch] text-[0.95rem] leading-[1.62] text-[var(--ink-2)]">
@@ -877,7 +882,7 @@ export default function Home() {
                     Built for the trader who already reads too much
                   </h2>
                   <p className="mt-5 max-w-[56ch] text-[0.95rem] leading-[1.62] text-[var(--ink-2)]">
-                    If you follow a chart account, a macro newsletter and crypto Twitter, you are
+                    If you follow a chart account, a macro newsletter and finance Twitter, you are
                     not short of opinions. You are short of a way to tell which of their
                     contradictions is signal and which is two people talking about different
                     weeks. That is the entire job of this page.

@@ -45,14 +45,14 @@ export async function POST(req: Request) {
     );
   }
 
-  // Crypto base symbols only. PROGRESS.md: the Skills have no equity path.
+  // A base symbol: a US stock (AAPL) or a crypto asset (BTC). skills.ts maps each.
   if (mode !== "scenario" && !/^[A-Z0-9]{2,10}$/.test(ticker)) {
-    return NextResponse.json({ error: "Ticker must be 2-10 letters or digits, e.g. BTC" }, { status: 400 });
+    return NextResponse.json({ error: "Ticker must be 2-10 letters or digits, e.g. AAPL or BTC" }, { status: 400 });
   }
 
   if (mode === "demo" && !hasSnapshot(ticker)) {
     return NextResponse.json(
-      { error: `No recorded snapshot for ${ticker}. Recorded covers ${SNAPSHOT_TICKERS.join(", ")} — switch to Live to query anything else.` },
+      { error: `No recorded snapshot for ${ticker}. Recorded covers ${SNAPSHOT_TICKERS.join(", ")}. Switch to Live to query anything else.` },
       { status: 400 },
     );
   }
@@ -73,7 +73,7 @@ export async function POST(req: Request) {
   let tConflict = 0;
 
   if (!hasKey()) {
-    analyseError = "No LLM key configured — showing the fan-out only. See BUILD.md.";
+    analyseError = "No LLM key configured, so showing the fan-out only. See BUILD.md.";
   } else {
     try {
       const t1 = Date.now();

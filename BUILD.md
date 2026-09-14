@@ -95,7 +95,7 @@ all upstream fetching happens on their side — see PROGRESS.md.
 ## Verify the demo link opens for a stranger
 
 1. Open the deployment URL in a **private/incognito window** — no login must be required.
-2. Enter `BTC`, submit.
+2. Enter `AAPL` (or `BTC`), submit.
 3. You should see all five Skills listed, each with its individual MCP calls and
    latencies, and an explicit "N of 5 sources reporting" count.
 4. Unavailable Skills must state *why*. A source is never silently dropped.
@@ -128,7 +128,7 @@ Two things that must stay true:
 Only the upstream data is recorded — normalisation, conflict detection, ranking and the
 brief all run for real on top of it. Demo mode takes ~17s cold (no dead-Skill timeouts).
 
-Re-capture with `python spike/capture.py [TICKER ...]` (defaults to BTC ETH SOL). It merges
+Re-capture with `python spike/capture.py [TICKER ...]` (defaults to AAPL NVDA TSLA BTC ETH SOL). It merges
 by ticker, so re-running one never discards the others.
 
 ### Illustrative scenarios

@@ -13,7 +13,7 @@
 import { McpClient } from "./mcp";
 import { deadReason } from "./liveness";
 import { computeIndicators, type Candle } from "./indicators";
-import { SKILLS, type SkillDef, type SkillName } from "./skills";
+import { SKILLS, isEquity, type SkillDef, type SkillName } from "./skills";
 
 export type CallTrace = {
   tool: string;
@@ -46,6 +46,9 @@ async function runSkill(def: SkillDef, ticker: string): Promise<SourceResult> {
   // One MCP session per Skill. Fanning ~12 concurrent calls down a single session caused
   // head-of-line blocking (live klines that answer in ~1s hit the 12s cap) on top of the
   // id-collision bug above.
+  if (def.noEquityPath && isEquity(ticker)) {
+    return { skill: def.name, measures: def.measures, timeframe: def.timeframe, status: "unavailable", reason: def.noEquityPath, calls: [] };
+  }
   const mcp = new McpClient();
   const calls = def.calls(ticker);
   const traces: CallTrace[] = [];

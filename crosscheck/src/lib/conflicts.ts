@@ -76,6 +76,7 @@ Rules:
 - Never recommend an action. No buy, sell, hold, entry, target, stop, or price forecast.
 - "consensus_summary" must state how many sources reported and must not imply a direction
   the sources did not collectively express.
+- Write for a reader, not a program: never mention JSON, arrays, fields or this list.
 - Never use em dashes in any field. Use a comma, a colon, or a full stop instead.`;
 }
 
