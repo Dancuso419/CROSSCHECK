@@ -41,12 +41,51 @@ export const providerOf = (model: string) => (/^deepseek/.test(model) ? "deepsee
 const TRANSIENT = new Set([429, 500, 502, 503, 504]);
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+/* A provider can accept a request and then never answer: on 2026-09-14 deepseek-flash
+   held a two-word prompt open for 60s while deepseek-v4-pro and gemini-2.5-flash answered
+   in 1s. With no cap, one hung call ate the whole 60s route budget and Vercel returned an
+   HTML 504 instead of a brief. So every call is capped, and a capped or failing model hands
+   over to the next one in the chain rather than taking the page down with it. */
+const CALL_TIMEOUT_MS = Number(process.env.LLM_TIMEOUT_MS ?? 20_000);
+// A model that just hung is skipped for a while, so only the first request after an outage
+// pays the timeout. ponytail: per-instance memory, which is all a serverless box has.
+const BENCH_MS = 5 * 60_000;
+const benchedUntil = new Map<string, number>();
+const FALLBACKS = (process.env.MODEL_FALLBACKS ?? "gemini-2.5-flash,deepseek-v4-pro").split(",").map((m) => m.trim()).filter(Boolean);
+
+/** Errors that say the provider is struggling, not that the request is wrong. Callers use
+ *  it too, so they do not retry a whole chain that has already been tried. */
+export const PROVIDER_TROUBLE = /timed out|LLM HTTP (429|500|502|503|504)|fetch failed|LLM unavailable/;
+
+const hasKey = (model: string) =>
+  Boolean(providerOf(model) === "deepseek" ? process.env.DEEPSEEK_API_KEY : process.env.GEMINI_API_KEY);
+
 /** 8192, not 2048: these models spend reasoning tokens from the same output budget, so a
  *  tight cap truncates the JSON rather than producing a shorter answer. */
 export async function askJson(model: string, prompt: string, maxTokens = 8192): Promise<string> {
+  const all = [model, ...FALLBACKS.filter((m) => m !== model && hasKey(m))];
+  const healthy = all.filter((m) => (benchedUntil.get(m) ?? 0) < Date.now());
+  const chain = healthy.length ? healthy : all;
+  const errors: string[] = [];
+  for (const m of chain) {
+    try {
+      return await askOneModel(m, prompt, maxTokens);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      errors.push(`${m}: ${msg}`);
+      // Only provider trouble moves down the chain. A bad key or a blocked prompt would
+      // fail the same way everywhere, so it surfaces immediately.
+      if (!PROVIDER_TROUBLE.test(msg)) throw e;
+      benchedUntil.set(m, Date.now() + BENCH_MS);
+    }
+  }
+  throw new Error(`LLM unavailable: ${errors.join(" | ")}`);
+}
+
+async function askOneModel(model: string, prompt: string, maxTokens: number): Promise<string> {
   let lastErr: Error = new Error("unreachable");
   let waitMs = 600;
-  for (let attempt = 0; attempt < 4; attempt++) {
+  for (let attempt = 0; attempt < 3; attempt++) {
     if (attempt) await sleep(waitMs);
     try {
       return providerOf(model) === "deepseek"
@@ -54,6 +93,7 @@ export async function askJson(model: string, prompt: string, maxTokens = 8192): 
         : await geminiOnce(model, prompt, maxTokens);
     } catch (e) {
       lastErr = e instanceof Error ? e : new Error(String(e));
+      if (lastErr.name === "TimeoutError") throw new Error(`timed out after ${CALL_TIMEOUT_MS}ms`);
       if (!/^LLM HTTP (429|500|502|503|504)/.test(lastErr.message)) throw lastErr;
       // A RetryInfo delay is the server telling us this is a short window, so honour it --
       // an observed 429 asked for 35s, which a 0.6-2.4s backoff blows straight through.
@@ -61,7 +101,9 @@ export async function askJson(model: string, prompt: string, maxTokens = 8192): 
       // cap: Gemini's per-minute 429 says "check your plan and billing details" too.
       const asked = lastErr.message.match(/retryAfter=(\d+(?:\.\d+)?)s/);
       if (asked) {
-        waitMs = Math.min(Number(asked[1]) * 1000 + 1000, 45_000);
+        // Longer than a demo can wait: let the next model in the chain take it instead.
+        if (Number(asked[1]) > 8) throw lastErr;
+        waitMs = Number(asked[1]) * 1000 + 500;
       } else {
         // No delay offered and it mentions exhausted credit: a hard cap, retrying burns more.
         if (/^LLM HTTP 429/.test(lastErr.message) && /billing|insufficient|balance/i.test(lastErr.message)) throw lastErr;
@@ -89,6 +131,7 @@ async function geminiOnce(model: string, prompt: string, maxTokens: number): Pro
   const res = await fetch(`${GEMINI}/models/${model}:generateContent`, {
     method: "POST",
     headers: { "content-type": "application/json", "x-goog-api-key": key },
+    signal: AbortSignal.timeout(CALL_TIMEOUT_MS),
     body: JSON.stringify({
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       generationConfig: {
@@ -123,6 +166,7 @@ async function deepseekOnce(model: string, prompt: string, maxTokens: number): P
   const res = await fetch(DEEPSEEK, {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
+    signal: AbortSignal.timeout(CALL_TIMEOUT_MS),
     body: JSON.stringify({
       model,
       messages: [{ role: "user", content: prompt }],

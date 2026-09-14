@@ -23,6 +23,7 @@ type Result = {
   snapshot: { capturedAt: string; note: string; ticker: string } | null;
   scenario: { id: string; title: string; teaches: string } | null;
   snapshotTickers?: string[];
+  prewritten: { generatedAt: string; model: string } | null;
 };
 
 /* Which tickers have a recording. Mirrors snapshot.json; the route sends the
@@ -537,7 +538,9 @@ function GatherFigure({ res }: { res: Result }) {
                 8s cut-off, so a dead source cannot stall the page
               </span>
             )}
-            {res.mode === "demo" && <span className="text-[var(--ink-3)]">Times are from the capture, not from now.</span>}
+            {res.mode === "demo" && (
+              <span className="text-[var(--ink-3)]">Call times are from the capture; reading times are from when the brief was written.</span>
+            )}
           </div>
         </>
       )}
@@ -743,8 +746,16 @@ export default function Home() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ ticker, mode, scenario }),
       });
-      const body = await r.json();
-      if (!r.ok) throw new Error(body.error ?? `The request failed (${r.status}).`);
+      // The platform answers a crashed or timed-out function with an HTML page, not JSON.
+      const body = await r.json().catch(() => null);
+      if (!r.ok || !body) {
+        throw new Error(
+          body?.error ??
+            (r.status === 504
+              ? "The analysis took longer than the 60 second limit. Please try again in a moment."
+              : `The request failed (${r.status}). Please try again.`),
+        );
+      }
       setRes(body);
       requestAnimationFrame(() => document.getElementById("brief")?.scrollIntoView({ behavior: "smooth", block: "start" }));
     } catch (e) {
@@ -1239,14 +1250,17 @@ export default function Home() {
                 <Label>{res.mode === "demo" ? "Recorded snapshot" : "Illustrative example"}</Label>
                 <p className="mt-2 max-w-[74ch] text-[0.82rem] leading-relaxed text-[var(--ink-2)]">
                   {res.mode === "demo" && res.snapshot && (
-                    <>Real market data, captured {new Date(res.snapshot.capturedAt).toLocaleString()}. Not live. {res.snapshot.note}</>
+                    <>
+                      Real market data, captured {new Date(res.snapshot.capturedAt).toLocaleString()}. Not live. {res.snapshot.note}
+                      {res.prewritten && ` The brief below was written from this recording by ${res.prewritten.model}, through the same pipeline Live mode uses, so every visitor sees the same reading.`}
+                    </>
                   )}
                   {res.mode === "scenario" && res.scenario && (
                     <>
                       Constructed data, not real market data. “{res.scenario.title}”.{" "}
-                      {res.scenario.teaches} Conflict detection, ranking and the brief run for real
-                      on these inputs; normalisation is skipped because the sources arrive already
-                      normalised.
+                      {res.scenario.teaches} Conflict detection and ranking are the real code; the
+                      explanation was written ahead of time on these inputs. Normalisation is skipped
+                      because the sources arrive already normalised.
                     </>
                   )}
                 </p>

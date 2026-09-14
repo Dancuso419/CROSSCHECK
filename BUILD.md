@@ -125,8 +125,19 @@ Two things that must stay true:
 - **A snapshot is never shown as live.** The response always carries `capturedAt` plus the
   capture note, and the UI renders a permanent badge above the brief.
 
-Only the upstream data is recorded — normalisation, conflict detection, ranking and the
-brief all run for real on top of it. Demo mode takes ~17s cold (no dead-Skill timeouts).
+The upstream data is recorded, and so is the brief built from it. `scripts/prewrite.ts`
+runs the real pipeline (normalise, detect and rank, explain) over every recording and
+every Illustrative case and saves the result to `crosscheck/src/data/briefs.json`, so
+these modes answer instantly, read the same for every visitor, and survive an LLM outage.
+This was forced on 2026-09-14: `deepseek-flash` stopped answering, every request hit the
+60s limit, and the demo link showed Vercel's error page. Re-run after any re-capture:
+`npx tsx scripts/prewrite.ts [model]` (default `deepseek-v4-pro`; it takes a few minutes).
+
+Live mode still calls the LLM on every query. It has three guards: a 20s cap per model
+call, a fallback chain (`MODEL_FALLBACKS`, default `gemini-2.5-flash,deepseek-v4-pro`,
+skipping any without a key) that benches a hung model for 5 minutes, and a route deadline
+at 52s that returns the fan-out with a plain message instead of letting the platform time
+out. `npx tsx scripts/latency.ts` times each model when a provider looks degraded.
 
 Re-capture with `python spike/capture.py [TICKER ...]` (defaults to AAPL NVDA TSLA BTC ETH SOL). It merges
 by ticker, so re-running one never discards the others.

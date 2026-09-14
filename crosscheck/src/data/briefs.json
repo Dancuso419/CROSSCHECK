@@ -1,0 +1,1648 @@
+{
+ "model": "deepseek-v4-pro",
+ "generatedAt": "2026-09-14T18:59:54.707Z",
+ "tickers": {
+  "AAPL": {
+   "normalised": [
+    {
+     "skill": "macro-analyst",
+     "status": "ok",
+     "value": {
+      "source": "macro-analyst",
+      "direction": "neutral",
+      "conviction": 0.3,
+      "timeframe": "months",
+      "evidence": "US 10Y yield 4.97, up 6.21% 1m; US 2Y yield 4.79, up 9.26% 1m; DXY 99.14, down 0.82% 1m; gold 4379.8, up 0.37% 1m; Nasdaq 100 29368.44, down 1.26% 1m; S&P 500 7656.98, down 1.18% 1m.",
+      "internal_divergence": "Rising yields and flattening curve lean bearish, while weaker dollar and stable gold lean bullish or safe-haven.",
+      "internal_pulls": [
+       {
+        "leans": "bearish",
+        "point": "US 10Y yield +6.21% 1m to 4.97"
+       },
+       {
+        "leans": "bearish",
+        "point": "US 2Y yield +9.26% 1m to 4.79"
+       },
+       {
+        "leans": "bullish",
+        "point": "DXY -0.82% 1m to 99.14"
+       },
+       {
+        "leans": "bullish",
+        "point": "Gold +0.37% 1m to 4379.8"
+       }
+      ]
+     }
+    },
+    {
+     "skill": "market-intel",
+     "status": "unavailable",
+     "reason": "no US stock data path: this Skill reads on-chain flows, stablecoins and crypto market structure, none of which describe a stock"
+    },
+    {
+     "skill": "news-briefing",
+     "status": "ok",
+     "value": {
+      "source": "news-briefing",
+      "direction": "neutral",
+      "conviction": 0.3,
+      "timeframe": "days",
+      "evidence": "Headlines include '$880 Billion' stock buyback, 'Fed Rate Hike Seen As Oil, Yields Pressure Stocks', and 'Apple, Moderna Are New Buys'.",
+      "internal_divergence": "Apple-specific headlines lean bullish on iPhone Duo event and buybacks, while a macro headline cites Fed rate hike and oil/yield pressure on stocks.",
+      "internal_pulls": [
+       {
+        "leans": "bullish",
+        "point": "iPhone Duo event should put bears to rest"
+       },
+       {
+        "leans": "bullish",
+        "point": "$880 billion buyback during Tim Cook era"
+       },
+       {
+        "leans": "bullish",
+        "point": "Apple CEO rejects biggest fear over iPhone Duo launch"
+       },
+       {
+        "leans": "bullish",
+        "point": "Apple, Moderna Are New Buys"
+       },
+       {
+        "leans": "bearish",
+        "point": "Fed rate hike seen as oil, yields pressure stocks"
+       }
+      ]
+     }
+    },
+    {
+     "skill": "sentiment-analyst",
+     "status": "ok",
+     "value": {
+      "source": "sentiment-analyst",
+      "direction": "neutral",
+      "conviction": 0.2,
+      "timeframe": "months",
+      "evidence": "VIX last 15.84, month ago 15.28, 1-month high 17.84, 1-month low 14.25.",
+      "internal_divergence": "VIX last 15.84 is above month-ago 15.28, but below the 1-month high 17.84 and slightly below the midpoint of the 1-month range.",
+      "internal_pulls": [
+       {
+        "leans": "bearish",
+        "point": "VIX last 15.84 above month-ago 15.28"
+       },
+       {
+        "leans": "bullish",
+        "point": "VIX last 15.84 below 1-month high 17.84"
+       }
+      ]
+     }
+    },
+    {
+     "skill": "technical-analysis",
+     "status": "ok",
+     "value": {
+      "source": "technical-analysis",
+      "direction": "neutral",
+      "conviction": 0.5,
+      "timeframe": "days",
+      "evidence": "1d price 330.96 above 1d MA7 325.42, 1d MA25 319.42, 1d MA99 311.41; 1d RSI 62.70, 1d MACD hist 1.129, bullish crossover 3 bars ago; 4h price 330.96 below 4h MA7 332.11, 4h MACD hist -0.5179, bearish crossover 3 bars ago, 4h Bollinger middle 331.13.",
+      "internal_divergence": "Daily timeframe is bullish (1d RSI 62.70, 1d MACD hist 1.129, price above all daily MAs) while 4h timeframe shows bearish momentum (4h MACD hist -0.5179, price below 4h MA7 and Bollinger middle).",
+      "internal_pulls": [
+       {
+        "leans": "bullish",
+        "point": "1d MACD hist 1.129, crossed up 3 bars ago"
+       },
+       {
+        "leans": "bearish",
+        "point": "4h MACD hist -0.5179, crossed down 3 bars ago"
+       },
+       {
+        "leans": "bullish",
+        "point": "1d RSI 62.70, above 50"
+       },
+       {
+        "leans": "bearish",
+        "point": "4h price 330.96 below 4h MA7 332.11"
+       }
+      ]
+     }
+    }
+   ],
+   "brief": {
+    "ticker": "AAPL",
+    "agreement_level": "strong_agreement",
+    "headline": "Four independent sources all see no clear direction for Apple right now.",
+    "consensus_summary": "Four sources reported, and all four landed neutral on Apple. They agree there is no clear directional tilt, though each source has mixed internal signals and different time horizons.",
+    "reporting": 4,
+    "total": 5,
+    "conflicts": [],
+    "internal_divergences": [
+     {
+      "source": "macro-analyst",
+      "materiality": "medium",
+      "detail": "Rising yields and flattening curve lean bearish, while weaker dollar and stable gold lean bullish or safe-haven.",
+      "pulls": [
+       {
+        "leans": "bearish",
+        "point": "US 10Y yield +6.21% 1m to 4.97"
+       },
+       {
+        "leans": "bearish",
+        "point": "US 2Y yield +9.26% 1m to 4.79"
+       },
+       {
+        "leans": "bullish",
+        "point": "DXY -0.82% 1m to 99.14"
+       },
+       {
+        "leans": "bullish",
+        "point": "Gold +0.37% 1m to 4379.8"
+       }
+      ]
+     },
+     {
+      "source": "news-briefing",
+      "materiality": "medium",
+      "detail": "Apple-specific headlines lean bullish on iPhone Duo event and buybacks, while a macro headline cites Fed rate hike and oil/yield pressure on stocks.",
+      "pulls": [
+       {
+        "leans": "bullish",
+        "point": "iPhone Duo event should put bears to rest"
+       },
+       {
+        "leans": "bullish",
+        "point": "$880 billion buyback during Tim Cook era"
+       },
+       {
+        "leans": "bullish",
+        "point": "Apple CEO rejects biggest fear over iPhone Duo launch"
+       },
+       {
+        "leans": "bullish",
+        "point": "Apple, Moderna Are New Buys"
+       },
+       {
+        "leans": "bearish",
+        "point": "Fed rate hike seen as oil, yields pressure stocks"
+       }
+      ]
+     },
+     {
+      "source": "sentiment-analyst",
+      "materiality": "medium",
+      "detail": "VIX last 15.84 is above month-ago 15.28, but below the 1-month high 17.84 and slightly below the midpoint of the 1-month range.",
+      "pulls": [
+       {
+        "leans": "bearish",
+        "point": "VIX last 15.84 above month-ago 15.28"
+       },
+       {
+        "leans": "bullish",
+        "point": "VIX last 15.84 below 1-month high 17.84"
+       }
+      ]
+     },
+     {
+      "source": "technical-analysis",
+      "materiality": "medium",
+      "detail": "Daily timeframe is bullish (1d RSI 62.70, 1d MACD hist 1.129, price above all daily MAs) while 4h timeframe shows bearish momentum (4h MACD hist -0.5179, price below 4h MA7 and Bollinger middle).",
+      "pulls": [
+       {
+        "leans": "bullish",
+        "point": "1d MACD hist 1.129, crossed up 3 bars ago"
+       },
+       {
+        "leans": "bearish",
+        "point": "4h MACD hist -0.5179, crossed down 3 bars ago"
+       },
+       {
+        "leans": "bullish",
+        "point": "1d RSI 62.70, above 50"
+       },
+       {
+        "leans": "bearish",
+        "point": "4h price 330.96 below 4h MA7 332.11"
+       }
+      ]
+     }
+    ],
+    "unavailable_sources": [
+     {
+      "source": "market-intel",
+      "reason": "no US stock data path: this Skill reads on-chain flows, stablecoins and crypto market structure, none of which describe a stock"
+     }
+    ]
+   },
+   "normaliseMs": 62468,
+   "conflictMs": 8260
+  },
+  "BTC": {
+   "normalised": [
+    {
+     "skill": "macro-analyst",
+     "status": "ok",
+     "value": {
+      "source": "macro-analyst",
+      "direction": "bearish",
+      "conviction": 0.6,
+      "timeframe": "months",
+      "evidence": "US 10-year yield rose 6.21% to 4.97% over one month, 2-year yield rose 9.26% to 4.79%, S&P 500 fell 1.18% to 7656.98, Nasdaq 100 fell 1.26% to 29368.44, gold rose 1.04% to 4408.9, DXY fell 0.84% to 99.12.",
+      "internal_divergence": "Equity declines and sharp yield increases point to risk-off, but dollar weakness and gold strength diverge.",
+      "internal_pulls": [
+       {
+        "leans": "bearish",
+        "point": "US 2y yield +9.26% in a month"
+       },
+       {
+        "leans": "bearish",
+        "point": "Nasdaq 100 -1.26% over 1 month"
+       },
+       {
+        "leans": "bearish",
+        "point": "S&P 500 -1.18% over 1 month"
+       },
+       {
+        "leans": "bullish",
+        "point": "Gold +1.04% in a month"
+       },
+       {
+        "leans": "bullish",
+        "point": "DXY -0.84% over 1 month"
+       }
+      ]
+     }
+    },
+    {
+     "skill": "market-intel",
+     "status": "ok",
+     "value": {
+      "source": "market-intel",
+      "direction": "neutral",
+      "conviction": 0.3,
+      "timeframe": "days",
+      "evidence": "Total market cap change 24h is -3.76%. Stablecoin 7d changes: USDT +$98,229,171, USDC -$316,966,783, USDS +$117,427,417, DAI -$37,310,398, USDe +$243,501,937. DeFi TVL: Ethereum $49,884,006,596, Solana $5,854,462,566, BSC $5,609,344,180, Base $5,578,312,509, Tron $5,467,786,606.",
+      "internal_divergence": "Bearish 24h market cap decline versus mixed stablecoin supply changes. USDC and DAI contracted while USDT, USDS and USDe expanded. Net stablecoin supply rose $104,881,344 over 7d, but the decline in USDC is notable.",
+      "internal_pulls": [
+       {
+        "leans": "bearish",
+        "point": "24h market cap change -3.76%"
+       },
+       {
+        "leans": "bearish",
+        "point": "USDC 7d supply -$316.97M"
+       },
+       {
+        "leans": "bearish",
+        "point": "DAI 7d supply -$37.31M"
+       },
+       {
+        "leans": "bullish",
+        "point": "USDT 7d supply +$98.23M"
+       },
+       {
+        "leans": "bullish",
+        "point": "USDe 7d supply +$243.50M"
+       },
+       {
+        "leans": "bullish",
+        "point": "USDS 7d supply +$117.43M"
+       }
+      ]
+     }
+    },
+    {
+     "skill": "news-briefing",
+     "status": "ok",
+     "value": {
+      "source": "news-briefing",
+      "direction": "neutral",
+      "conviction": 0.4,
+      "timeframe": "days",
+      "evidence": "Headlines include 'Bitcoin spikes toward $80K' and 'Bitcoin recovers toward $77,300 as zcash leverage unwinds', but also 'Bitcoin ETF outflows accelerate as investors pull $449M in three days', 'Rising yields, oil prices leave bitcoin vulnerable ahead of U.S. inflation report', and 'Bitcoin Golden Cross Flickers Off as Rate-Hike Bets Firm Up'.",
+      "internal_divergence": "Bullish price spikes conflict with bearish ETF outflows, macro vulnerability, and technical failure.",
+      "internal_pulls": [
+       {
+        "leans": "bullish",
+        "point": "Bitcoin spikes toward $80K on CPI data day"
+       },
+       {
+        "leans": "bullish",
+        "point": "Bitcoin recovers toward $77,300 as zcash leverage unwinds"
+       },
+       {
+        "leans": "bearish",
+        "point": "ETF outflows accelerate, investors pull $449M in three days"
+       },
+       {
+        "leans": "bearish",
+        "point": "Bitcoin Golden Cross flickers off as rate hikes firm"
+       }
+      ]
+     }
+    },
+    {
+     "skill": "sentiment-analyst",
+     "status": "ok",
+     "value": {
+      "source": "sentiment-analyst",
+      "direction": "bullish",
+      "conviction": 0.6,
+      "timeframe": "days",
+      "evidence": "Fear & Greed value 61, classification 'Greed', with history values 61, 63, 56, 69, 66, 69, 71, 73 all 'Greed'.",
+      "internal_divergence": null,
+      "internal_pulls": []
+     }
+    },
+    {
+     "skill": "technical-analysis",
+     "status": "ok",
+     "value": {
+      "source": "technical-analysis",
+      "direction": "neutral",
+      "conviction": 0.35,
+      "timeframe": "days",
+      "evidence": "4h: price 77329.85, RSI 46.35, MACD hist +61.29 (crossed up 10 bars ago), Bollinger pctB 0.6556. 1d: price 77329.85, MA7 77753.89, MA25 78219.10, MA99 67279.90, RSI 55.24, MACD hist -750.59 (crossed down 9 bars ago), Bollinger pctB 0.2633.",
+      "internal_divergence": "4h momentum indicators lean bullish, with MACD hist +61.29 and price above MA7, while 1d trend indicators lean bearish, with price below MA7/MA25 and MACD hist -750.59; long term support remains bullish via 1d price above MA99.",
+      "internal_pulls": [
+       {
+        "leans": "bearish",
+        "point": "1d price 77329.85 below MA7 77753 and MA25 78219"
+       },
+       {
+        "leans": "bearish",
+        "point": "1d MACD hist -750.59, crossed down 9 bars ago"
+       },
+       {
+        "leans": "bearish",
+        "point": "4h RSI 46.35 below 50 midline"
+       },
+       {
+        "leans": "bullish",
+        "point": "4h MACD hist +61.29, crossed up 10 bars ago"
+       },
+       {
+        "leans": "bullish",
+        "point": "1d RSI 55.24 above 50 midline"
+       },
+       {
+        "leans": "bullish",
+        "point": "1d price above MA99 67279.90, long-term support"
+       }
+      ]
+     }
+    }
+   ],
+   "brief": {
+    "ticker": "BTC",
+    "agreement_level": "mixed",
+    "headline": "Five sources split, but the negative and positive views cover different time horizons.",
+    "consensus_summary": "Five sources reported. Three are neutral, one is bearish, and one is bullish, so the group does not collectively lean one way. Much of the split comes from looking at different time horizons.",
+    "reporting": 5,
+    "total": 5,
+    "conflicts": [
+     {
+      "sources": [
+       "macro-analyst",
+       "sentiment-analyst"
+      ],
+      "materiality": "low",
+      "why_it_matters": "Pair not in the materiality matrix; treated as low until rated.",
+      "is_timeframe_divergence": true,
+      "in_plain_terms": "The macroeconomic source is worried about the next few months, while the sentiment source sees short-term enthusiasm, and both can be right because they are looking at different periods.",
+      "description": "The macro-analyst is bearish over months because the US 2-year yield rose 9.26% in a month, the S&P 500 fell 1.18%, and the Nasdaq 100 fell 1.26%, though gold rose 1.04% and the dollar fell 0.84%. The sentiment-analyst is bullish over days because the Fear & Greed Index is 61, classified as Greed, with recent history also in Greed territory. This is a timeframe divergence: both can be correct simultaneously, as short-term sentiment can be positive while longer-term macro conditions point down.",
+      "case_for_a": "For macro-analyst to be right, the recent rise in US yields and the fall in equity indices would need to persist over the coming months and outweigh the bullish pull from gold's rise and the dollar's fall.",
+      "case_for_b": "For sentiment-analyst to be right, the Fear & Greed Index reading of 61, classified as Greed, would need to translate into continued upward pressure on Bitcoin over the next few days, without a negative macro surprise.",
+      "what_would_resolve_it": "The next monthly US Consumer Price Index release would show whether yields keep rising, and the next Fear & Greed Index print would show whether short-term greed persists."
+     }
+    ],
+    "internal_divergences": [
+     {
+      "source": "macro-analyst",
+      "materiality": "medium",
+      "detail": "Equity declines and sharp yield increases point to risk-off, but dollar weakness and gold strength diverge.",
+      "pulls": [
+       {
+        "leans": "bearish",
+        "point": "US 2y yield +9.26% in a month"
+       },
+       {
+        "leans": "bearish",
+        "point": "Nasdaq 100 -1.26% over 1 month"
+       },
+       {
+        "leans": "bearish",
+        "point": "S&P 500 -1.18% over 1 month"
+       },
+       {
+        "leans": "bullish",
+        "point": "Gold +1.04% in a month"
+       },
+       {
+        "leans": "bullish",
+        "point": "DXY -0.84% over 1 month"
+       }
+      ]
+     },
+     {
+      "source": "market-intel",
+      "materiality": "medium",
+      "detail": "Bearish 24h market cap decline versus mixed stablecoin supply changes. USDC and DAI contracted while USDT, USDS and USDe expanded. Net stablecoin supply rose $104,881,344 over 7d, but the decline in USDC is notable.",
+      "pulls": [
+       {
+        "leans": "bearish",
+        "point": "24h market cap change -3.76%"
+       },
+       {
+        "leans": "bearish",
+        "point": "USDC 7d supply -$316.97M"
+       },
+       {
+        "leans": "bearish",
+        "point": "DAI 7d supply -$37.31M"
+       },
+       {
+        "leans": "bullish",
+        "point": "USDT 7d supply +$98.23M"
+       },
+       {
+        "leans": "bullish",
+        "point": "USDe 7d supply +$243.50M"
+       },
+       {
+        "leans": "bullish",
+        "point": "USDS 7d supply +$117.43M"
+       }
+      ]
+     },
+     {
+      "source": "news-briefing",
+      "materiality": "medium",
+      "detail": "Bullish price spikes conflict with bearish ETF outflows, macro vulnerability, and technical failure.",
+      "pulls": [
+       {
+        "leans": "bullish",
+        "point": "Bitcoin spikes toward $80K on CPI data day"
+       },
+       {
+        "leans": "bullish",
+        "point": "Bitcoin recovers toward $77,300 as zcash leverage unwinds"
+       },
+       {
+        "leans": "bearish",
+        "point": "ETF outflows accelerate, investors pull $449M in three days"
+       },
+       {
+        "leans": "bearish",
+        "point": "Bitcoin Golden Cross flickers off as rate hikes firm"
+       }
+      ]
+     },
+     {
+      "source": "technical-analysis",
+      "materiality": "medium",
+      "detail": "4h momentum indicators lean bullish, with MACD hist +61.29 and price above MA7, while 1d trend indicators lean bearish, with price below MA7/MA25 and MACD hist -750.59; long term support remains bullish via 1d price above MA99.",
+      "pulls": [
+       {
+        "leans": "bearish",
+        "point": "1d price 77329.85 below MA7 77753 and MA25 78219"
+       },
+       {
+        "leans": "bearish",
+        "point": "1d MACD hist -750.59, crossed down 9 bars ago"
+       },
+       {
+        "leans": "bearish",
+        "point": "4h RSI 46.35 below 50 midline"
+       },
+       {
+        "leans": "bullish",
+        "point": "4h MACD hist +61.29, crossed up 10 bars ago"
+       },
+       {
+        "leans": "bullish",
+        "point": "1d RSI 55.24 above 50 midline"
+       },
+       {
+        "leans": "bullish",
+        "point": "1d price above MA99 67279.90, long-term support"
+       }
+      ]
+     }
+    ],
+    "unavailable_sources": []
+   },
+   "normaliseMs": 34672,
+   "conflictMs": 27101
+  },
+  "ETH": {
+   "normalised": [
+    {
+     "skill": "macro-analyst",
+     "status": "ok",
+     "value": {
+      "source": "macro-analyst",
+      "direction": "neutral",
+      "conviction": 0.2,
+      "timeframe": "months",
+      "evidence": "US 10y yield 4.97% (up 6.21% in 1 month, from 4.68%), 2y yield 4.79% (up 9.26%, from 4.39%), DXY 99.12 (down 0.84%), gold 4408.9 (up 1.04%), Nasdaq 100 29368.44 (down 1.26%), S&P 500 7656.98 (down 1.18%), 10y-2y spread 0.18, curve not inverted.",
+      "internal_divergence": "Rising Treasury yields and falling equity indices lean bearish, while a lower dollar and higher gold lean bullish; the 10y-2y spread is positive at 0.18 with no inversion.",
+      "internal_pulls": [
+       {
+        "leans": "bearish",
+        "point": "10y yield 4.97%, up 6.21% in 1 month"
+       },
+       {
+        "leans": "bearish",
+        "point": "2y yield 4.79%, up 9.26% in 1 month"
+       },
+       {
+        "leans": "bearish",
+        "point": "S&P 500 7656.98, down 1.18%"
+       },
+       {
+        "leans": "bullish",
+        "point": "DXY 99.12, down 0.84%"
+       },
+       {
+        "leans": "bullish",
+        "point": "Gold 4408.9, up 1.04%"
+       }
+      ]
+     }
+    },
+    {
+     "skill": "market-intel",
+     "status": "ok",
+     "value": {
+      "source": "market-intel",
+      "direction": "neutral",
+      "conviction": 0.3,
+      "timeframe": "days",
+      "evidence": "Total market cap fell 3.76% over 24h to $2,634,564,273,441. Stablecoin 7d changes were mixed: USDT +$98,229,171, USDC -$316,966,783, USDS +$117,427,417, DAI -$37,310,398, USDe +$243,501,937. DeFi TVL figures are static values with no trend stated.",
+      "internal_divergence": "Bearish price action and USDC outflows conflict with net positive stablecoin supply growth driven by USDe, USDS, and USDT.",
+      "internal_pulls": [
+       {
+        "leans": "bearish",
+        "point": "Market cap change -3.76% 24h"
+       },
+       {
+        "leans": "bearish",
+        "point": "USDC 7d change -$316,966,783"
+       },
+       {
+        "leans": "bearish",
+        "point": "DAI 7d change -$37,310,398"
+       },
+       {
+        "leans": "bullish",
+        "point": "USDe 7d change +$243,501,937"
+       },
+       {
+        "leans": "bullish",
+        "point": "USDS 7d change +$117,427,417"
+       },
+       {
+        "leans": "bullish",
+        "point": "USDT 7d change +$98,229,171"
+       }
+      ]
+     }
+    },
+    {
+     "skill": "news-briefing",
+     "status": "ok",
+     "value": {
+      "source": "news-briefing",
+      "direction": "neutral",
+      "conviction": 0.1,
+      "timeframe": "days",
+      "evidence": "Headlines include \"Staked ether should be seen as the benchmark of the decentralized economy\" and \"Vitalik Buterin Pushes Ethereum Plan to Slash Quantum-Safe Privacy Costs\" (Ethereum-focused), plus \"OpenAI Asks Congress Whether an AI Slowdown Would Be Legal\" (AI policy). No price or sentiment metrics stated.",
+      "internal_divergence": null,
+      "internal_pulls": []
+     }
+    },
+    {
+     "skill": "sentiment-analyst",
+     "status": "ok",
+     "value": {
+      "source": "sentiment-analyst",
+      "direction": "neutral",
+      "conviction": 0.2,
+      "timeframe": "days",
+      "evidence": "Fear & Greed index value 61, classification Greed. History values range from 56 to 73, all classified Greed.",
+      "internal_divergence": null,
+      "internal_pulls": []
+     }
+    },
+    {
+     "skill": "technical-analysis",
+     "status": "ok",
+     "value": {
+      "source": "technical-analysis",
+      "direction": "neutral",
+      "conviction": 0.4,
+      "timeframe": "days",
+      "evidence": "4h: price 2504.46 below MA7 2508.70 but above MA25 2493.78 and MA99 2471.68; RSI 51.13; MACD hist -2.87, bearish cross 2 bars ago; Bollinger %B 0.53. 1d: price 2504.46 above MA7 2489.78, MA25 2466.16, MA99 1969.38; RSI 61.37; MACD hist -15.89, bearish cross 12 bars ago; Bollinger %B 0.71.",
+      "internal_divergence": "Trend and Bollinger signals are bullish on both timeframes, but both MACDs have bearish crossovers with negative histograms; 4h RSI is neutral 51.13 while 1d RSI is bullish 61.37.",
+      "internal_pulls": [
+       {
+        "leans": "bullish",
+        "point": "1d RSI 61.37, bullish above 50"
+       },
+       {
+        "leans": "bullish",
+        "point": "1d Bollinger %B 0.71, price above middle"
+       },
+       {
+        "leans": "bullish",
+        "point": "4h price above MA25 2493.78 and MA99 2471.68"
+       },
+       {
+        "leans": "bearish",
+        "point": "4h MACD hist -2.87, bearish cross 2 bars ago"
+       },
+       {
+        "leans": "bearish",
+        "point": "1d MACD hist -15.89, bearish cross 12 bars ago"
+       }
+      ]
+     }
+    }
+   ],
+   "brief": {
+    "ticker": "ETH",
+    "agreement_level": "strong_agreement",
+    "headline": "All five sources agree: the outlook is neither clearly up nor clearly down.",
+    "consensus_summary": "Five independent sources reported, and all five gave a neutral direction. Their evidence pulls both ways: one sees higher Treasury yields and weaker equities against a lower dollar and higher gold; another sees a falling total market cap but mixed stablecoin flows; technical analysis sees price near its shorter moving averages with mixed momentum readings; news and sentiment provided no strong lean.",
+    "reporting": 5,
+    "total": 5,
+    "conflicts": [],
+    "internal_divergences": [
+     {
+      "source": "macro-analyst",
+      "materiality": "medium",
+      "detail": "Rising Treasury yields and falling equity indices lean bearish, while a lower dollar and higher gold lean bullish; the 10y-2y spread is positive at 0.18 with no inversion.",
+      "pulls": [
+       {
+        "leans": "bearish",
+        "point": "10y yield 4.97%, up 6.21% in 1 month"
+       },
+       {
+        "leans": "bearish",
+        "point": "2y yield 4.79%, up 9.26% in 1 month"
+       },
+       {
+        "leans": "bearish",
+        "point": "S&P 500 7656.98, down 1.18%"
+       },
+       {
+        "leans": "bullish",
+        "point": "DXY 99.12, down 0.84%"
+       },
+       {
+        "leans": "bullish",
+        "point": "Gold 4408.9, up 1.04%"
+       }
+      ]
+     },
+     {
+      "source": "market-intel",
+      "materiality": "medium",
+      "detail": "Bearish price action and USDC outflows conflict with net positive stablecoin supply growth driven by USDe, USDS, and USDT.",
+      "pulls": [
+       {
+        "leans": "bearish",
+        "point": "Market cap change -3.76% 24h"
+       },
+       {
+        "leans": "bearish",
+        "point": "USDC 7d change -$316,966,783"
+       },
+       {
+        "leans": "bearish",
+        "point": "DAI 7d change -$37,310,398"
+       },
+       {
+        "leans": "bullish",
+        "point": "USDe 7d change +$243,501,937"
+       },
+       {
+        "leans": "bullish",
+        "point": "USDS 7d change +$117,427,417"
+       },
+       {
+        "leans": "bullish",
+        "point": "USDT 7d change +$98,229,171"
+       }
+      ]
+     },
+     {
+      "source": "technical-analysis",
+      "materiality": "medium",
+      "detail": "Trend and Bollinger signals are bullish on both timeframes, but both MACDs have bearish crossovers with negative histograms; 4h RSI is neutral 51.13 while 1d RSI is bullish 61.37.",
+      "pulls": [
+       {
+        "leans": "bullish",
+        "point": "1d RSI 61.37, bullish above 50"
+       },
+       {
+        "leans": "bullish",
+        "point": "1d Bollinger %B 0.71, price above middle"
+       },
+       {
+        "leans": "bullish",
+        "point": "4h price above MA25 2493.78 and MA99 2471.68"
+       },
+       {
+        "leans": "bearish",
+        "point": "4h MACD hist -2.87, bearish cross 2 bars ago"
+       },
+       {
+        "leans": "bearish",
+        "point": "1d MACD hist -15.89, bearish cross 12 bars ago"
+       }
+      ]
+     }
+    ],
+    "unavailable_sources": []
+   },
+   "normaliseMs": 37593,
+   "conflictMs": 8203
+  },
+  "NVDA": {
+   "normalised": [
+    {
+     "skill": "macro-analyst",
+     "status": "ok",
+     "value": {
+      "source": "macro-analyst",
+      "direction": "neutral",
+      "conviction": 0.2,
+      "timeframe": "months",
+      "evidence": "US 10y yield rose 6.21% to 4.97, 2y rose 9.26% to 4.79; DXY fell 0.82% to 99.14; gold rose 0.37% to 4379.8; Nasdaq fell 1.26% to 29368.44; S&P 500 fell 1.18% to 7656.98; 10y-2y spread 0.18, not inverted.",
+      "internal_divergence": "Yields rose sharply while the dollar weakened and gold firmed; equities slipped modestly and the yield curve flattened but is not inverted.",
+      "internal_pulls": [
+       {
+        "leans": "bearish",
+        "point": "10y yield +6.21% to 4.97"
+       },
+       {
+        "leans": "bearish",
+        "point": "2y yield +9.26% to 4.79"
+       },
+       {
+        "leans": "bearish",
+        "point": "Nasdaq -1.26% to 29368.44"
+       },
+       {
+        "leans": "bearish",
+        "point": "S&P 500 -1.18% to 7656.98"
+       },
+       {
+        "leans": "bullish",
+        "point": "Gold +0.37% to 4379.8"
+       },
+       {
+        "leans": "bullish",
+        "point": "10y-2y spread 0.18, not inverted"
+       }
+      ]
+     }
+    },
+    {
+     "skill": "market-intel",
+     "status": "unavailable",
+     "reason": "no US stock data path: this Skill reads on-chain flows, stablecoins and crypto market structure, none of which describe a stock"
+    },
+    {
+     "skill": "news-briefing",
+     "status": "ok",
+     "value": {
+      "source": "news-briefing",
+      "direction": "bullish",
+      "conviction": 0.7,
+      "timeframe": "months",
+      "evidence": "Headlines include '2 Monster Stocks to Buy and Hold for at Least the Next 5 Years', 'ServiceNow's AI Business Triples Before 2029', and 'Down 50% Over the Past Year, Is It Time to Back Up the Truck and Buy Oracle Stock as Revenue Surges?'",
+      "internal_divergence": null,
+      "internal_pulls": []
+     }
+    },
+    {
+     "skill": "sentiment-analyst",
+     "status": "ok",
+     "value": {
+      "source": "sentiment-analyst",
+      "direction": "neutral",
+      "conviction": 0.1,
+      "timeframe": "months",
+      "evidence": "VIX last 15.84, month ago 15.28, 1-month high 17.84, 1-month low 14.25.",
+      "internal_divergence": null,
+      "internal_pulls": []
+     }
+    },
+    {
+     "skill": "technical-analysis",
+     "status": "ok",
+     "value": {
+      "source": "technical-analysis",
+      "direction": "bearish",
+      "conviction": 0.6,
+      "timeframe": "days",
+      "evidence": "4h price 214.7 below ma7 216.21, ma25 218.93, ma99 223.53; 4h RSI 23.68; 4h MACD hist -0.11, crossed down 3 bars ago; 1d price 214.71 below ma7 221.58 and ma25 221.07 but above ma99 210.82; 1d RSI 41.69; 1d MACD hist -1.52, crossed down 3 bars ago.",
+      "internal_divergence": "4h RSI 23.68 is oversold and 1d price 214.71 holds above ma99 210.82, while 4h and 1d MACD histograms are negative and prices sit below shorter MAs.",
+      "internal_pulls": [
+       {
+        "leans": "bullish",
+        "point": "4h RSI 23.68, below 30"
+       },
+       {
+        "leans": "bullish",
+        "point": "1d price 214.71 above ma99 210.82"
+       },
+       {
+        "leans": "bearish",
+        "point": "4h price below ma7 216.21, ma25 218.93, ma99 223.53"
+       },
+       {
+        "leans": "bearish",
+        "point": "4h MACD hist -0.11, crossed down 3 bars ago"
+       },
+       {
+        "leans": "bearish",
+        "point": "1d MACD hist -1.52, crossed down 3 bars ago"
+       },
+       {
+        "leans": "bearish",
+        "point": "1d RSI 41.69, below 50"
+       }
+      ]
+     }
+    }
+   ],
+   "brief": {
+    "ticker": "NVDA",
+    "agreement_level": "mixed",
+    "headline": "Two sources split because one looks many months out and the other only days.",
+    "consensus_summary": "Four sources reported. Two are neutral over months, one is bullish over months, and one is bearish over days. The only conflict is between the bullish news view and the bearish short-term technical view, and it is mostly a difference in time horizon.",
+    "reporting": 4,
+    "total": 5,
+    "conflicts": [
+     {
+      "sources": [
+       "news-briefing",
+       "technical-analysis"
+      ],
+      "materiality": "medium",
+      "why_it_matters": "Price may already reflect the news.",
+      "is_timeframe_divergence": true,
+      "in_plain_terms": "The news source is thinking about long-term promise from recent tech headlines, while the technical source is watching a short-term pullback, so they are not really in conflict.",
+      "description": "News-briefing has a bullish direction with 0.7 conviction over months. Its evidence is headlines about buying stocks for five years, ServiceNow's AI business tripling before 2029, and Oracle's revenue surge after a 50 percent price drop. Technical-analysis has a bearish direction with 0.6 conviction over days. Its evidence is that the four-hour price of 214.7 sits below its 7, 25, and 99 moving averages at 216.21, 218.93, and 223.53, the four-hour RSI is 23.68, and the four-hour MACD histogram is minus 0.11 and crossed down three bars ago. On the daily chart the price of 214.71 is below the 7 and 25 moving averages at 221.58 and 221.07 but above the 99 moving average at 210.82, the daily RSI is 41.69, and the daily MACD histogram is minus 1.52 and crossed down three bars ago. Because news-briefing looks months ahead and technical-analysis looks only days ahead, these two views can both be correct at once.",
+      "case_for_a": "News-briefing would be right if the long-term revenue and AI themes in its headlines lead to higher demand over months, making the short-term technical weakness irrelevant to that horizon.",
+      "case_for_b": "Technical-analysis would be right if the current price continues to hold below its short-term moving averages and the negative momentum persists for days, even if the longer-term story remains positive.",
+      "what_would_resolve_it": "A four-hour close above 223.53 would show the short-term slide is fading. A daily close below 210.82 would show the bearish daily view is intact."
+     }
+    ],
+    "internal_divergences": [
+     {
+      "source": "macro-analyst",
+      "materiality": "medium",
+      "detail": "Yields rose sharply while the dollar weakened and gold firmed; equities slipped modestly and the yield curve flattened but is not inverted.",
+      "pulls": [
+       {
+        "leans": "bearish",
+        "point": "10y yield +6.21% to 4.97"
+       },
+       {
+        "leans": "bearish",
+        "point": "2y yield +9.26% to 4.79"
+       },
+       {
+        "leans": "bearish",
+        "point": "Nasdaq -1.26% to 29368.44"
+       },
+       {
+        "leans": "bearish",
+        "point": "S&P 500 -1.18% to 7656.98"
+       },
+       {
+        "leans": "bullish",
+        "point": "Gold +0.37% to 4379.8"
+       },
+       {
+        "leans": "bullish",
+        "point": "10y-2y spread 0.18, not inverted"
+       }
+      ]
+     },
+     {
+      "source": "technical-analysis",
+      "materiality": "medium",
+      "detail": "4h RSI 23.68 is oversold and 1d price 214.71 holds above ma99 210.82, while 4h and 1d MACD histograms are negative and prices sit below shorter MAs.",
+      "pulls": [
+       {
+        "leans": "bullish",
+        "point": "4h RSI 23.68, below 30"
+       },
+       {
+        "leans": "bullish",
+        "point": "1d price 214.71 above ma99 210.82"
+       },
+       {
+        "leans": "bearish",
+        "point": "4h price below ma7 216.21, ma25 218.93, ma99 223.53"
+       },
+       {
+        "leans": "bearish",
+        "point": "4h MACD hist -0.11, crossed down 3 bars ago"
+       },
+       {
+        "leans": "bearish",
+        "point": "1d MACD hist -1.52, crossed down 3 bars ago"
+       },
+       {
+        "leans": "bearish",
+        "point": "1d RSI 41.69, below 50"
+       }
+      ]
+     }
+    ],
+    "unavailable_sources": [
+     {
+      "source": "market-intel",
+      "reason": "no US stock data path: this Skill reads on-chain flows, stablecoins and crypto market structure, none of which describe a stock"
+     }
+    ]
+   },
+   "normaliseMs": 75731,
+   "conflictMs": 31982
+  },
+  "SOL": {
+   "normalised": [
+    {
+     "skill": "macro-analyst",
+     "status": "ok",
+     "value": {
+      "source": "macro-analyst",
+      "direction": "neutral",
+      "conviction": 0.3,
+      "timeframe": "months",
+      "evidence": "US 10Y yield 4.97% vs 4.68% a month ago (+6.21%), US 2Y yield 4.79% vs 4.39% (+9.26%), DXY 99.12 vs 99.96 (-0.84%), gold 4408.9 vs 4363.6 (+1.04%), Nasdaq 100 29368.44 vs 29742.6 (-1.26%), S&P 500 7656.98 vs 7748.5 (-1.18%).",
+      "internal_divergence": "Rising Treasury yields and modest equity declines lean bearish for risk, while gold's gain and a lower dollar lean bullish for hard assets; the 10Y-2Y spread at 0.18 and not inverted adds a less bearish rate-structure signal.",
+      "internal_pulls": [
+       {
+        "leans": "bearish",
+        "point": "US 2Y yield +9.26% over month"
+       },
+       {
+        "leans": "bearish",
+        "point": "US 10Y yield +6.21% over month"
+       },
+       {
+        "leans": "bearish",
+        "point": "Nasdaq 100 -1.26% over month"
+       },
+       {
+        "leans": "bearish",
+        "point": "S&P 500 -1.18% over month"
+       },
+       {
+        "leans": "bullish",
+        "point": "Gold +1.04% over month"
+       },
+       {
+        "leans": "bullish",
+        "point": "10Y-2Y spread +0.18, not inverted"
+       }
+      ]
+     }
+    },
+    {
+     "skill": "market-intel",
+     "status": "ok",
+     "value": {
+      "source": "market-intel",
+      "direction": "bearish",
+      "conviction": 0.45,
+      "timeframe": "intraday",
+      "evidence": "total_market_cap_change_24h_pct is -3.76, USDC 7d change is -316,966,783 USD, USDT 7d change is +98,229,171 USD, USDe 7d change is +243,501,937 USD",
+      "internal_divergence": "Market cap 24h change is bearish at -3.76%, while stablecoin 7d changes are mixed: USDT, USDS, and USDe grew, but USDC and DAI shrank.",
+      "internal_pulls": [
+       {
+        "leans": "bearish",
+        "point": "Total market cap 24h change -3.76%"
+       },
+       {
+        "leans": "bearish",
+        "point": "USDC 7d change -316,966,783 USD"
+       },
+       {
+        "leans": "bearish",
+        "point": "DAI 7d change -37,310,398 USD"
+       },
+       {
+        "leans": "bullish",
+        "point": "USDT 7d change +98,229,171 USD"
+       },
+       {
+        "leans": "bullish",
+        "point": "USDS 7d change +117,427,417 USD"
+       },
+       {
+        "leans": "bullish",
+        "point": "USDe 7d change +243,501,937 USD"
+       }
+      ]
+     }
+    },
+    {
+     "skill": "news-briefing",
+     "status": "ok",
+     "value": {
+      "source": "news-briefing",
+      "direction": "neutral",
+      "conviction": 0.1,
+      "timeframe": "days",
+      "evidence": "Headline from decrypt: 'AI Is Solving Math's Best Problems Faster Than They Can Be Replaced, Terence Tao Warns'; feeds_returning: 1",
+      "internal_divergence": null,
+      "internal_pulls": []
+     }
+    },
+    {
+     "skill": "sentiment-analyst",
+     "status": "ok",
+     "value": {
+      "source": "sentiment-analyst",
+      "direction": "bullish",
+      "conviction": 0.6,
+      "timeframe": "days",
+      "evidence": "Fear & Greed index value 61, classification Greed; history values 61, 63, 56, 69, 66, 69, 71, 73, all classified Greed.",
+      "internal_divergence": null,
+      "internal_pulls": []
+     }
+    },
+    {
+     "skill": "technical-analysis",
+     "status": "ok",
+     "value": {
+      "source": "technical-analysis",
+      "direction": "neutral",
+      "conviction": 0.25,
+      "timeframe": "days",
+      "evidence": "4h: price 100.99, MA7 100.9229, MA25 100.9904, MA99 102.7382; RSI 47.18; MACD hist -0.0044, crossed down 1 bar; Bollinger %B 0.534. 1d: price 100.99, MA7 101.8029, MA25 100.8252, MA99 81.0622; RSI 55.78; MACD hist -1.1912, crossed down 9 bars; Bollinger %B 0.3577.",
+      "internal_divergence": "4h MACD crossed down 1 bar ago with negative hist and RSI 47.18 point bearish, but 4h Bollinger %B 0.534 above midline points bullish. 1d RSI 55.78 above 50 is bullish, but 1d MACD hist -1.1912 crossed down 9 bars and price 100.99 below 1d MA7 101.8029 point bearish.",
+      "internal_pulls": [
+       {
+        "leans": "bearish",
+        "point": "4h MACD hist -0.0044, crossed down 1 bar"
+       },
+       {
+        "leans": "bearish",
+        "point": "4h RSI 47.18 below 50"
+       },
+       {
+        "leans": "bearish",
+        "point": "1d MACD hist -1.1912, crossed down 9 bars"
+       },
+       {
+        "leans": "bullish",
+        "point": "1d RSI 55.78 above 50"
+       },
+       {
+        "leans": "bullish",
+        "point": "4h Bollinger %B 0.534 above 0.5"
+       },
+       {
+        "leans": "bullish",
+        "point": "1d price 100.99 above MA99 81.0622"
+       }
+      ]
+     }
+    }
+   ],
+   "brief": {
+    "ticker": "SOL",
+    "agreement_level": "sharp_conflict",
+    "headline": "Two sources are split: one sees a short-term drop, the other sees growing confidence.",
+    "consensus_summary": "Five sources reported. Three are neutral, one is bearish on intraday capital flows, and one is bullish on days. The sharpest disagreement is between the bearish intraday flow source and the bullish crowd sentiment source.",
+    "reporting": 5,
+    "total": 5,
+    "conflicts": [
+     {
+      "sources": [
+       "market-intel",
+       "sentiment-analyst"
+      ],
+      "materiality": "high",
+      "why_it_matters": "Smart money against the crowd, the classic informative divergence.",
+      "is_timeframe_divergence": false,
+      "in_plain_terms": "One source says money is leaving the market today, while the other says people are feeling very greedy, so they are seeing opposite moods.",
+      "description": "Market-intel is bearish because total market cap changed -3.76% in 24 hours and USDC's 7-day change was -316,966,783 USD, although USDT, USDS, and USDe grew. Sentiment-analyst is bullish because the Fear & Greed index reads 61, classified as Greed, and its recent values are all classified Greed. The timeframes differ: market-intel covers intraday, while sentiment-analyst covers days.",
+      "case_for_a": "For market-intel to be right, the negative 24-hour market cap change and the USDC outflows would need to represent actual selling pressure that overwhelms any greed-driven buying.",
+      "case_for_b": "For sentiment-analyst to be right, the Fear & Greed reading of 61 and the repeated Greed classifications would need to reflect durable optimism that survives the current short-term outflows.",
+      "what_would_resolve_it": "A specific resolution would be the next total market cap 24-hour change and the Fear & Greed index: if total market cap changes positive while the index stays above 60, sentiment-analyst is favored; if it stays negative and the index falls below 50, market-intel is favored."
+     }
+    ],
+    "internal_divergences": [
+     {
+      "source": "macro-analyst",
+      "materiality": "medium",
+      "detail": "Rising Treasury yields and modest equity declines lean bearish for risk, while gold's gain and a lower dollar lean bullish for hard assets; the 10Y-2Y spread at 0.18 and not inverted adds a less bearish rate-structure signal.",
+      "pulls": [
+       {
+        "leans": "bearish",
+        "point": "US 2Y yield +9.26% over month"
+       },
+       {
+        "leans": "bearish",
+        "point": "US 10Y yield +6.21% over month"
+       },
+       {
+        "leans": "bearish",
+        "point": "Nasdaq 100 -1.26% over month"
+       },
+       {
+        "leans": "bearish",
+        "point": "S&P 500 -1.18% over month"
+       },
+       {
+        "leans": "bullish",
+        "point": "Gold +1.04% over month"
+       },
+       {
+        "leans": "bullish",
+        "point": "10Y-2Y spread +0.18, not inverted"
+       }
+      ]
+     },
+     {
+      "source": "market-intel",
+      "materiality": "medium",
+      "detail": "Market cap 24h change is bearish at -3.76%, while stablecoin 7d changes are mixed: USDT, USDS, and USDe grew, but USDC and DAI shrank.",
+      "pulls": [
+       {
+        "leans": "bearish",
+        "point": "Total market cap 24h change -3.76%"
+       },
+       {
+        "leans": "bearish",
+        "point": "USDC 7d change -316,966,783 USD"
+       },
+       {
+        "leans": "bearish",
+        "point": "DAI 7d change -37,310,398 USD"
+       },
+       {
+        "leans": "bullish",
+        "point": "USDT 7d change +98,229,171 USD"
+       },
+       {
+        "leans": "bullish",
+        "point": "USDS 7d change +117,427,417 USD"
+       },
+       {
+        "leans": "bullish",
+        "point": "USDe 7d change +243,501,937 USD"
+       }
+      ]
+     },
+     {
+      "source": "technical-analysis",
+      "materiality": "medium",
+      "detail": "4h MACD crossed down 1 bar ago with negative hist and RSI 47.18 point bearish, but 4h Bollinger %B 0.534 above midline points bullish. 1d RSI 55.78 above 50 is bullish, but 1d MACD hist -1.1912 crossed down 9 bars and price 100.99 below 1d MA7 101.8029 point bearish.",
+      "pulls": [
+       {
+        "leans": "bearish",
+        "point": "4h MACD hist -0.0044, crossed down 1 bar"
+       },
+       {
+        "leans": "bearish",
+        "point": "4h RSI 47.18 below 50"
+       },
+       {
+        "leans": "bearish",
+        "point": "1d MACD hist -1.1912, crossed down 9 bars"
+       },
+       {
+        "leans": "bullish",
+        "point": "1d RSI 55.78 above 50"
+       },
+       {
+        "leans": "bullish",
+        "point": "4h Bollinger %B 0.534 above 0.5"
+       },
+       {
+        "leans": "bullish",
+        "point": "1d price 100.99 above MA99 81.0622"
+       }
+      ]
+     }
+    ],
+    "unavailable_sources": []
+   },
+   "normaliseMs": 35831,
+   "conflictMs": 41084
+  },
+  "TSLA": {
+   "normalised": [
+    {
+     "skill": "macro-analyst",
+     "status": "ok",
+     "value": {
+      "source": "macro-analyst",
+      "direction": "neutral",
+      "conviction": 0.2,
+      "timeframe": "months",
+      "evidence": "US 10Y yield 4.97% up 6.21% from 4.68%; US 2Y yield 4.79% up 9.26%; DXY 99.14 down 0.82%; gold 4379.2 up 0.36%; Nasdaq 100 29368.44 down 1.26%; S&P 500 7656.98 down 1.18%; 10y-2y spread 0.18, curve not inverted.",
+      "internal_divergence": "Rising Treasury yields and falling equities point bearish, while a lower dollar and firmer gold point bullish.",
+      "internal_pulls": [
+       {
+        "leans": "bearish",
+        "point": "10Y yield up 6.21% to 4.97%"
+       },
+       {
+        "leans": "bearish",
+        "point": "2Y yield up 9.26% to 4.79%"
+       },
+       {
+        "leans": "bullish",
+        "point": "DXY down 0.82% to 99.14"
+       },
+       {
+        "leans": "bullish",
+        "point": "Gold up 0.36% to 4379.2"
+       },
+       {
+        "leans": "bearish",
+        "point": "Nasdaq 100 down 1.26% to 29368.44"
+       },
+       {
+        "leans": "bearish",
+        "point": "S&P 500 down 1.18% to 7656.98"
+       }
+      ]
+     }
+    },
+    {
+     "skill": "market-intel",
+     "status": "unavailable",
+     "reason": "no US stock data path: this Skill reads on-chain flows, stablecoins and crypto market structure, none of which describe a stock"
+    },
+    {
+     "skill": "news-briefing",
+     "status": "ok",
+     "value": {
+      "source": "news-briefing",
+      "direction": "neutral",
+      "conviction": 0.2,
+      "timeframe": "months",
+      "evidence": "Headlines include: 'Elon Musk Needs Tesla to Reach a $8.5 Trillion Market Cap to Cash In'; '$10,000 in Tesla When It Joined the S&P 500 Would Be About $15,700 Today. An Index Fund Would Have Done Better.'; 'Nearly All Robotaxi Billions Flow to TSLA, Not You'; 'Musk attacks Britain over stifling driverless car rules'.",
+      "internal_divergence": "Headlines contain both bullish signals (Robotaxi billions flow to TSLA, $8.5 trillion market cap target) and bearish signals (Tesla underperformed index since S&P inclusion, Musk attacks stifling driverless rules).",
+      "internal_pulls": [
+       {
+        "leans": "bullish",
+        "point": "Robotaxi billions flow to TSLA, not you"
+       },
+       {
+        "leans": "bullish",
+        "point": "$8.5 trillion market cap target"
+       },
+       {
+        "leans": "bearish",
+        "point": "Tesla underperformed index since S&P inclusion"
+       },
+       {
+        "leans": "bearish",
+        "point": "Musk attacks stifling driverless car rules"
+       }
+      ]
+     }
+    },
+    {
+     "skill": "sentiment-analyst",
+     "status": "ok",
+     "value": {
+      "source": "sentiment-analyst",
+      "direction": "neutral",
+      "conviction": 0.1,
+      "timeframe": "months",
+      "evidence": "VIX last 15.84, month ago 15.28, 1-month high 17.84, 1-month low 14.25.",
+      "internal_divergence": null,
+      "internal_pulls": []
+     }
+    },
+    {
+     "skill": "technical-analysis",
+     "status": "ok",
+     "value": {
+      "source": "technical-analysis",
+      "direction": "neutral",
+      "conviction": 0.2,
+      "timeframe": "days",
+      "evidence": "4h timeframe: RSI 45.28, MACD histogram -0.593, price 362.91 below MA7 364.83 and MA25 365.19. 1d timeframe: RSI 53.87, MACD histogram +0.148, DIF 4.719 above DEA 4.571, price 362.89 above MA25 358.43. Bollinger pctB: 4h 0.219 vs 1d 0.637. Conflicting signals lead to a neutral overall view.",
+      "internal_divergence": "4h indicators are bearish while 1d indicators are bullish.",
+      "internal_pulls": [
+       {
+        "leans": "bearish",
+        "point": "4h MACD hist -0.593, DIF below DEA"
+       },
+       {
+        "leans": "bearish",
+        "point": "4h RSI 45.28 below 50 midline"
+       },
+       {
+        "leans": "bearish",
+        "point": "4h price 362.91 below MA7 364.83"
+       },
+       {
+        "leans": "bullish",
+        "point": "1d MACD hist +0.148, DIF above DEA"
+       },
+       {
+        "leans": "bullish",
+        "point": "1d RSI 53.87 above 50 midline"
+       },
+       {
+        "leans": "bullish",
+        "point": "1d price 362.89 above MA25 358.43"
+       }
+      ]
+     }
+    }
+   ],
+   "brief": {
+    "ticker": "TSLA",
+    "agreement_level": "strong_agreement",
+    "headline": "All four sources sit neutral, though each sees crosscurrents underneath.",
+    "consensus_summary": "Four sources reported. All four express a neutral view for TSLA, with macro, news, sentiment, and technical inputs each showing offsetting bullish and bearish signals rather than a collective lean.",
+    "reporting": 4,
+    "total": 5,
+    "conflicts": [],
+    "internal_divergences": [
+     {
+      "source": "macro-analyst",
+      "materiality": "medium",
+      "detail": "Rising Treasury yields and falling equities point bearish, while a lower dollar and firmer gold point bullish.",
+      "pulls": [
+       {
+        "leans": "bearish",
+        "point": "10Y yield up 6.21% to 4.97%"
+       },
+       {
+        "leans": "bearish",
+        "point": "2Y yield up 9.26% to 4.79%"
+       },
+       {
+        "leans": "bullish",
+        "point": "DXY down 0.82% to 99.14"
+       },
+       {
+        "leans": "bullish",
+        "point": "Gold up 0.36% to 4379.2"
+       },
+       {
+        "leans": "bearish",
+        "point": "Nasdaq 100 down 1.26% to 29368.44"
+       },
+       {
+        "leans": "bearish",
+        "point": "S&P 500 down 1.18% to 7656.98"
+       }
+      ]
+     },
+     {
+      "source": "news-briefing",
+      "materiality": "medium",
+      "detail": "Headlines contain both bullish signals (Robotaxi billions flow to TSLA, $8.5 trillion market cap target) and bearish signals (Tesla underperformed index since S&P inclusion, Musk attacks stifling driverless rules).",
+      "pulls": [
+       {
+        "leans": "bullish",
+        "point": "Robotaxi billions flow to TSLA, not you"
+       },
+       {
+        "leans": "bullish",
+        "point": "$8.5 trillion market cap target"
+       },
+       {
+        "leans": "bearish",
+        "point": "Tesla underperformed index since S&P inclusion"
+       },
+       {
+        "leans": "bearish",
+        "point": "Musk attacks stifling driverless car rules"
+       }
+      ]
+     },
+     {
+      "source": "technical-analysis",
+      "materiality": "medium",
+      "detail": "4h indicators are bearish while 1d indicators are bullish.",
+      "pulls": [
+       {
+        "leans": "bearish",
+        "point": "4h MACD hist -0.593, DIF below DEA"
+       },
+       {
+        "leans": "bearish",
+        "point": "4h RSI 45.28 below 50 midline"
+       },
+       {
+        "leans": "bearish",
+        "point": "4h price 362.91 below MA7 364.83"
+       },
+       {
+        "leans": "bullish",
+        "point": "1d MACD hist +0.148, DIF above DEA"
+       },
+       {
+        "leans": "bullish",
+        "point": "1d RSI 53.87 above 50 midline"
+       },
+       {
+        "leans": "bullish",
+        "point": "1d price 362.89 above MA25 358.43"
+       }
+      ]
+     }
+    ],
+    "unavailable_sources": [
+     {
+      "source": "market-intel",
+      "reason": "no US stock data path: this Skill reads on-chain flows, stablecoins and crypto market structure, none of which describe a stock"
+     }
+    ]
+   },
+   "normaliseMs": 34694,
+   "conflictMs": 6380
+  }
+ },
+ "scenarios": {
+  "sharp-conflict": {
+   "brief": {
+    "ticker": "BTC",
+    "agreement_level": "sharp_conflict",
+    "headline": "Five sources are split: two lean upbeat, two lean downbeat, and one is unsure.",
+    "consensus_summary": "Five sources reported: two are bullish, two are bearish, and one is neutral. They do not settle on a single direction; the splits align with the different horizons each source is watching.",
+    "reporting": 5,
+    "total": 5,
+    "conflicts": [
+     {
+      "sources": [
+       "market-intel",
+       "macro-analyst"
+      ],
+      "materiality": "high",
+      "why_it_matters": "Two genuinely independent views: positioning versus structure.",
+      "is_timeframe_divergence": false,
+      "in_plain_terms": "One source sees money flowing into the asset over the next few weeks, while the other sees rising borrowing costs biting over the next few months.",
+      "description": "Market-intel reports net ETF inflows of $412m over 5 sessions, exchange reserves down 18,400 BTC, and stablecoin supply up $2.1bn, giving a bullish weeks view. Macro-analyst reports a CPI surprise at 3.4% versus 3.1% expected, a 28 basis point repricing in the 2-year yield, and a stronger dollar, giving a bearish months view.",
+      "case_for_a": "ETF inflows keep running at or above the $412m five-session pace, exchange reserves keep falling, and stablecoin supply keeps expanding.",
+      "case_for_b": "Inflation stays above the 3.1% expected, the 2-year yield holds its 28 basis point repricing, and the dollar keeps strengthening.",
+      "what_would_resolve_it": "The next monthly CPI print and whether it lands above or below the 3.1% expected, combined with a weekly ETF flow print showing whether the $412m five-session pace continues or reverses."
+     },
+     {
+      "sources": [
+       "market-intel",
+       "technical-analysis"
+      ],
+      "materiality": "high",
+      "why_it_matters": "Capital flow against price action; flows often lead.",
+      "is_timeframe_divergence": true,
+      "in_plain_terms": "These two are using different clocks: one is looking at money flows over weeks while the other is looking at price moves over hours, so both can be right at once.",
+      "description": "Market-intel tracks ETF inflows, falling exchange reserves, and rising stablecoin supply over a weeks horizon. Technical-analysis tracks RSI at 38.2, price below MA25 at 77885 and MA99 at 78658, and a negative MACD histogram on a 4-hour chart, with an internal note that Bollinger pctB at 0.31 suggests room lower but OBV has risen over the same 12 bars.",
+      "case_for_a": "Positive ETF inflows continue, exchange reserves keep falling, and stablecoin supply keeps rising, confirming that longer-horizon capital is still entering.",
+      "case_for_b": "The intraday price stays below MA25 at 77885 and MA99 at 78658, and the MACD histogram remains negative, showing short-term selling pressure even as OBV rises.",
+      "what_would_resolve_it": "A 4-hour close above MA25 at 77885 while weekly ETF inflows stay positive would favor the flow view, while a further 4-hour decline with weekly inflows turning negative would favor the technical view."
+     },
+     {
+      "sources": [
+       "macro-analyst",
+       "sentiment-analyst"
+      ],
+      "materiality": "low",
+      "why_it_matters": "Pair not in the materiality matrix; treated as low until rated.",
+      "is_timeframe_divergence": true,
+      "in_plain_terms": "These two look at different time spans: one sees a tougher borrowing environment building over months, while the other sees a burst of trader optimism over days, so both can be true at once.",
+      "description": "Macro-analyst cites the CPI surprise at 3.4% versus 3.1% expected, a 28 basis point repricing in the 2-year yield, and a stronger dollar as a months-long bearish signal. Sentiment-analyst cites Fear & Greed at 72, a long/short ratio of 2.4, and positive 8-hour funding as a days-long bullish signal.",
+      "case_for_a": "Inflation keeps running above expected, the 2-year yield holds or extends its repricing, and the dollar stays bid.",
+      "case_for_b": "Greed remains elevated, the long/short ratio stays above 2, and funding remains positive, showing short-term traders are still leaning long.",
+      "what_would_resolve_it": "The next CPI print and the 2-year yield's reaction to it, combined with whether the Fear & Greed Index holds above 70 or falls back toward 54."
+     },
+     {
+      "sources": [
+       "sentiment-analyst",
+       "technical-analysis"
+      ],
+      "materiality": "low",
+      "why_it_matters": "Both derive from the same candles. Their disagreement is usually noise, and their agreement is worthless as confirmation.",
+      "is_timeframe_divergence": false,
+      "in_plain_terms": "Both are reading the same short-term price chart and disagreeing about whether the crowd's eagerness or the price chart's message matters more.",
+      "description": "Sentiment-analyst sees bullishness in Fear & Greed at 72, a long/short ratio of 2.4, and positive 8-hour funding. Technical-analysis sees bearishness in RSI at 38.2, price below MA25 at 77885 and MA99 at 78658, and a negative MACD histogram, with an internal split between Bollinger pctB at 0.31 and rising OBV.",
+      "case_for_a": "The crowd's positioning stays strong: greed holds above 70, the long/short ratio stays above 2, and funding remains positive.",
+      "case_for_b": "The chart's downward momentum continues: RSI stays below 50, price stays below MA25 and MA99, and the MACD histogram stays negative, with the OBV rise not enough to push price up.",
+      "what_would_resolve_it": "A 4-hour RSI crossing back above 50 while price closes above MA25 at 77885 would favor sentiment, while a 4-hour RSI staying below 40 and the long/short ratio falling from 2.4 would favor technical."
+     }
+    ],
+    "internal_divergences": [
+     {
+      "source": "technical-analysis",
+      "materiality": "medium",
+      "detail": "Bollinger pctB at 0.31 suggests room lower, but OBV has risen over the same 12 bars.",
+      "pulls": []
+     }
+    ],
+    "unavailable_sources": []
+   },
+   "normaliseMs": 0,
+   "conflictMs": 143434
+  },
+  "strong-agreement": {
+   "brief": {
+    "ticker": "BTC",
+    "agreement_level": "strong_agreement",
+    "headline": "Five sources all describe the outlook as positive, but they focus on different time horizons.",
+    "consensus_summary": "All five sources reported and all point in the same positive direction. They agree on supportive conditions, while each explains them with different evidence and a different time span. No source contradicts another.",
+    "reporting": 5,
+    "total": 5,
+    "conflicts": [],
+    "internal_divergences": [],
+    "unavailable_sources": []
+   },
+   "normaliseMs": 0,
+   "conflictMs": 14476
+  },
+  "timeframe-divergence": {
+   "brief": {
+    "ticker": "BTC",
+    "agreement_level": "mixed",
+    "headline": "Three sources split by time horizon, with one expecting a fall, one a rise, and one little change.",
+    "consensus_summary": "Three sources reported. One expects a decline over months, one expects an increase within the day, and one expects little change over days. There is no single shared direction because the decline and increase views describe different time horizons, while the neutral view sees no dominant catalyst in the last day.",
+    "reporting": 3,
+    "total": 3,
+    "conflicts": [
+     {
+      "sources": [
+       "macro-analyst",
+       "technical-analysis"
+      ],
+      "materiality": "medium",
+      "why_it_matters": "Different timeframes, so often not a real conflict.",
+      "is_timeframe_divergence": true,
+      "in_plain_terms": "One source is worried about a weak economy and persistent inflation over the next few months, while the other is pointing to an upward move over the next few hours, and they can both be right because they are looking at different time windows.",
+      "description": "Macro-analyst is bearish for months, citing a 10-year minus 2-year yield inversion of 47 basis points for a fourth consecutive month, core PCE re-accelerating to 3.2 percent, and Fed minutes repeating higher for longer. Technical-analysis is bullish within the day, citing a 4-hour RSI of 62.4, price above the 7-period moving average at 77,310, the 25-period at 77,885 and the 99-period at 78,658, a MACD histogram of +305 with an upward cross two bars ago, and an ADX of 27 that is rising.",
+      "case_for_a": "For macro-analyst to be right, the bond-market stress and re-accelerating inflation it cites would need to lead to sustained downward pressure on the market over the coming months, and the Fed would need to maintain tighter policy for longer as the minutes suggest.",
+      "case_for_b": "For technical-analysis to be right, the current short-term upward push would need to continue, with price staying above the moving averages and the upward MACD cross holding within the intraday session.",
+      "what_would_resolve_it": "A new monthly core PCE release and a 4-hour close below 77,310 or above 78,658 would show whether each source's own timeframe evidence is still intact, since no single event resolves both horizons at once."
+     }
+    ],
+    "internal_divergences": [],
+    "unavailable_sources": []
+   },
+   "normaliseMs": 0,
+   "conflictMs": 32942
+  },
+  "missing-source": {
+   "brief": {
+    "ticker": "BTC",
+    "agreement_level": "sharp_conflict",
+    "headline": "The three reports split: one sees strength, one sees worry, one sees little change.",
+    "consensus_summary": "Three sources reported. They do not form a collective directional view: one is bullish, one is bearish, and one is neutral.",
+    "reporting": 3,
+    "total": 5,
+    "conflicts": [
+     {
+      "sources": [
+       "market-intel",
+       "sentiment-analyst"
+      ],
+      "materiality": "high",
+      "why_it_matters": "Smart money against the crowd, the classic informative divergence.",
+      "is_timeframe_divergence": false,
+      "in_plain_terms": "They disagree on whether steady buying from larger investors matters more than the current cautious mood among shorter-term traders.",
+      "description": "Market-intel points to net ETF inflows of $295 million over four sessions and exchange reserves down by 9,800 BTC as evidence of bullish accumulation. Sentiment-analyst points to the Fear & Greed Index at 31 in Fear, down from 52, a long/short ratio of 0.81, and eight-hour funding at -0.009% as evidence of bearish positioning. The market-intel view is set over weeks, while the sentiment-analyst view is set over days.",
+      "case_for_a": "For market-intel to be right, the ETF inflows and falling exchange reserves would need to reflect sustained accumulation by buyers with a multi-week horizon, strong enough to absorb the short-term selling pressure implied by the sentiment data.",
+      "case_for_b": "For sentiment-analyst to be right, the Fear & Greed reading of 31, the long/short ratio of 0.81, and negative funding would need to signal enough trader caution or forced selling to overwhelm the buying that shows up in ETF inflows and exchange reserves.",
+      "what_would_resolve_it": "The next daily ETF flow print, showing whether net inflows continue near the $295 million pace or turn negative, would resolve which signal is stronger."
+     }
+    ],
+    "internal_divergences": [
+     {
+      "source": "technical-analysis",
+      "materiality": "medium",
+      "detail": "MACD has just crossed up while the MA stack remains bearish.",
+      "pulls": []
+     }
+    ],
+    "unavailable_sources": [
+     {
+      "source": "macro-analyst",
+      "reason": "upstream fetch failed (error field present)"
+     },
+     {
+      "source": "news-briefing",
+      "reason": "all feeds returned zero items"
+     }
+    ]
+   },
+   "normaliseMs": 0,
+   "conflictMs": 38801
+  }
+ }
+}

@@ -11,7 +11,7 @@
  * all, so "do not manufacture disagreement" stops being an instruction it might ignore and
  * becomes a property of the pipeline.
  */
-import { MODEL_REASON, askJson, extractJson } from "./llm";
+import { MODEL_REASON, PROVIDER_TROUBLE, askJson, extractJson } from "./llm";
 import { Pass2Output, type Brief, type NormalisedSource } from "./schema";
 import { agreementLevel, detectConflicts, internalDivergences, type ConflictCandidate } from "./materiality";
 import type { NormaliseOutcome } from "./schema";
@@ -114,6 +114,7 @@ export async function buildBrief(ticker: string, outcomes: NormaliseOutcome[], t
         break;
       } catch (e) {
         lastErr = e instanceof Error ? e.message : String(e);
+        if (PROVIDER_TROUBLE.test(lastErr)) break;
       }
     }
     if (lastErr) throw new Error(`conflict pass failed: ${lastErr}`);

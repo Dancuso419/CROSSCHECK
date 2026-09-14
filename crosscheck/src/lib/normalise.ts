@@ -6,7 +6,7 @@
  * opportunity to invent conflict. Pass 2 never sees raw data, only these objects —
  * that separation is what stops fabricated disagreement.
  */
-import { MODEL_EXTRACT, askJson, extractJson } from "./llm";
+import { MODEL_EXTRACT, PROVIDER_TROUBLE, askJson, extractJson } from "./llm";
 import { NormalisedSource, type NormaliseOutcome } from "./schema";
 import type { SourceResult } from "./fanout";
 
@@ -60,6 +60,8 @@ export async function normaliseSource(src: SourceResult): Promise<NormaliseOutco
       return { skill: src.skill, status: "ok", value: { ...parsed, source: src.skill } };
     } catch (e) {
       lastErr = e instanceof Error ? e.message : String(e);
+      // The retry is for a malformed answer. askJson has already tried every model.
+      if (PROVIDER_TROUBLE.test(lastErr)) break;
     }
   }
   return { skill: src.skill, status: "unavailable", reason: `normalisation failed: ${lastErr}` };
