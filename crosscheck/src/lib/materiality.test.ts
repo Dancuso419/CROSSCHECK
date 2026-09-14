@@ -13,7 +13,7 @@ const src = (
   direction: "bullish" | "bearish" | "neutral",
   timeframe: "intraday" | "days" | "weeks" | "months",
   internal_divergence: string | null = null,
-): NormalisedSource => ({ source, direction, conviction: 0.5, timeframe, evidence: "x", internal_divergence });
+): NormalisedSource => ({ source, direction, conviction: 0.5, timeframe, evidence: "x", internal_divergence, internal_pulls: [] });
 
 let fail = 0;
 const check = (name: string, cond: boolean, detail = "") => {

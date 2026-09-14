@@ -26,7 +26,8 @@ Return ONLY valid JSON matching this schema:
   "conviction": number between 0 and 1,
   "timeframe": "intraday" | "days" | "weeks" | "months",
   "evidence": string,
-  "internal_divergence": string | null
+  "internal_divergence": string | null,
+  "internal_pulls": [{ "leans": "bullish" | "bearish", "point": string }]
 }
 
 Rules:
@@ -36,6 +37,10 @@ Rules:
 - "conviction" reflects how strongly THIS SOURCE states its view, not how right it is.
 - "internal_divergence": if the source contains sub-signals pointing different ways
   (common for technical indicator sets), describe it. Otherwise null.
+- "internal_pulls": the same divergence split into its sides. One entry per sub-signal,
+  "leans" is the way that sub-signal points, "point" is under 10 words and names the
+  signal with its figure, e.g. "4h RSI 45, below the midline". Two to six entries, at
+  least one each way. If "internal_divergence" is null, return an empty array.
 - Do not incorporate outside knowledge. Only what is in the raw output.
 - Never use em dashes. Use a comma, a colon, or a full stop instead.`;
 }

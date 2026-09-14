@@ -19,6 +19,12 @@ export const NormalisedSource = z.object({
   timeframe: z.enum(TIMEFRAMES),
   evidence: z.string().min(1),
   internal_divergence: z.string().nullable(),
+  /* The same divergence split into its two sides, so the page can draw it as a
+     tug of war instead of a paragraph. Empty when the source does not diverge.
+     Defaulted so older fixtures, which predate it, still parse. */
+  internal_pulls: z
+    .array(z.object({ leans: z.enum(["bullish", "bearish"]), point: z.string().min(1) }))
+    .default([]),
 });
 export type NormalisedSource = z.infer<typeof NormalisedSource>;
 
@@ -68,6 +74,11 @@ export type Brief = {
     case_for_b: string;
     what_would_resolve_it: string;
   }[];
-  internal_divergences: { source: string; materiality: "medium"; detail: string }[];
+  internal_divergences: {
+    source: string;
+    materiality: "medium";
+    detail: string;
+    pulls: { leans: "bullish" | "bearish"; point: string }[];
+  }[];
   unavailable_sources: { source: string; reason: string }[];
 };

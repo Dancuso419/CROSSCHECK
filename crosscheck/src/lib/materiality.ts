@@ -112,7 +112,7 @@ export function detectConflicts(sources: NormalisedSource[]): ConflictCandidate[
 export const internalDivergences = (sources: NormalisedSource[]) =>
   sources
     .filter((s) => s.internal_divergence)
-    .map((s) => ({ source: s.source, materiality: "medium" as const, detail: s.internal_divergence! }));
+    .map((s) => ({ source: s.source, materiality: "medium" as const, detail: s.internal_divergence!, pulls: s.internal_pulls ?? [] }));
 
 /** Agreement level is counted, not judged. */
 export function agreementLevel(

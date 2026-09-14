@@ -379,6 +379,305 @@ function SourcePlate({ sources, links }: { sources: PlateSource[]; links: PlateL
   );
 }
 
+/* ------------------------------------------------------ gathering figure ---
+   "How this was gathered" as a picture. The run is three stages in proportion,
+   then every MCP call as a bar on one shared time axis. Status is carried by
+   fill, never colour: solid returned data, open answered empty, hatched never
+   answered. The cut-off rule shows why a dead source costs what it costs. */
+
+const HATCH = "repeating-linear-gradient(135deg, var(--ink-2) 0 1.5px, transparent 1.5px 5px)";
+const CALL_FILL: Record<string, string> = { ok: "var(--ink)", dead: "transparent", error: HATCH };
+const CALL_WORDS: Record<string, string> = { ok: "returned data", dead: "answered, but empty", error: "no answer" };
+
+function Swatch({ fill }: { fill: string }) {
+  return <span aria-hidden className="inline-block h-2.5 w-5 shrink-0 border border-[var(--ink)]" style={{ background: fill }} />;
+}
+
+function GatherFigure({ res }: { res: Result }) {
+  const t = res.timings;
+  const stages = [
+    ["Ask the sources", t.fanoutMs, "var(--ink)"],
+    ["Read each answer", t.normaliseMs, HATCH],
+    ["Find and explain disagreements", t.conflictMs, "transparent"],
+  ] as const;
+  const total = Math.max(1, stages.reduce((s, [, ms]) => s + ms, 0));
+  const secs = (ms: number) => `${(ms / 1000).toFixed(ms < 1000 ? 2 : 1)}s`;
+
+  const calls = res.sources.flatMap((s) =>
+    s.status === "unavailable" && s.reason?.startsWith("no US stock data path") ? [] : s.calls,
+  );
+  const returned = calls.filter((c) => c.status === "ok").length;
+  const live = res.mode === "live";
+  const slowest = Math.max(live ? 8000 : 0, 500, ...calls.map((c) => c.latencyMs));
+  const step = [250, 500, 1000, 2000, 5000, 10000].find((ms) => slowest / ms <= 5) ?? 20000;
+  const axisTop = Math.ceil(slowest / step) * step;
+  const ticks = Array.from({ length: axisTop / step + 1 }, (_, i) => i * step);
+  const pct = (ms: number) => `${Math.min(100, (ms / axisTop) * 100)}%`;
+
+  return (
+    <div>
+      {/* the run, in proportion */}
+      <div className="flex items-baseline justify-between gap-4">
+        <Label>The run, start to finish</Label>
+        <span className="font-[family-name:var(--font-display)] text-[1.35rem] leading-none">{secs(t.totalMs)}</span>
+      </div>
+      <div
+        className="mt-3 flex h-7 gap-[2px]"
+        role="img"
+        aria-label={stages.map(([l, ms]) => `${l} ${secs(ms)}`).join(", ")}
+      >
+        {stages.map(([label, ms, fill]) => (
+          <div
+            key={label}
+            title={`${label}: ${secs(ms)}`}
+            className="border border-[var(--ink)]"
+            style={{ width: `${Math.max(1.5, (ms / total) * 100)}%`, background: fill }}
+          />
+        ))}
+      </div>
+      <ol className="mt-3 grid gap-x-6 gap-y-2 sm:grid-cols-3">
+        {stages.map(([label, ms, fill], i) => (
+          <li key={label} className="flex items-center gap-2 text-[0.78rem] text-[var(--ink-2)]">
+            <Swatch fill={fill} />
+            <span>
+              {i + 1}. {label}
+            </span>
+            <span className="ml-auto font-[family-name:var(--font-data)] text-[0.72rem] text-[var(--ink-3)] sm:ml-0">
+              {secs(ms)}
+            </span>
+          </li>
+        ))}
+      </ol>
+
+      {calls.length > 0 && (
+        <>
+          <div className="mt-10 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+            <Label>Every call, on one clock</Label>
+            <span className="text-[0.8rem] text-[var(--ink-2)]">
+              <span className="font-[family-name:var(--font-display)] text-[1.1rem]">{returned}</span> of {calls.length} calls
+              returned data
+            </span>
+          </div>
+
+          <div className="mt-4">
+            {res.sources.map((s) => {
+              // A Skill with no path for this asset was never asked, so it gets no bars.
+              const notAsked = s.status === "unavailable" && s.reason?.startsWith("no US stock data path");
+              const shown = notAsked ? [] : s.calls;
+              const ok = shown.filter((c) => c.status === "ok").length;
+              return (
+                <div key={s.skill} className="grid grid-cols-1 gap-x-4 border-t border-[var(--rule)] py-3 sm:grid-cols-[11rem_1fr]">
+                  <div className="pb-2 sm:pb-0">
+                    <div className="font-[family-name:var(--font-data)] text-[0.76rem]">{s.skill}</div>
+                    <div className="mt-0.5 text-[0.7rem] text-[var(--ink-3)]">
+                      {shown.length === 0 ? "not asked: no data path for a stock" : `${ok} of ${shown.length} returned`}
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    {shown.map((c, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center gap-2"
+                        title={`${c.tool}/${c.action}: ${CALL_WORDS[c.status] ?? c.status} in ${c.latencyMs}ms${c.detail ? ` (${c.detail})` : ""}`}
+                      >
+                        <div className="relative h-3 flex-1">
+                          {live && (
+                            <span
+                              aria-hidden
+                              className="absolute -inset-y-1 w-px border-l border-dashed border-[var(--ink-3)]"
+                              style={{ left: pct(8000) }}
+                            />
+                          )}
+                          <div
+                            className="absolute inset-y-0 left-0 border border-[var(--ink)]"
+                            style={{ width: pct(Math.max(c.latencyMs, axisTop * 0.006)), background: CALL_FILL[c.status] ?? HATCH }}
+                          />
+                        </div>
+                        <span className="w-[8.5rem] shrink-0 truncate font-[family-name:var(--font-data)] text-[0.64rem] text-[var(--ink-3)] sm:w-[10rem]">
+                          {c.tool}/{c.action}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+            {/* shared time axis */}
+            <div className="grid grid-cols-1 gap-x-4 border-t border-[var(--frame)] pt-1.5 sm:grid-cols-[11rem_1fr]">
+              <span className="hidden sm:block" />
+              <div className="flex gap-2">
+                <div className="relative h-4 flex-1">
+                  {ticks.map((ms, i) => (
+                    <span
+                      key={ms}
+                      className={`absolute font-[family-name:var(--font-data)] text-[0.62rem] text-[var(--ink-3)] ${
+                        i === 0 ? "" : i === ticks.length - 1 ? "-translate-x-full" : "-translate-x-1/2"
+                      }`}
+                      style={{ left: pct(ms) }}
+                    >
+                      {+(ms / 1000).toFixed(2)}s
+                    </span>
+                  ))}
+                </div>
+                <span className="w-[8.5rem] shrink-0 sm:w-[10rem]" />
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-[0.74rem] text-[var(--ink-2)]">
+            {(["ok", "dead", "error"] as const).map((k) => (
+              <span key={k} className="flex items-center gap-2">
+                <Swatch fill={CALL_FILL[k]} />
+                {CALL_WORDS[k]}
+              </span>
+            ))}
+            {live && (
+              <span className="flex items-center gap-2">
+                <span aria-hidden className="inline-block h-3 w-px border-l border-dashed border-[var(--ink-3)]" />
+                8s cut-off, so a dead source cannot stall the page
+              </span>
+            )}
+            {res.mode === "demo" && <span className="text-[var(--ink-3)]">Times are from the capture, not from now.</span>}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/* --------------------------------------------------- divergence figures ----
+   A source disagreeing with itself is two groups of evidence pulling apart, so it
+   is drawn that way: what pulls down on the left, what pulls up on the right, and
+   a beam that tips toward whichever side holds more.                           */
+
+function Beam({ down, up }: { down: number; up: number }) {
+  // Heavier side sinks. SVG rotation is clockwise, so more "up" evidence tips right down.
+  const tilt = Math.max(-12, Math.min(12, (up - down) * 6));
+  const w = (n: number) => 5 + Math.min(n, 5) * 1.6;
+  return (
+    <svg width="124" height="50" viewBox="0 0 124 50" aria-hidden className="mx-auto">
+      <path d="M62 26 54 48h16Z" fill="none" stroke="var(--ink)" strokeWidth={1.1} />
+      <g transform={`rotate(${tilt} 62 26)`}>
+        <line x1="10" y1="26" x2="114" y2="26" stroke="var(--ink)" strokeWidth={1.6} />
+        <rect x={14 - w(down) / 2} y={26 - w(down)} width={w(down)} height={w(down)} fill="var(--ink)" />
+        <rect
+          x={110 - w(up) / 2} y={26 - w(up)} width={w(up)} height={w(up)}
+          fill="var(--sheet)" stroke="var(--ink)" strokeWidth={1.2}
+        />
+      </g>
+    </svg>
+  );
+}
+
+function TugOfWar({ d }: { d: Brief["internal_divergences"][number] }) {
+  const down = d.pulls.filter((p) => p.leans === "bearish");
+  const up = d.pulls.filter((p) => p.leans === "bullish");
+  const side = (items: typeof d.pulls, dir: "bearish" | "bullish") => (
+    <div className={dir === "bearish" ? "sm:text-right" : ""}>
+      <div className={`flex items-center gap-1.5 ${dir === "bearish" ? "sm:justify-end" : ""}`}>
+        <DirectionMark direction={dir} />
+        <Label>
+          {dir === "bearish" ? "Pulling down" : "Pulling up"} · {items.length}
+        </Label>
+      </div>
+      <ul className="mt-2 space-y-1.5">
+        {items.map((p, i) => (
+          <li key={i} className="text-[0.84rem] leading-snug text-[var(--ink-2)]">
+            {p.point}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+  return (
+    <div className="grid items-center gap-x-6 gap-y-4 sm:grid-cols-[1fr_9rem_1fr]">
+      {side(down, "bearish")}
+      <div className="order-first text-center sm:order-none">
+        <Beam down={down.length} up={up.length} />
+        <div className="mt-1 font-[family-name:var(--font-data)] text-[0.76rem]">{d.source}</div>
+      </div>
+      {side(up, "bullish")}
+    </div>
+  );
+}
+
+/* The chart source's split, read straight from its numbers: the same five
+   signals on 4h and 1d candles side by side. Computed here, not by a model, so
+   the figure cannot drift from the figures it cites. */
+type TfIndicators = {
+  price: number;
+  ma: { ma25: number; ma99: number };
+  rsi: { value: number };
+  macd: { hist: number };
+  boll: { pctB: number };
+};
+
+const SIGNALS: [string, string, (x: TfIndicators) => [boolean, string]][] = [
+  ["Short trend", "price vs its 25-bar average", (x) => [x.price > x.ma.ma25, `${x.price > x.ma.ma25 ? "above" : "below"} ${x.ma.ma25.toFixed(2)}`]],
+  ["Long trend", "price vs its 99-bar average", (x) => [x.price > x.ma.ma99, `${x.price > x.ma.ma99 ? "above" : "below"} ${x.ma.ma99.toFixed(2)}`]],
+  ["Momentum", "MACD histogram", (x) => [x.macd.hist > 0, x.macd.hist.toFixed(3)]],
+  ["Strength", "RSI against its midline of 50", (x) => [x.rsi.value > 50, x.rsi.value.toFixed(1)]],
+  ["Band position", "where price sits in its Bollinger band", (x) => [x.boll.pctB > 0.5, `${Math.round(x.boll.pctB * 100)}% of the way up`]],
+];
+
+function SignalGrid({ raw }: { raw: Record<string, TfIndicators> }) {
+  const tfs = ["4h", "1d"].filter((tf) => typeof raw?.[tf]?.price === "number");
+  if (tfs.length < 2) return null;
+  const rows = SIGNALS.map(([name, what, read]) => {
+    const [a, b] = tfs.map((tf) => read(raw[tf]));
+    return { name, what, a, b, split: a[0] !== b[0] };
+  });
+  const splits = rows.filter((r) => r.split).length;
+  const cell = ([up, text]: [boolean, string]) => (
+    <span className="flex items-center gap-2">
+      <DirectionMark direction={up ? "bullish" : "bearish"} />
+      <span className="font-[family-name:var(--font-data)] text-[0.72rem] text-[var(--ink-2)]">{text}</span>
+    </span>
+  );
+  return (
+    <div className="mt-7">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+        <Label>The chart, signal by signal</Label>
+        <span className="text-[0.8rem] text-[var(--ink-2)]">
+          <span className="font-[family-name:var(--font-display)] text-[1.1rem]">{splits}</span> of {rows.length} signals
+          point opposite ways on 4h and 1d
+        </span>
+      </div>
+      <div className="mt-3 overflow-x-auto">
+        <table className="w-full min-w-[30rem] border-collapse text-left">
+          <thead>
+            <tr className="border-b border-[var(--frame)]">
+              <th className="py-2 pr-4"><Label>Signal</Label></th>
+              <th className="py-2 pr-4"><Label>4h candles</Label></th>
+              <th className="py-2 pr-4"><Label>1d candles</Label></th>
+              <th className="py-2"><Label>Agree?</Label></th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.name} className={`border-b border-[var(--rule)] ${r.split ? "bg-[var(--sheet-sunken)]" : ""}`}>
+                <td className="py-2.5 pr-4 pl-2">
+                  <div className="text-[0.84rem]">{r.name}</div>
+                  <div className="text-[0.68rem] text-[var(--ink-3)]">{r.what}</div>
+                </td>
+                <td className="py-2.5 pr-4">{cell(r.a)}</td>
+                <td className="py-2.5 pr-4">{cell(r.b)}</td>
+                <td className="py-2.5 pr-2">
+                  {r.split ? (
+                    <span className="text-[0.78rem] font-medium">split</span>
+                  ) : (
+                    <span className="text-[0.78rem] text-[var(--ink-3)]">same way</span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 /* ---------------------------------------------------------------- atoms ---- */
 
 function Label({ children, className = "" }: { children: React.ReactNode; className?: string }) {
@@ -1192,16 +1491,38 @@ export default function Home() {
             {brief && brief.internal_divergences.length > 0 && (
               <div className={`band arrive py-10 ${PAD}`}>
                 <Opener label="Medium materiality" title="Sources disagreeing with themselves" />
-                <ul>
-                  {brief.internal_divergences.map((d) => (
-                    <li key={d.source} className="border-b border-[var(--rule)] py-4 last:border-0">
-                      <div className="flex flex-wrap items-center gap-x-3">
-                        <span className="font-[family-name:var(--font-data)] text-[0.84rem]">{d.source}</span>
-                        <MaterialityMark level="medium" />
-                      </div>
-                      <p className="mt-2 max-w-[72ch] text-[0.89rem] leading-[1.6] text-[var(--ink-2)]">{d.detail}</p>
-                    </li>
-                  ))}
+                <p className="max-w-[64ch] text-[0.84rem] leading-relaxed text-[var(--ink-3)]">
+                  One source can hold evidence pointing both ways. That is shown, not averaged away:
+                  the beam sinks toward the side holding more evidence, and a level beam is a real
+                  stand-off.
+                </p>
+                <ul className="mt-2">
+                  {brief.internal_divergences.map((d) => {
+                    const ta =
+                      d.source === "technical-analysis"
+                        ? res.sources.find((x) => x.skill === "technical-analysis" && x.status === "ok")
+                        : undefined;
+                    return (
+                      <li key={d.source} className="border-b border-[var(--rule)] py-7 last:border-0">
+                        {d.pulls.length > 0 ? (
+                          <TugOfWar d={d} />
+                        ) : (
+                          <div className="font-[family-name:var(--font-data)] text-[0.84rem]">{d.source}</div>
+                        )}
+                        {ta && <SignalGrid raw={ta.raw as Record<string, TfIndicators>} />}
+                        {d.pulls.length > 0 ? (
+                          <details className="mt-4">
+                            <summary className="cursor-pointer list-none text-[0.76rem] text-[var(--ink-3)] underline decoration-dotted underline-offset-[4px] hover:text-[var(--ink-2)]">
+                              In full, with figures
+                            </summary>
+                            <p className="mt-2 max-w-[72ch] text-[0.86rem] leading-[1.6] text-[var(--ink-2)]">{d.detail}</p>
+                          </details>
+                        ) : (
+                          <p className="mt-2 max-w-[72ch] text-[0.89rem] leading-[1.6] text-[var(--ink-2)]">{d.detail}</p>
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             )}
@@ -1229,19 +1550,19 @@ export default function Home() {
             <div className={`band arrive py-10 ${PAD}`}>
               <Opener label="Provenance" title="How this was gathered" />
               <p className="max-w-[70ch] text-[0.83rem] leading-relaxed text-[var(--ink-3)]">
-                Five Skills queried in parallel. Normalisation on {res.models.extract}, conflict
-                explanation on {res.models.reason}. Detection and ranking are deterministic code,
-                not model judgment.
-                {res.mode === "scenario" && " No Skills were queried for this example, so no calls or latencies are shown."}
+                All five Skills asked at once. Each answer read on {res.models.extract};
+                disagreements found and ranked by code, then explained on {res.models.reason}.
+                {res.mode === "scenario" && " No Skills were queried for this example, so no calls are shown."}
               </p>
-              <p className="mt-2 font-[family-name:var(--font-data)] text-[0.74rem] text-[var(--ink-3)]">
-                fan-out {(res.timings.fanoutMs / 1000).toFixed(1)}s · normalise{" "}
-                {(res.timings.normaliseMs / 1000).toFixed(1)}s · conflict{" "}
-                {(res.timings.conflictMs / 1000).toFixed(1)}s · total{" "}
-                {(res.timings.totalMs / 1000).toFixed(1)}s
-              </p>
+              <div className="mt-7">
+                <GatherFigure res={res} />
+              </div>
 
-              <ul className="mt-7">
+              <details className="mt-9">
+                <summary className="cursor-pointer list-none text-[0.8rem] text-[var(--ink-3)] underline decoration-dotted underline-offset-[4px] hover:text-[var(--ink-2)]">
+                  Every source in detail: its reading, its evidence and its raw output
+                </summary>
+              <ul className="mt-5">
                 {res.sources.map((s) => {
                   const n = norm(s.skill);
                   return (
@@ -1296,6 +1617,7 @@ export default function Home() {
                   );
                 })}
               </ul>
+              </details>
             </div>
           </div>
         )}
